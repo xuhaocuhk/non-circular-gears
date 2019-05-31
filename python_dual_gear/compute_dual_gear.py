@@ -22,10 +22,16 @@ def compute_dual_gear(x: [float], k: int = 1) -> ([float], float, [float]):
     normalize_factor = 1.0 / phi[-1] * 2 * pi
     phi = [item * normalize_factor for item in phi]
     t = np.linspace(0, 2 * pi, n + 1)
+    phiInv = np.interp(t, phi, t)  # inverse function of phi
+    y = [center_distance - xval for xval in np.interp(phiInv, t, x + [x[0]])]
+    y = y[:-1]
+    phi = [2 * pi - p for p in phi[::-1]]
+    return y, center_distance, phi
+
 
 def cumulative_sum(x: list) -> list:
-    l = len(x)
+    length = len(x)
     result = [x[0]]
-    for i in range(1, l):
+    for i in range(1, length):
         result.append(result[i - 1] + x[i])
     return result
