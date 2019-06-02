@@ -6,6 +6,8 @@ def plot_sampled_function(sample_function: [float], range_start: float, range_en
     sample_points = np.linspace(range_start, range_end, len(sample_function))
     plt.plot(sample_points, sample_function)
     plt.show()
+    plt.polar(sample_points, sample_function)
+    plt.show()
 
 
 if __name__ == '__main__':
