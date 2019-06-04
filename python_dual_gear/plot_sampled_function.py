@@ -3,6 +3,7 @@ from matplotlib import animation
 import numpy as np
 from math import sin, cos
 from functools import reduce
+from matplotlib import patches
 
 
 def polar_to_rectangular(sample_function: [float], sample_points: [float]) -> [(float, float)]:
@@ -13,6 +14,31 @@ def polar_to_rectangular(sample_function: [float], sample_points: [float]) -> [(
     ]
 
 
+def translation(original_points: [(float, float)], translation_vector: (float, float)) -> [(float, float)]:
+    return [(x + translation_vector[0], y + translation_vector[1]) for x, y in original_points]
+
+
+def rotate(polygon_points: [(float, float)], rotation_angle: float) -> [(float, float)]:
+    return [
+        (x * cos(rotation_angle) + y * sin(rotation_angle), -x * sin(rotation_angle) + y * cos(rotation_angle))
+        for x, y in polygon_points
+    ]
+
+
+def generate_polygon(sample_function, sample_points, rotation_angle=0.0, translation_vector=(0.0, 0.0), **kwargs):
+    default_options = {
+        'edgecolor': 'blue',
+        'facecolor': None,
+        'fill': False,
+        'linewidth': 0.1
+    }
+    polygon_points = polar_to_rectangular(sample_function, sample_points)
+    polygon_points = rotate(polygon_points, rotation_angle)
+    polygon_points = translation(polygon_points, translation_vector)
+    default_options.update(kwargs)
+    return patches.Polygon(np.array(polygon_points), closed=True, **default_options)
+
+
 def plot_sampled_function(sample_functions: ([float]), range_start: float, range_end: float):
     if sample_functions == ():
         return
@@ -21,18 +47,34 @@ def plot_sampled_function(sample_functions: ([float]), range_start: float, range
     fig, subplots = plt.subplots(1, len(sample_functions))
     sample_points = np.linspace(range_start, range_end, len(sample_functions[0]))
     for sample_function, subplot in zip(sample_functions, subplots):
-        polygon_points = polar_to_rectangular(sample_function, sample_points)
-        # subplot.figure()
-        subplot.fill([item[0] for item in polygon_points], [item[1] for item in polygon_points],
-                     facecolor='none', edgecolor='purple', linewidth=1)
+        subplot.add_patch(generate_polygon(sample_function, sample_points))
         subplot.axis('tight')
         subplot.axis('equal')
         subplot.axis('off')
     plt.show()
 
 
-def rotate(sample_function: [float]) -> [float]:
-    pass
+def plot_polygon(subplot, polygon_points):
+    polygon = subplot.fill([item[0] for item in polygon_points], [item[1] for item in polygon_points],
+                           facecolor='none', edgecolor='purple', linewidth=1)
+    return polygon
+
+
+def initial_animation(subplot, sample_function, sample_points):
+    def _initial_animation():
+        polygon_points = polar_to_rectangular(sample_function, sample_points)
+        return plot_polygon(subplot, polygon_points)
+
+    return _initial_animation
+
+
+def animation_function(subplot, angle_per_frame, sample_function, sample_points):
+    def _animate(frame):
+        plt.clf()
+        angle = angle_per_frame * frame
+        return plot_polygon(subplot, rotate(polar_to_rectangular(sample_function, sample_points), angle))
+
+    return _animate
 
 
 if __name__ == '__main__':
