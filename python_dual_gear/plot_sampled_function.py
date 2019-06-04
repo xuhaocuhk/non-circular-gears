@@ -39,18 +39,29 @@ def generate_polygon(sample_function, sample_points, rotation_angle=0.0, transla
     return patches.Polygon(np.array(polygon_points), closed=True, **default_options)
 
 
-def plot_sampled_function(sample_functions: ([float]), range_start: float, range_end: float):
+def gear_system(sample_functions, sample_points, rotation_angles=(0.0,), gear_positions=((0.0, 0.0),)):
+    assert len(sample_functions) == len(sample_points) and len(sample_points) == len(rotation_angles) \
+           and len(rotation_angles) == len(gear_positions)
+    patches = []
+    for function, points, theta, trans in zip(sample_functions, sample_points, rotation_angles, gear_positions):
+        polygon = generate_polygon(function, points, theta, trans)
+        patches.append(polygon)
+    return patches
+
+
+def plot_sampled_function(sample_functions: ([float]), range_start: float, range_end: float, rotation_angles=(0.0,),
+                          gear_positions=((0.0, 0.0),)):
     if sample_functions == ():
         return
-
     assert reduce(lambda x, y: len(x) == len(y), sample_functions)
-    fig, subplots = plt.subplots(1, len(sample_functions))
+    fig, subplot = plt.subplots()
     sample_points = np.linspace(range_start, range_end, len(sample_functions[0]))
-    for sample_function, subplot in zip(sample_functions, subplots):
-        subplot.add_patch(generate_polygon(sample_function, sample_points))
-        subplot.axis('tight')
-        subplot.axis('equal')
-        subplot.axis('off')
+    sample_points = [sample_points] * len(sample_functions)
+    for patch in gear_system(sample_functions, sample_points, rotation_angles, gear_positions):
+        subplot.add_patch(patch)
+    subplot.axis('tight')
+    subplot.axis('equal')
+    subplot.axis('off')
     plt.show()
 
 
@@ -84,4 +95,4 @@ if __name__ == '__main__':
 
     drive_gear = [random.uniform(4, 5) for i in range(8192)]
     driven_gear, center_distance, phi = compute_dual_gear(drive_gear)
-    plot_sampled_function((drive_gear, driven_gear), 0, 2 * math.pi)
+    plot_sampled_function((drive_gear, driven_gear), 0, 2 * math.pi, [0.0, 0.0], [(0.0, 0.0), (center_distance, 0.0)])
