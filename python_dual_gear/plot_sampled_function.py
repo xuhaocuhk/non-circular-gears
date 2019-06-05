@@ -55,7 +55,7 @@ def plot_sampled_function(sample_functions: ([float]), range_start: float, range
         return
     assert reduce(lambda x, y: len(x) == len(y), sample_functions)
     fig, subplot = plt.subplots()
-    sample_points = np.linspace(range_start, range_end, len(sample_functions[0]))
+    sample_points = np.linspace(range_start, range_end, len(sample_functions[0]), endpoint=False)
     sample_points = [sample_points] * len(sample_functions)
     for patch in gear_system(sample_functions, sample_points, rotation_angles, gear_positions):
         subplot.add_patch(patch)
