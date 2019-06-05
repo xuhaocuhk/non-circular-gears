@@ -30,7 +30,7 @@ def generate_polygon(sample_function, sample_points, rotation_angle=0.0, transla
         'edgecolor': 'blue',
         'facecolor': None,
         'fill': False,
-        'linewidth': 0.1
+        'linewidth': 0.5
     }
     polygon_points = polar_to_rectangular(sample_function, sample_points)
     polygon_points = rotate(polygon_points, rotation_angle)
@@ -91,8 +91,9 @@ def animation_function(subplot, angle_per_frame, sample_function, sample_points)
 if __name__ == '__main__':
     from compute_dual_gear import compute_dual_gear
     import math
-    import random
+    from drive_gears.ellipse_gear import generate_gear
 
-    drive_gear = [random.uniform(4, 5) for i in range(8192)]
+    drive_gear = generate_gear(8192)
     driven_gear, center_distance, phi = compute_dual_gear(drive_gear)
+    plot_sampled_function((drive_gear,), 0, 2 * math.pi)
     plot_sampled_function((drive_gear, driven_gear), 0, 2 * math.pi, [0.0, 0.0], [(0.0, 0.0), (center_distance, 0.0)])
