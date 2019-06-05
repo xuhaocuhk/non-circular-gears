@@ -25,7 +25,8 @@ def rotate(polygon_points: [(float, float)], rotation_angle: float) -> [(float, 
     ]
 
 
-def generate_polygon(sample_function, sample_points, rotation_angle=0.0, translation_vector=(0.0, 0.0), **kwargs):
+def generate_polygon(sample_function, sample_points, rotation_angle=0.0, translation_vector=(0.0, 0.0), update=None,
+                     **kwargs):
     default_options = {
         'edgecolor': 'blue',
         'facecolor': None,
@@ -36,17 +37,28 @@ def generate_polygon(sample_function, sample_points, rotation_angle=0.0, transla
     polygon_points = rotate(polygon_points, rotation_angle)
     polygon_points = translation(polygon_points, translation_vector)
     default_options.update(kwargs)
-    return patches.Polygon(np.array(polygon_points), closed=True, **default_options)
+    if update is None:
+        return patches.Polygon(np.array(polygon_points), closed=True, **default_options)
+    else:
+        update.set_xy(np.array(polygon_points))
+        return update
 
 
-def gear_system(sample_functions, sample_points, rotation_angles=(0.0,), gear_positions=((0.0, 0.0),)):
+def gear_system(sample_functions, sample_points, rotation_angles=(0.0,), gear_positions=((0.0, 0.0),), update=None):
     assert len(sample_functions) == len(sample_points) and len(sample_points) == len(rotation_angles) \
            and len(rotation_angles) == len(gear_positions)
-    patches = []
-    for function, points, theta, trans in zip(sample_functions, sample_points, rotation_angles, gear_positions):
-        polygon = generate_polygon(function, points, theta, trans)
-        patches.append(polygon)
-    return patches
+    patches_collection = []
+    if update is None:
+        for function, points, theta, trans in zip(sample_functions, sample_points, rotation_angles, gear_positions):
+            polygon = generate_polygon(function, points, theta, trans)
+            patches_collection.append(polygon)
+    else:
+        assert len(update) == len(sample_functions)
+        for function, points, theta, trans, patch in zip(sample_functions, sample_points, rotation_angles,
+                                                         gear_positions, update):
+            polygon = generate_polygon(function, points, theta, trans, patch)
+            patches_collection.append(polygon)
+    return patches_collection
 
 
 def sync_rotation(phi_functions, drive_rotation):
@@ -76,6 +88,13 @@ def plot_sampled_function(sample_functions: ([float],), range_start: float, rang
     subplot.axis('equal')
     subplot.axis('off')
     plt.show()
+    fig, subplot = plt.subplots()
+    frames = 1000
+    patch_col, initial_func = initial_animation(subplot, sample_functions, sample_points, gear_positions)
+    animate = animation_function(frames, sample_functions, sample_points, patch_col, phi_functions, gear_positions)
+    ani = animation.FuncAnimation(plt.figure(), animate, frames, initial_func, interval=100, blit=True)
+    ani.save('output.gif', writer='imagemagick')
+    plt.show()
 
 
 def plot_polygon(subplot, polygon_points):
@@ -84,19 +103,25 @@ def plot_polygon(subplot, polygon_points):
     return polygon
 
 
-def initial_animation(subplot, sample_function, sample_points):
+def initial_animation(subplot, sample_functions, sample_points, gear_positions):
+    patches_collection = gear_system(sample_functions, sample_points, (0.0,) * len(sample_functions), gear_positions)
+    for patch in patches_collection:
+        subplot.add_patch(patch)
+
     def _initial_animation():
-        polygon_points = polar_to_rectangular(sample_function, sample_points)
-        return plot_polygon(subplot, polygon_points)
+        return patches_collection
 
-    return _initial_animation
+    return patches_collection, _initial_animation
 
 
-def animation_function(subplot, angle_per_frame, sample_function, sample_points):
+def animation_function(count_of_frames, sample_functions, sample_points, patches_collection, phi_functions,
+                       gear_positions):
+    angle_per_frame = 2 * pi / count_of_frames
+
     def _animate(frame):
-        plt.clf()
         angle = angle_per_frame * frame
-        return plot_polygon(subplot, rotate(polar_to_rectangular(sample_function, sample_points), angle))
+        return gear_system(sample_functions, sample_points, sync_rotation(phi_functions, angle), gear_positions,
+                           patches_collection)
 
     return _animate
 
@@ -108,6 +133,4 @@ if __name__ == '__main__':
 
     drive_gear = generate_gear(8192)
     driven_gear, center_distance, phi = compute_dual_gear(drive_gear)
-    for rotation_angle in (0, pi / 3, pi / 2, pi):
-        plot_sampled_function((drive_gear, driven_gear), 0, 2 * math.pi, [phi], rotation_angle,
-                              [(0.0, 0.0), (center_distance, 0.0)])
+    plot_sampled_function((drive_gear, driven_gear), 0, 2 * math.pi, [phi], 0, [(0.0, 0.0), (center_distance, 0.0)])
