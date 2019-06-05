@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from matplotlib import animation
 import numpy as np
-from math import sin, cos
+from math import sin, cos, pi
 from functools import reduce
 from matplotlib import patches
 
@@ -49,15 +49,28 @@ def gear_system(sample_functions, sample_points, rotation_angles=(0.0,), gear_po
     return patches
 
 
-def plot_sampled_function(sample_functions: ([float]), range_start: float, range_end: float, rotation_angles=(0.0,),
-                          gear_positions=((0.0, 0.0),)):
+def sync_rotation(phi_functions, drive_rotation):
+    assert len(phi_functions)
+    assert reduce(lambda x, y: len(x) == len(y), phi_functions)
+    rotation_angles = [drive_rotation]
+    xp = np.linspace(0, 2 * pi, len(phi_functions[0]), endpoint=False)
+    for phi in phi_functions:
+        angle = np.interp(drive_rotation, xp, phi)
+        rotation_angles.append(angle)
+    return tuple(rotation_angles)
+
+
+def plot_sampled_function(sample_functions: ([float],), range_start: float, range_end: float, phi_functions: [[float]],
+                          drive_rotation: float, gear_positions=((0.0, 0.0),)):
     if sample_functions == ():
         return
     assert reduce(lambda x, y: len(x) == len(y), sample_functions)
+    assert len(phi_functions) == len(sample_functions) - 1
     fig, subplot = plt.subplots()
     sample_points = np.linspace(range_start, range_end, len(sample_functions[0]), endpoint=False)
     sample_points = [sample_points] * len(sample_functions)
-    for patch in gear_system(sample_functions, sample_points, rotation_angles, gear_positions):
+    for patch in gear_system(sample_functions, sample_points, sync_rotation(phi_functions, drive_rotation),
+                             gear_positions):
         subplot.add_patch(patch)
     subplot.axis('tight')
     subplot.axis('equal')
@@ -95,5 +108,6 @@ if __name__ == '__main__':
 
     drive_gear = generate_gear(8192)
     driven_gear, center_distance, phi = compute_dual_gear(drive_gear)
-    plot_sampled_function((drive_gear,), 0, 2 * math.pi)
-    plot_sampled_function((drive_gear, driven_gear), 0, 2 * math.pi, [0.0, 0.0], [(0.0, 0.0), (center_distance, 0.0)])
+    for rotation_angle in (0, pi / 3, pi / 2, pi):
+        plot_sampled_function((drive_gear, driven_gear), 0, 2 * math.pi, [phi], rotation_angle,
+                              [(0.0, 0.0), (center_distance, 0.0)])
