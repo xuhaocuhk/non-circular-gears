@@ -6,7 +6,11 @@ import numpy as np
 def generate_gear(number_of_samples: int) -> [float]:
     a, b = 1.5, 0.5
     sample_points = np.linspace(0, 2 * pi, number_of_samples, endpoint=False)
+
+    def _radius(theta):
+        return a * b / distance.euclidean((0, 0), (b * cos(theta), a * sin(theta)))
+
     return [
-        distance.euclidean((0, 0), (a * cos(theta), b * sin(theta)))
+        _radius(theta)
         for theta in sample_points
     ]
