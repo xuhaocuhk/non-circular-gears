@@ -93,7 +93,10 @@ def plot_sampled_function(sample_functions: ([float],), range_start: float, rang
     patch_col, initial_func = initial_animation(subplot, sample_functions, sample_points, gear_positions)
     animate = animation_function(frames, sample_functions, sample_points, patch_col, phi_functions, gear_positions)
     ani = animation.FuncAnimation(plt.figure(), animate, frames, initial_func, interval=100, blit=True)
-    ani.save('output.gif', writer='imagemagick')
+    subplot.axis('tight')
+    subplot.axis('equal')
+    subplot.axis('off')
+    # ani.save('output.gif', writer='imagemagick')
     plt.show()
 
 
