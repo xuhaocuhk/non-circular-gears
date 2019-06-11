@@ -135,5 +135,5 @@ if __name__ == '__main__':
     from drive_gears.ellipse_gear import generate_gear
 
     drive_gear = generate_gear(8192)
-    driven_gear, center_distance, phi = compute_dual_gear(drive_gear)
+    driven_gear, center_distance, phi = compute_dual_gear(drive_gear, 1)
     plot_sampled_function((drive_gear, driven_gear), 0, 2 * math.pi, [phi], 0, [(0.0, 0.0), (center_distance, 0.0)])
