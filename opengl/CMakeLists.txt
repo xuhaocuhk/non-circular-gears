@@ -21,6 +21,13 @@ include_directories(./glad/include)
 link_directories($ENV{GLFW_ROOT}/lib-$ENV{COMPILER_NAME}/)
 link_libraries(libglfw3.a)
 
+set(SOURCE
+        main.cpp
+        GearFunction.cpp
+        GearFunction.h
+        utility.cpp
+        utility.h
+        )
 set(DEPENDENT_SOURCE ./glad/src/glad.c)
 
-add_executable(simulator main.cpp ${DEPENDENT_SOURCE} GearFunction.cpp GearFunction.h utility.cpp utility.h)
+add_executable(simulator ${SOURCE} ${DEPENDENT_SOURCE})
