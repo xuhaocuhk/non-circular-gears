@@ -1,7 +1,3 @@
-//
-// Created by kevin on 2019-06-12.
-//
-
 #include "GearFunction.h"
 #include "utility.h"
 
