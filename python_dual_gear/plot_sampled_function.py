@@ -73,7 +73,7 @@ def sync_rotation(phi_functions, drive_rotation):
 
 
 def plot_sampled_function(sample_functions: ([float],), range_start: float, range_end: float, phi_functions: [[float]],
-                          drive_rotation: float, gear_positions=((0.0, 0.0),)):
+                          drive_rotation: float, gear_positions=((0.0, 0.0),), save=None):
     if sample_functions == ():
         return
     assert reduce(lambda x, y: len(x) == len(y), sample_functions)
@@ -84,19 +84,9 @@ def plot_sampled_function(sample_functions: ([float],), range_start: float, rang
     for patch in gear_system(sample_functions, sample_points, sync_rotation(phi_functions, drive_rotation),
                              gear_positions):
         subplot.add_patch(patch)
-    subplot.axis('tight')
-    subplot.axis('equal')
+    subplot.set_xlim([-10, 50])
+    subplot.set_ylim([-10, 50])
     subplot.axis('off')
-    plt.show()
-    fig, subplot = plt.subplots()
-    frames = 1000
-    patch_col, initial_func = initial_animation(subplot, sample_functions, sample_points, gear_positions)
-    animate = animation_function(frames, sample_functions, sample_points, patch_col, phi_functions, gear_positions)
-    ani = animation.FuncAnimation(plt.figure(), animate, frames, initial_func, interval=100, blit=True)
-    subplot.axis('tight')
-    subplot.axis('equal')
-    subplot.axis('off')
-    # ani.save('output.gif', writer='imagemagick')
     plt.show()
 
 
