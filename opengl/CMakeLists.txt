@@ -39,7 +39,7 @@ set(SOURCE
         GearFunction.h
         utility.cpp
         utility.h
-        )
+        Shader.cpp Shader.h GearDisplay.cpp GearDisplay.h)
 set(DEPENDENT_SOURCE ./glad/src/glad.c)
 
 add_executable(simulator ${SOURCE} ${DEPENDENT_SOURCE})

@@ -5,4 +5,5 @@
 #include <cmath>
 
 namespace util {
+    const double PI = acos(-1);
 }
