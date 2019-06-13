@@ -26,6 +26,7 @@ def compute_dual_gear(x: [float], k: int = 1) -> ([float], float, [float]):
     y = [center_distance - xval for xval in np.interp(phiInv, t, x + [x[0]])]
     y = y[:-1]
     phi = [2 * pi - p for p in phi[::-1]]
+    phi = [-p for p in phi]
     return y, center_distance, phi
 
 

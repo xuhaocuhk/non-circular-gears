@@ -93,7 +93,10 @@ def plot_sampled_function(sample_functions: ([float],), range_start: float, rang
     patch_col, initial_func = initial_animation(subplot, sample_functions, sample_points, gear_positions)
     animate = animation_function(frames, sample_functions, sample_points, patch_col, phi_functions, gear_positions)
     ani = animation.FuncAnimation(plt.figure(), animate, frames, initial_func, interval=100, blit=True)
-    ani.save('output.gif', writer='imagemagick')
+    subplot.axis('tight')
+    subplot.axis('equal')
+    subplot.axis('off')
+    # ani.save('output.gif', writer='imagemagick')
     plt.show()
 
 
@@ -132,5 +135,5 @@ if __name__ == '__main__':
     from drive_gears.ellipse_gear import generate_gear
 
     drive_gear = generate_gear(8192)
-    driven_gear, center_distance, phi = compute_dual_gear(drive_gear)
+    driven_gear, center_distance, phi = compute_dual_gear(drive_gear, 1)
     plot_sampled_function((drive_gear, driven_gear), 0, 2 * math.pi, [phi], 0, [(0.0, 0.0), (center_distance, 0.0)])
