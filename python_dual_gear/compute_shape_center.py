@@ -24,6 +24,7 @@ def isAllVisible(p: Point, poly: Polygon):
     return True
 
 '''
+convert polar to euclidean coordinate
 sample usage:
 polar_shape = [2, 1, 2, 1, 2, 1, 2, 1]
 x, y = toEuclideanCoord(polar_shape)
@@ -32,13 +33,16 @@ def toEuclideanCoord(polar_r):
     thetas = [theta * 2 * math.pi / len(polar_r) for theta in range(0, len(polar_r))]
     return list(map(computeEuclideanCoord_x, polar_r, thetas)), list(map(computeEuclideanCoord_y, polar_r, thetas))
 
+
 def getIntersDist(p:Point, theta, poly: Polygon, MAX_R):
     outer_point = Point(p.x + MAX_R * sin(theta), p.y + MAX_R * cos(theta))
     ring = LineString(list(poly.exterior.coords))
     inters_pt = ring.intersection(LineString([p, outer_point]))
     return p.distance(inters_pt)
 
-
+'''
+convert euclidean coordinate shape to polar coordinate
+'''
 def toPolarCoord(p: Point, poly: Polygon, n: int):
     assert isAllVisible(p, poly)
     vtx = list(poly.exterior.coords)
@@ -48,10 +52,9 @@ def toPolarCoord(p: Point, poly: Polygon, n: int):
     return sample_distances
 
 
-
 # read coutour from a local file
 def getSVGShape(filename):
-    for line in open("..\silhouette\man.txt"):
+    for line in open(filename):
         listWords = line.split(",")
     x_coords = list(map(lambda word : float(word.split(" ")[0]), listWords))
     y_coords = list(map(lambda word: float(word.split(" ")[1]), listWords))
@@ -59,7 +62,7 @@ def getSVGShape(filename):
 
 if __name__ == '__main__':
 
-    x, y = getSVGShape(filename="F:\workspace\gears\silhouette\man.txt")
+    x, y = getSVGShape(filename="..\silhouette\man.txt")
 
     polygon = Polygon(zip(x,y))
     poly_bound = polygon.bounds
