@@ -35,7 +35,7 @@ int main() {
     }
 
     std::shared_ptr<Shader> shader = std::make_shared<Shader>("./shaders/gear.vert", "./shaders/gear.frag");
-    CircleGearFunction gearFunction{1.5f};
+    CenterEllipseGearFunction gearFunction{1.5f, 0.5f};
     GearDisplay display{4096, &gearFunction, 0, 0, shader};
 
     while (!glfwWindowShouldClose(window)) {
@@ -43,6 +43,7 @@ int main() {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        display.rotate(0.0005f);
         display.draw(-5.0f, 5.0f, -5.0f, 5.0f);
 
         glfwSwapBuffers(window);
