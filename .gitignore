@@ -1,2 +1,5 @@
 /python_dual_gear/venv
 /python_dual_gear/__pycache__
+venv
+.idea
+__pycache__
