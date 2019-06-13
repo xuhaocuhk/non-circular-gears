@@ -1,13 +1,14 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-
+#include "Shader.h"
+#include "GearDisplay.h"
 #include <iostream>
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 
 void processInput(GLFWwindow *window);
 
-const GLuint SCR_WIDTH = 800;
+const GLuint SCR_WIDTH = 600;
 const GLuint SCR_HEIGHT = 600;
 
 int main() {
@@ -33,10 +34,16 @@ int main() {
         return -1;
     }
 
+    std::shared_ptr<Shader> shader = std::make_shared<Shader>("./shaders/gear.vert", "./shaders/gear.frag");
+    CircleGearFunction gearFunction{1.5f};
+    GearDisplay display{4096, &gearFunction, 0, 0, shader};
+
     while (!glfwWindowShouldClose(window)) {
         processInput(window);
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        display.draw(-5.0f, 5.0f, -5.0f, 5.0f);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

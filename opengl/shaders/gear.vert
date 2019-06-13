@@ -5,8 +5,9 @@ uniform float rotation;
 uniform float xMin, xMax, yMin, yMax;
 
 void main() {
-    vPos = vec2(vPos.x*cos(rotation)-vPos.y*sin(rotation), vPos.y*sin(rotation)+vPos.x*cos(rotation));
-    vPos = vPos+translation;
-    vPos = vec2((vPos.x - xMin)/(xMax-xMin), (vPos.y - yMin)/(yMax-yMin));
-    gl_Position = vec4(vPos, 1.0, 1.0);
+    vec2 pos;
+    pos = vec2(vPos.x*cos(rotation)-vPos.y*sin(rotation), vPos.x*sin(rotation)+vPos.y*cos(rotation));
+    pos = pos+translation;
+    pos = vec2((pos.x - xMin)/(xMax-xMin)*2-1.0f, (pos.y - yMin)/(yMax-yMin)*2-1.0f);
+    gl_Position = vec4(pos, 0.0, 1.0);
 }

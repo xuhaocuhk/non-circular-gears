@@ -7,6 +7,15 @@ public:
     virtual const GLfloat operator()(GLfloat theta) const = 0;
 };
 
+class CircleGearFunction : public GearFunction {
+private:
+    GLfloat radius;
+public:
+    CircleGearFunction(GLfloat radius) : radius(radius) {}
+
+    const GLfloat operator()(GLfloat theta) const override { return radius; }
+};
+
 class CenterEllipseGearFunction : public GearFunction {
     GLfloat a, b;
 public:
