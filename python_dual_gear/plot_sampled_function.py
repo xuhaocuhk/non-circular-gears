@@ -71,14 +71,13 @@ def sync_rotation(phi_functions, drive_rotation):
     return tuple(rotation_angles)
 
 
-def plot_frame(sample_functions: ([float],), range_start: float, range_end: float, phi_functions: [[float]],
+def plot_frame(subplot, sample_functions: ([float],), range_start: float, range_end: float, phi_functions: [[float]],
                drive_rotation: float, gear_positions=((0.0, 0.0),), save=None):
-    plt.clf()
+    subplot.clear()
     if sample_functions == ():
         return
     assert reduce(lambda x, y: len(x) == len(y), sample_functions)
     assert len(phi_functions) == len(sample_functions) - 1
-    fig, subplot = plt.subplots(figsize=(8, 8))
     sample_points = np.linspace(range_start, range_end, len(sample_functions[0]), endpoint=False)
     sample_points = [sample_points] * len(sample_functions)
     for patch in gear_system(sample_functions, sample_points, sync_rotation(phi_functions, drive_rotation),
@@ -87,28 +86,34 @@ def plot_frame(sample_functions: ([float],), range_start: float, range_end: floa
     subplot.set_xlim([-3, 7])
     subplot.set_ylim([-5, 5])
     subplot.axis('off')
-    if save is None:
-        plt.show()
-    else:
+    plt.draw()
+    if save is not None:
+        # WARNING: saving to png will cause the animation to be not smooth (due to IO and image processing)
         plt.savefig(f'{save}.png')
-    plt.close(fig)
 
 
-def plot_sampled_function(sample_functions, phi_functions, filename_prefix, frames, gear_positions,
+def plot_sampled_function(sample_functions, phi_functions, filename_prefix, frames, frame_pause, gear_positions,
                           angle_range=(0, 2 * pi)):
+    fig, subplot = plt.subplots(figsize=(8, 8))
+    plt.ion()
     range_start, range_end = angle_range
     frame_count = 0
     for drive_rotation in np.linspace(range_start, range_end, frames, False):
         frame_count = frame_count + 1
-        plot_frame(sample_functions, range_start, range_end, phi_functions, drive_rotation, gear_positions,
-                   '%s-%05d' % (filename_prefix, frame_count))
+        if filename_prefix is None:
+            plot_frame(subplot, sample_functions, range_start, range_end, phi_functions, drive_rotation, gear_positions)
+        else:
+            plot_frame(subplot, sample_functions, range_start, range_end, phi_functions, drive_rotation, gear_positions,
+                       '%s-%05d' % (filename_prefix, frame_count))
+        plt.pause(frame_pause)
+    plt.ioff()
+    plt.close(fig)
 
 
 if __name__ == '__main__':
     from compute_dual_gear import compute_dual_gear
-    import math
     from drive_gears.ellipse_gear import generate_gear
 
     drive_gear = generate_gear(8192)
     driven_gear, center_distance, phi = compute_dual_gear(drive_gear, 1)
-    plot_sampled_function((drive_gear, driven_gear), (phi,), 'output', 100, [(0, 0), (center_distance, 0)])
+    plot_sampled_function((drive_gear, driven_gear), (phi,), 'output', 100, 0.001, [(0, 0), (center_distance, 0)])
