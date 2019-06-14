@@ -73,7 +73,6 @@ def sync_rotation(phi_functions, drive_rotation):
 
 def plot_frame(subplot, sample_functions: ([float],), range_start: float, range_end: float, phi_functions: [[float]],
                drive_rotation: float, gear_positions=((0.0, 0.0),), save=None):
-    subplot.clear()
     if sample_functions == ():
         return
     assert reduce(lambda x, y: len(x) == len(y), sample_functions)
@@ -83,9 +82,6 @@ def plot_frame(subplot, sample_functions: ([float],), range_start: float, range_
     for patch in gear_system(sample_functions, sample_points, sync_rotation(phi_functions, drive_rotation),
                              gear_positions):
         subplot.add_patch(patch)
-    subplot.set_xlim([-3, 7])
-    subplot.set_ylim([-5, 5])
-    subplot.axis('off')
     plt.draw()
     if save is not None:
         # WARNING: saving to png will cause the animation to be not smooth (due to IO and image processing)
@@ -93,12 +89,17 @@ def plot_frame(subplot, sample_functions: ([float],), range_start: float, range_
 
 
 def plot_sampled_function(sample_functions, phi_functions, filename_prefix, frames, frame_pause, gear_positions,
-                          angle_range=(0, 2 * pi)):
-    fig, subplot = plt.subplots(figsize=(8, 8))
+                          figure_size, canvas_limit, angle_range=(0, 2 * pi)):
+    fig, subplot = plt.subplots(figsize=figure_size)
     plt.ion()
+    xlim, ylim = canvas_limit
     range_start, range_end = angle_range
     frame_count = 0
     for drive_rotation in np.linspace(range_start, range_end, frames, False):
+        subplot.clear()
+        subplot.set_xlim(xlim)
+        subplot.set_ylim(ylim)
+        subplot.axis('off')
         frame_count = frame_count + 1
         if filename_prefix is None:
             plot_frame(subplot, sample_functions, range_start, range_end, phi_functions, drive_rotation, gear_positions)
@@ -116,4 +117,5 @@ if __name__ == '__main__':
 
     drive_gear = generate_gear(8192)
     driven_gear, center_distance, phi = compute_dual_gear(drive_gear, 1)
-    plot_sampled_function((drive_gear, driven_gear), (phi,), 'output', 100, 0.001, [(0, 0), (center_distance, 0)])
+    plot_sampled_function((drive_gear, driven_gear), (phi,), None, 100, 0.001, [(0, 0), (center_distance, 0)],
+                          (8, 8), ((-3, 7), (-5, 5)))
