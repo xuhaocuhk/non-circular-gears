@@ -19,7 +19,7 @@ def isAllVisible(p: Point, poly: Polygon):
     vtx = list(poly.exterior.coords)
     for p1 in range(len(vtx)):
         line_center = LineString([p, vtx[p1]])
-        if line_center.crosses(polygon):
+        if line_center.crosses(poly):
             return False
     return True
 
@@ -29,9 +29,12 @@ sample usage:
 polar_shape = [2, 1, 2, 1, 2, 1, 2, 1]
 x, y = toEuclideanCoord(polar_shape)
 '''
-def toEuclideanCoord(polar_r):
+
+
+def toEuclideanCoord(polar_r, center_x, center_y):
     thetas = [theta * 2 * math.pi / len(polar_r) for theta in range(0, len(polar_r))]
-    return list(map(computeEuclideanCoord_x, polar_r, thetas)), list(map(computeEuclideanCoord_y, polar_r, thetas))
+    return list(map(lambda n: n + center_x, map(computeEuclideanCoord_x, polar_r, thetas))), list(
+        map(lambda n: n + center_y, map(computeEuclideanCoord_y, polar_r, thetas)))
 
 
 def getIntersDist(p:Point, theta, poly: Polygon, MAX_R):
@@ -60,32 +63,51 @@ def getSVGShape(filename):
     y_coords = list(map(lambda word: float(word.split(" ")[1]), listWords))
     return x_coords, y_coords
 
-if __name__ == '__main__':
 
+def testSampleVisibleCenters():
     x, y = getSVGShape(filename="..\silhouette\man.txt")
 
-    polygon = Polygon(zip(x,y))
+    polygon = Polygon(zip(x, y))
     poly_bound = polygon.bounds
 
     plt.figure(figsize=(8, 8))
     plt.axis('equal')
-    #plt.fill(x, y, "b", alpha = 0.3)
+    plt.fill(x, y, "b", alpha=0.3)
     for i in range(1000):
         x_i = (poly_bound[2] - poly_bound[0]) * np.random.random_sample() + poly_bound[0]
         y_i = (poly_bound[3] - poly_bound[1]) * np.random.random_sample() + poly_bound[1]
 
         if isAllVisible(Point(x_i, y_i), polygon):
             plt.scatter(x_i, y_i, s=50, c='b')
-            polar_poly = toPolarCoord(Point(x_i,y_i), polygon, 100)
-            new_x, new_y = toEuclideanCoord(polar_poly)
-            plt.fill(new_x, new_y, "r", alpha=0.3)
-            plt.show()
         else:
             plt.scatter(x_i, y_i, s=50, c='g')
 
-        # if polygon.contains(Point(x_i, y_i)):
-        #     plt.scatter(x_i, y_i, s=50, c='b')
-        # else:
-        #     plt.scatter(x_i, y_i, s=50, c='g')
-
     plt.show()
+
+
+def testConvertCoordinate():
+    x, y = getSVGShape(filename="..\silhouette\man.txt")
+
+    polygon = Polygon(zip(x, y))
+    poly_bound = polygon.bounds
+
+    plt.figure(figsize=(8, 8))
+    plt.axis('equal')
+    plt.fill(x, y, "b", alpha=0.3)
+    for i in range(1000):
+        x_i = (poly_bound[2] - poly_bound[0]) * np.random.random_sample() + poly_bound[0]
+        y_i = (poly_bound[3] - poly_bound[1]) * np.random.random_sample() + poly_bound[1]
+
+        if isAllVisible(Point(x_i, y_i), polygon):
+            plt.scatter(x_i, y_i, s=50, c='b')
+            polar_poly = toPolarCoord(Point(x_i, y_i), polygon, 100)
+            new_x, new_y = toEuclideanCoord(polar_poly, x_i, y_i)
+            plt.fill(new_x, new_y, "r", alpha=0.3)
+            plt.show()
+        # else:
+        # plt.scatter(x_i, y_i, s=50, c='g')
+    plt.show()
+
+if __name__ == '__main__':
+    # testSampleVisibleCenters()
+    testConvertCoordinate()
