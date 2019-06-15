@@ -91,11 +91,21 @@ def rotate_and_cut(drive_gear, center_distance, phi):
     phi_incremental = phi[0] + [phi[i] - phi[i - 1] for i in range(1, len(phi))]
 
     for angle in phi_incremental:
-        drive_polygon = rotate(drive_polygon, delta_theta)
-        driven_polygon = rotate(driven_polygon, angle)
+        drive_polygon = rotate(drive_polygon, delta_theta, use_radians=True)
+        driven_polygon = rotate(driven_polygon, angle, use_radians=True)
         driven_polygon = driven_polygon.difference(drive_polygon)
+        _plot_polygon((drive_polygon, driven_polygon))
 
     return driven_polygon
+
+
+def _plot_polygon(polygons):
+    for poly in polygons:
+        poly_x, poly_y = poly.exterior.xy
+        plt.plot(poly_x, poly_y)
+    plt.axis('tight')
+    plt.axis('equal')
+    plt.show()
 
 
 if __name__ == '__main__':
@@ -105,8 +115,3 @@ if __name__ == '__main__':
     drive_gear = generate_gear(8192)
     y, center_distance, phi = compute_dual_gear(drive_gear)
     poly = rotate_and_cut(drive_gear, center_distance, phi)
-    poly_x, poly_y = poly.exterior.xy
-    plt.plot(poly_x, poly_y)
-    plt.axis('tight')
-    plt.axis('equal')
-    plt.show()
