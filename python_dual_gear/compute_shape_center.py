@@ -72,7 +72,7 @@ def getSVGShape(filename):
 
 
 def testSampleVisibleCenters():
-    x, y = getSVGShape(filename="..\silhouette\man.txt")
+    x, y = getSVGShape(filename="..\silhouette\mahou.txt")
 
     polygon = Polygon(zip(x, y))
     poly_bound = polygon.bounds
@@ -117,7 +117,7 @@ def testConvertCoordinate():
 
 
 def different_center():
-    x, y = getSVGShape(filename="../silhouette/man.txt")
+    x, y = getSVGShape(filename="../silhouette/mahou.txt")
 
     polygon = Polygon(zip(x, y))
     poly_bound = polygon.bounds
@@ -132,10 +132,10 @@ def different_center():
             driven_gear, center_distance, phi = compute_dual_gear(polar_poly, 1)
             phi = [value - math.pi for value in phi]
             plot_sampled_function((polar_poly, driven_gear), (phi,), None, 100, 0.001, [(0, 0), (center_distance, 0)],
-                                  (8, 8), ((-300, 700), (-500, 500)))
+                                  (8, 8), ((-800, 1600), (-1200, 1200)))
 
 
 if __name__ == '__main__':
-    # testSampleVisibleCenters()
+    #testSampleVisibleCenters()
     # testConvertCoordinate()
     different_center()
