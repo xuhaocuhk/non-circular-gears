@@ -45,29 +45,21 @@ def generate_polygon(sample_function, sample_points, rotation_angle=0.0, transla
         return update
 
 
-def gear_system(sample_functions, sample_points, rotation_angles=(0.0,), gear_positions=((0.0, 0.0),), update=None):
+def gear_system(sample_functions, sample_points, rotation_angles=(0.0,), gear_positions=((0.0, 0.0),)):
     assert len(sample_functions) == len(sample_points) and len(sample_points) == len(rotation_angles) \
            and len(rotation_angles) == len(gear_positions)
     patches_collection = []
-    if update is None:
-        for function, points, theta, trans in zip(sample_functions, sample_points, rotation_angles, gear_positions):
-            polygon = generate_polygon(function, points, theta, trans)
-            patches_collection.append(polygon)
-    else:
-        assert len(update) == len(sample_functions)
-        for function, points, theta, trans, patch in zip(sample_functions, sample_points, rotation_angles,
-                                                         gear_positions, update):
-            polygon = generate_polygon(function, points, theta, trans, patch)
-            patches_collection.append(polygon)
+    for function, points, theta, trans in zip(sample_functions, sample_points, rotation_angles, gear_positions):
+        polygon = generate_polygon(function, points, theta, trans)
+        patches_collection.append(polygon)
     return patches_collection
 
 
 def sync_rotation(phi_functions, drive_rotation):
     assert len(phi_functions)
-    assert reduce(lambda x, y: len(x) == len(y), phi_functions)
     rotation_angles = [drive_rotation]
-    xp = np.linspace(0, 2 * pi, len(phi_functions[0]), endpoint=False)
     for phi in phi_functions:
+        xp = np.linspace(0, 2 * pi, len(phi), endpoint=False)
         angle = np.interp(drive_rotation, xp, phi)
         rotation_angles.append(angle)
     return tuple(rotation_angles)
@@ -77,10 +69,9 @@ def plot_frame(subplot, sample_functions: ([float],), range_start: float, range_
                drive_rotation: float, gear_positions=((0.0, 0.0),), save=None):
     if sample_functions == ():
         return
-    assert reduce(lambda x, y: len(x) == len(y), sample_functions)
     assert len(phi_functions) == len(sample_functions) - 1
-    sample_points = np.linspace(range_start, range_end, len(sample_functions[0]), endpoint=False)
-    sample_points = [sample_points] * len(sample_functions)
+    sample_points = [np.linspace(range_start, range_end, len(sample_function), endpoint=False) for sample_function in
+                     sample_functions]
     for patch in gear_system(sample_functions, sample_points, sync_rotation(phi_functions, drive_rotation),
                              gear_positions):
         subplot.add_patch(patch)
@@ -119,6 +110,6 @@ if __name__ == '__main__':
 
     drive_gear = generate_gear(8192)
 
-    driven_gear, center_distance, phi = compute_dual_gear(drive_gear, 1)
+    driven_gear, center_distance, phi = compute_dual_gear(drive_gear, 2)
     plot_sampled_function((drive_gear, driven_gear), (phi,), None, 100, 0.001, [(0, 0), (center_distance, 0)],
                           (8, 8), ((-3, 7), (-5, 5)))
