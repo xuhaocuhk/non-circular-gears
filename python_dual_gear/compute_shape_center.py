@@ -92,6 +92,7 @@ def testSampleVisibleCenters():
 
 
 def testConvertCoordinate():
+    n = 4096
     x, y = getSVGShape(filename="..\silhouette\man.txt")
 
     polygon = Polygon(zip(x, y))
@@ -99,20 +100,42 @@ def testConvertCoordinate():
 
     plt.figure(figsize=(8, 8))
     plt.axis('equal')
-    plt.fill(x, y, "b", alpha=0.3)
+    # plt.fill(x, y, "b", alpha=0.1)
     for i in range(1000):
         x_i = (poly_bound[2] - poly_bound[0]) * np.random.random_sample() + poly_bound[0]
         y_i = (poly_bound[3] - poly_bound[1]) * np.random.random_sample() + poly_bound[1]
 
         if isAllVisible(Point(x_i, y_i), polygon):
             plt.scatter(x_i, y_i, s=50, c='b')
-            polar_poly = toPolarCoord(Point(x_i, y_i), polygon, 100)
+            polar_poly = toPolarCoord(Point(x_i, y_i), polygon, n)
             new_x, new_y = toEuclideanCoord(polar_poly, x_i, y_i)
             plt.fill(new_x, new_y, "r", alpha=0.3)
             plt.show()
+            input("Stop")
         # else:
         # plt.scatter(x_i, y_i, s=50, c='g')
     plt.show()
+
+
+def toothShape(x: float, height: float):
+    assert x >= 0 and x <= 1
+    if x < 0.2:
+        assert x >= 0 and x < 0.2
+        return height * (x / 0.2)
+    elif x < 0.5:
+        assert x >= 0.2 and x < 0.5
+        return height
+    elif x < 0.7:
+        assert x >= 0.5 and x < 0.7
+        return height * (0.7 - x) / 0.2
+    else:
+        return 0.0
+
+
+# generate teeth in polar coordinate
+def getToothFuc(n: int, tooth_num: int, height: float):
+    return [toothShape((i % tooth_num) / tooth_num, height) - height for i in range(n)]
+
 
 if __name__ == '__main__':
     # testSampleVisibleCenters()
