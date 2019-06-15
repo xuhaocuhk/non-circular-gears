@@ -3,6 +3,9 @@ import numpy as np
 from math import sin, cos, pi
 from functools import reduce
 from matplotlib import patches
+from shapely.geometry import Polygon
+from shapely.geometry import Point
+from compute_shape_center import getSVGShape, toPolarCoord
 
 
 def polar_to_rectangular(sample_function: [float], sample_points: [float]) -> [(float, float)]:
@@ -115,7 +118,13 @@ if __name__ == '__main__':
     from compute_dual_gear import compute_dual_gear
     from drive_gears.ellipse_gear import generate_gear
 
-    drive_gear = generate_gear(8192)
+    # drive_gear = generate_gear(8192)
+
+    x, y = getSVGShape(filename="../silhouette/man.txt")
+    polygon = Polygon(zip(x, y))
+    drive_gear = toPolarCoord(Point(131, 101), polygon, 8192)
+
     driven_gear, center_distance, phi = compute_dual_gear(drive_gear, 1)
+    phi = [value - pi for value in phi]
     plot_sampled_function((drive_gear, driven_gear), (phi,), None, 100, 0.001, [(0, 0), (center_distance, 0)],
-                          (8, 8), ((-3, 7), (-5, 5)))
+                          (8, 8), ((-300, 700), (-500, 500)))

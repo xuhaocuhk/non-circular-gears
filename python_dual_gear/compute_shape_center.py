@@ -92,7 +92,7 @@ def testSampleVisibleCenters():
 
 
 def testConvertCoordinate():
-    x, y = getSVGShape(filename="..\silhouette\man.txt")
+    x, y = getSVGShape(filename="../silhouette/man.txt")
 
     polygon = Polygon(zip(x, y))
     poly_bound = polygon.bounds
@@ -113,6 +113,7 @@ def testConvertCoordinate():
         # else:
         # plt.scatter(x_i, y_i, s=50, c='g')
     plt.show()
+
 
 if __name__ == '__main__':
     # testSampleVisibleCenters()
