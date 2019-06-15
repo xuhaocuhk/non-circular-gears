@@ -1,5 +1,6 @@
-from math import pi, isclose
+from math import pi, isclose, cos, sin
 import numpy as np
+from shapely.geometry import Polygon
 
 
 def compute_dual_gear(x: [float], k: int = 1) -> ([float], float, [float]):
@@ -75,5 +76,37 @@ def cumulative_sum(x: list) -> list:
     return result
 
 
+def to_polygon(sample_function, theta_range=(0, 2 * pi)) -> Polygon:
+    range_start, range_end = theta_range
+    return Polygon([(r * cos(theta), - r * sin(theta)) for r, theta in
+                    zip(sample_function, np.linspace(range_start, range_end, len(sample_function), endpoint=False))])
+
+
+def rotate_and_cut(drive_gear, center_distance, phi):
+    from shapely.affinity import translate, rotate
+    drive_polygon = to_polygon(drive_gear)
+    driven_polygon = to_polygon([center_distance] * len(drive_gear))
+    delta_theta = 2 * pi / len(drive_gear)
+    driven_polygon = translate(driven_polygon, center_distance)
+    phi_incremental = phi[0] + [phi[i] - phi[i - 1] for i in range(1, len(phi))]
+
+    for angle in phi_incremental:
+        drive_polygon = rotate(drive_polygon, delta_theta)
+        driven_polygon = rotate(driven_polygon, angle)
+        driven_polygon = driven_polygon.difference(drive_polygon)
+
+    return driven_polygon
+
+
 if __name__ == '__main__':
-    compute_dual_gear([1, 2, 3, 4, 5])
+    import matplotlib.pyplot as plt
+    from drive_gears.ellipse_gear import generate_gear
+
+    drive_gear = generate_gear(8192)
+    y, center_distance, phi = compute_dual_gear(drive_gear)
+    poly = rotate_and_cut(drive_gear, center_distance, phi)
+    poly_x, poly_y = poly.exterior.xy
+    plt.plot(poly_x, poly_y)
+    plt.axis('tight')
+    plt.axis('equal')
+    plt.show()
