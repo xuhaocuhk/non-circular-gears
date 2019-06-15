@@ -4,7 +4,8 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 from shapely.geometry import LineString
-
+from compute_dual_gear import compute_dual_gear
+from plot_sampled_function import plot_sampled_function
 from shapely.geometry import Polygon
 from shapely.geometry import Point
 
@@ -115,6 +116,26 @@ def testConvertCoordinate():
     plt.show()
 
 
+def different_center():
+    x, y = getSVGShape(filename="../silhouette/man.txt")
+
+    polygon = Polygon(zip(x, y))
+    poly_bound = polygon.bounds
+
+    for i in range(1000):
+        x_i = (poly_bound[2] - poly_bound[0]) * np.random.random_sample() + poly_bound[0]
+        y_i = (poly_bound[3] - poly_bound[1]) * np.random.random_sample() + poly_bound[1]
+
+        if isAllVisible(Point(x_i, y_i), polygon):
+            # plt.scatter(x_i, y_i, s=50, c='b')
+            polar_poly = toPolarCoord(Point(x_i, y_i), polygon, 8192)
+            driven_gear, center_distance, phi = compute_dual_gear(polar_poly, 1)
+            phi = [value - math.pi for value in phi]
+            plot_sampled_function((polar_poly, driven_gear), (phi,), None, 100, 0.001, [(0, 0), (center_distance, 0)],
+                                  (8, 8), ((-300, 700), (-500, 500)))
+
+
 if __name__ == '__main__':
     # testSampleVisibleCenters()
-    testConvertCoordinate()
+    # testConvertCoordinate()
+    different_center()
