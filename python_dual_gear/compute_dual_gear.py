@@ -45,10 +45,17 @@ def compute_dual_gear(x: [float], k: int = 1) -> ([float], float, [float]):
     uniform_k_value_points = np.linspace(0, target_final_phi, n + 1, endpoint=True)  # final point for simplicity
     phi_inv = np.interp(uniform_k_value_points, phi + [target_final_phi], np.linspace(0, 2 * pi, n + 1, endpoint=True))
     assert isclose(phi_inv[0], 0, rel_tol=float_tolerance)
-    raise Exception("not finished!")
 
-    # duplicate for k times
+    # calculate the driven gear curve
+    phi_inv = phi_inv[::-1]  # flip phi_inv
+    y = [center_distance - x_len for x_len in np.interp(phi_inv, np.linspace(0, 2 * pi, n + 1, True), x + [x[0]])]
+    y = y[:-1]  # drop the last one
+    assert len(y) == len(phi)
+
+    phi = [-value for value in phi]
+    # duplicate
     pass
+    return y, center_distance, phi
 
 
 def cumulative_sum(x: list) -> list:
