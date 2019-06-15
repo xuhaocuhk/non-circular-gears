@@ -10,7 +10,7 @@ from shapely.geometry import Point
 def polar_to_rectangular(sample_function: [float], sample_points: [float]) -> [(float, float)]:
     assert len(sample_points) == len(sample_function)
     return [
-        (r * cos(theta), r * sin(theta))
+        (r * cos(theta), - r * sin(theta))  # theta is clockwise
         for r, theta in zip(sample_function, sample_points)
     ]
 
@@ -21,7 +21,7 @@ def translation(original_points: [(float, float)], translation_vector: (float, f
 
 def rotate(polygon_points: [(float, float)], rotation_angle: float) -> [(float, float)]:
     return [
-        (x * cos(rotation_angle) + y * sin(rotation_angle), -x * sin(rotation_angle) + y * cos(rotation_angle))
+        (x * cos(rotation_angle) - y * sin(rotation_angle), x * sin(rotation_angle) + y * cos(rotation_angle))
         for x, y in polygon_points
     ]
 
@@ -120,6 +120,5 @@ if __name__ == '__main__':
     drive_gear = generate_gear(8192)
 
     driven_gear, center_distance, phi = compute_dual_gear(drive_gear, 1)
-    phi = [value - pi for value in phi]
     plot_sampled_function((drive_gear, driven_gear), (phi,), None, 100, 0.001, [(0, 0), (center_distance, 0)],
-                          (8, 8), ((-300, 700), (-500, 500)))
+                          (8, 8), ((-3, 7), (-5, 5)))

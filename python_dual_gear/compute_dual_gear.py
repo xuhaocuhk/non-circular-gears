@@ -52,10 +52,19 @@ def compute_dual_gear(x: [float], k: int = 1) -> ([float], float, [float]):
     y = y[:-1]  # drop the last one
     assert len(y) == len(phi)
 
-    phi = [-value for value in phi]
-    # duplicate
-    pass
-    return y, center_distance, phi
+    # duplicate to a full cycle
+    original_phi = np.array(phi)
+    original_y = np.array(y)
+    phi = np.copy(original_phi)
+    y = np.copy(original_y)
+    for i in range(1, k):
+        y = np.concatenate((y, original_y), axis=None)
+        original_phi += target_final_phi  # add to every element
+        phi = np.concatenate((phi, original_phi), axis=None)
+
+    # necessary transform for normalization
+    phi = (-phi - pi) % (2 * pi)  # negate rotation direction and have pi initial phase
+    return list(y), center_distance, list(phi)
 
 
 def cumulative_sum(x: list) -> list:

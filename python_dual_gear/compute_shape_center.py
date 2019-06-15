@@ -130,12 +130,11 @@ def different_center():
             # plt.scatter(x_i, y_i, s=50, c='b')
             polar_poly = toPolarCoord(Point(x_i, y_i), polygon, 8192)
             driven_gear, center_distance, phi = compute_dual_gear(polar_poly, 1)
-            phi = [value - math.pi for value in phi]
             plot_sampled_function((polar_poly, driven_gear), (phi,), None, 100, 0.001, [(0, 0), (center_distance, 0)],
                                   (8, 8), ((-800, 1600), (-1200, 1200)))
 
 
 if __name__ == '__main__':
-    #testSampleVisibleCenters()
+    # testSampleVisibleCenters()
     # testConvertCoordinate()
     different_center()
