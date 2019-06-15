@@ -72,7 +72,7 @@ def getSVGShape(filename):
 
 
 def testSampleVisibleCenters():
-    x, y = getSVGShape(filename="..\silhouette\mahou.txt")
+    x, y = getSVGShape(filename="../silhouette/mahou.txt")
 
     polygon = Polygon(zip(x, y))
     poly_bound = polygon.bounds
@@ -96,27 +96,26 @@ def testConvertCoordinate():
     x, y = getSVGShape(filename="../silhouette/man.txt")
     n = 4096
 
+    polygon = Polygon(zip(x, y))
+    poly_bound = polygon.bounds
 
-polygon = Polygon(zip(x, y))
-poly_bound = polygon.bounds
+    plt.figure(figsize=(8, 8))
+    plt.axis('equal')
+    # plt.fill(x, y, "b", alpha=0.1)
+    for i in range(1000):
+        x_i = (poly_bound[2] - poly_bound[0]) * np.random.random_sample() + poly_bound[0]
+        y_i = (poly_bound[3] - poly_bound[1]) * np.random.random_sample() + poly_bound[1]
 
-plt.figure(figsize=(8, 8))
-plt.axis('equal')
-# plt.fill(x, y, "b", alpha=0.1)
-for i in range(1000):
-    x_i = (poly_bound[2] - poly_bound[0]) * np.random.random_sample() + poly_bound[0]
-    y_i = (poly_bound[3] - poly_bound[1]) * np.random.random_sample() + poly_bound[1]
-
-    if isAllVisible(Point(x_i, y_i), polygon):
-        plt.scatter(x_i, y_i, s=50, c='b')
-        polar_poly = toPolarCoord(Point(x_i, y_i), polygon, n)
-        new_x, new_y = toEuclideanCoord(polar_poly, x_i, y_i)
-        plt.fill(new_x, new_y, "r", alpha=0.3)
-        plt.show()
-        input("Stop")
-    # else:
-    # plt.scatter(x_i, y_i, s=50, c='g')
-plt.show()
+        if isAllVisible(Point(x_i, y_i), polygon):
+            plt.scatter(x_i, y_i, s=50, c='b')
+            polar_poly = toPolarCoord(Point(x_i, y_i), polygon, n)
+            new_x, new_y = toEuclideanCoord(polar_poly, x_i, y_i)
+            plt.fill(new_x, new_y, "r", alpha=0.3)
+            plt.show()
+            input("Stop")
+        # else:
+        # plt.scatter(x_i, y_i, s=50, c='g')
+    plt.show()
 
 
 def toothShape(x: float, height: float):
