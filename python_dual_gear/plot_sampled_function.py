@@ -55,11 +55,12 @@ def gear_system(sample_functions, sample_points, rotation_angles=(0.0,), gear_po
     return patches_collection
 
 
-def sync_rotation(phi_functions, drive_rotation):
+def sync_rotation(phi_functions, drive_rotation, base_sample_rate):
     assert len(phi_functions)
     rotation_angles = [drive_rotation]
     for phi in phi_functions:
-        xp = np.linspace(0, 2 * pi, len(phi), endpoint=False)
+        assert len(phi) % base_sample_rate == 0
+        xp = np.linspace(0, 2 * pi * len(phi) / base_sample_rate, len(phi), endpoint=False)
         angle = np.interp(drive_rotation, xp, phi)
         rotation_angles.append(angle)
     return tuple(rotation_angles)
@@ -72,8 +73,8 @@ def plot_frame(subplot, sample_functions: ([float],), range_start: float, range_
     assert len(phi_functions) == len(sample_functions) - 1
     sample_points = [np.linspace(range_start, range_end, len(sample_function), endpoint=False) for sample_function in
                      sample_functions]
-    for patch in gear_system(sample_functions, sample_points, sync_rotation(phi_functions, drive_rotation),
-                             gear_positions):
+    for patch in gear_system(sample_functions, sample_points,
+                             sync_rotation(phi_functions, drive_rotation, len(sample_functions[0])), gear_positions):
         subplot.add_patch(patch)
     plt.draw()
     if save is not None:
@@ -110,6 +111,7 @@ if __name__ == '__main__':
 
     drive_gear = generate_gear(8192)
 
+    k = 2
     driven_gear, center_distance, phi = compute_dual_gear(drive_gear, 2)
     plot_sampled_function((drive_gear, driven_gear), (phi,), None, 100, 0.001, [(0, 0), (center_distance, 0)],
                           (8, 8), ((-3, 7), (-5, 5)))
