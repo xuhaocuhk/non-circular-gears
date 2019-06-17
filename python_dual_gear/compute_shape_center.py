@@ -9,12 +9,14 @@ from plot_sampled_function import plot_sampled_function
 from shapely.geometry import Polygon
 from shapely.geometry import Point
 
-
 def computeEuclideanCoord_x(r, theta):
     return r * sin(theta)
 
 def computeEuclideanCoord_y(r, theta):
     return r * cos(theta)
+
+def computeEuclideanCoord(r, theta):
+    return np.array( [r * sin(theta), r * cos(theta)] )
 
 
 def isAllVisible(p: Point, poly: Polygon):
@@ -34,8 +36,14 @@ x, y = toEuclideanCoord(polar_shape)
 '''
 def toEuclideanCoord(polar_r, center_x, center_y):
     thetas = [theta * 2 * math.pi / len(polar_r) for theta in range(0, len(polar_r))]
+    euCoords = np.array( [computeEuclideanCoord(r, theta) for r, theta in zip(polar_r, thetas)] )
+    return euCoords + [center_x, center_y]
+
+def toEuclideanCoord_old(polar_r, center_x, center_y):
+    thetas = [theta * 2 * math.pi / len(polar_r) for theta in range(0, len(polar_r))]
     return list(map(lambda n: n + center_x, map(computeEuclideanCoord_x, polar_r, thetas))), list(
         map(lambda n: n + center_y, map(computeEuclideanCoord_y, polar_r, thetas)))
+
 
 
 def getIntersDist(p: Point, theta, poly: Polygon, MAX_R):
@@ -50,20 +58,20 @@ convert euclidean coordinate shape to polar coordinate
 '''
 def toPolarCoord(p: Point, poly: Polygon, n: int):
     assert isAllVisible(p, poly)
-    vtx = list(poly.exterior.coords)
+    vtx = np.array(poly.exterior.coords)
     distances = [p.distance(Point(v[0], v[1])) for v in vtx]
     MAX_R = max(distances) + 10
     sample_distances = [getIntersDist(p, i * 2 * math.pi / n, poly, MAX_R) for i in range(n)]
-    return sample_distances
+    return np.array(sample_distances)
 
 
 # read coutour from a local file
 def getSVGShape(filename):
     for line in open(filename):
         listWords = line.split(",")
-    x_coords = list(map(lambda word: float(word.split(" ")[0]), listWords))
-    y_coords = list(map(lambda word: float(word.split(" ")[1]), listWords))
-    return x_coords, y_coords
+    listWords = np.array(listWords)
+    coords = np.array(list(map(lambda word: [float(word.split(" ")[0]), float(word.split(" ")[1])], listWords)))
+    return coords
 
 
 def testSampleVisibleCenters():
@@ -88,8 +96,8 @@ def testSampleVisibleCenters():
 
 
 def testConvertCoordinate():
-    x, y = getSVGShape(filename="../silhouette/man.txt")
-    n = 4096
+    vertices = getSVGShape(filename="../silhouette/man.txt")
+    n = 4096 # sample points
 
     polygon = Polygon(zip(x, y))
     poly_bound = polygon.bounds
@@ -134,9 +142,9 @@ def getToothFuc(n: int, tooth_num: int, height: float):
 
 
 def gen_shapes_different_center():
-    x, y = getSVGShape(filename="../silhouette/mahou.txt")
+    vertices = getSVGShape(filename="../silhouette/mahou.txt")
 
-    polygon = Polygon(zip(x, y))
+    polygon = Polygon(vertices)
     poly_bound = polygon.bounds
 
     for i in range(1000):
@@ -151,10 +159,10 @@ def gen_shapes_different_center():
                                   (8, 8), ((-800, 1600), (-1200, 1200)))
 
 def add_tooth():
-    x, y = getSVGShape(filename="../silhouette/mahou.txt")
-    n = 4096
+    vertices = getSVGShape(filename="../silhouette/mahou.txt")
+    n = 128
 
-    polygon = Polygon(zip(x, y))
+    polygon = Polygon(vertices)
     poly_bound = polygon.bounds
 
     plt.figure(figsize=(8, 8))
@@ -167,8 +175,62 @@ def add_tooth():
         if isAllVisible(Point(x_i, y_i), polygon):
             plt.scatter(x_i, y_i, s=50, c='b')
             polar_poly = toPolarCoord(Point(x_i, y_i), polygon, n)
-            new_x, new_y = toEuclideanCoord(polar_poly, x_i, y_i)
+            euCoords = toEuclideanCoord(polar_poly, x_i, y_i)
+
+            new_x, new_y = toEuclideanCoord_old(polar_poly, x_i, y_i)
+            tooth_func = getToothFuc(n, tooth_num=100, height=10)
+            normals = [(new_y[i]-new_y[i+1] , new_x[i+1]-new_x[i]) for i in range(n-1)] # compute normals perpendicular to countour.
+            normals.append((new_y[n-1] - new_y[0], new_x[0] - new_x[n-1]))
+            normals = np.array([ (normals[i][0] / math.sqrt( normals[i][0]*normals[i][0] + normals[i][1]*normals[i][1]) , normals[i][1] / math.sqrt( normals[i][0]*normals[i][0] + normals[i][1]*normals[i][1]))
+                        for i in range(n)]) # normalization
+
             tooth_func = getToothFuc(n, tooth_num=100, height=30)
+
+
+            for i in range(n):
+                start = euCoords[i]
+                nml = normals[i]
+                end = start + nml * 100
+                plt.plot([start[0], end[0]], [start[1], end[1]], linewidth=1, c="r")
+
+            plt.show()
+
+            deviation = np.array([(normals[i]*tooth_func[i]) for i in range(n)])
+            #plt.fill(euCoords[:,0], euCoords[:,1], "b", alpha=0.3)
+            plt.fill(euCoords[:, 0] + deviation[:, 0], euCoords[:, 1] + deviation[:, 1], "r", alpha=0.3)
+            plt.show()
+
+            #plt.fill(new_x, new_y, "b", alpha=0.3)
+            new_x = [new_x[i] + deviation[i][0] for i in range(n)]
+            new_y = [new_y[i] + deviation[i][1] for i in range(n)]
+
+            plt.fill(new_x, new_y, "r", alpha=0.3)
+            plt.show()
+            input("Stop")
+        # else:
+        # plt.scatter(x_i, y_i, s=50, c='g')
+    plt.show()
+
+
+def add_tooth2():
+    vertices = getSVGShape(filename="../silhouette/mahou.txt")
+    n = 128
+
+    polygon = Polygon(vertices)
+    poly_bound = polygon.bounds
+
+    plt.figure(figsize=(8, 8))
+    plt.axis('equal')
+    # plt.fill(x, y, "b", alpha=0.1)
+    for i in range(1000):
+        x_i = (poly_bound[2] - poly_bound[0]) * np.random.random_sample() + poly_bound[0]
+        y_i = (poly_bound[3] - poly_bound[1]) * np.random.random_sample() + poly_bound[1]
+
+        if isAllVisible(Point(x_i, y_i), polygon):
+            plt.scatter(x_i, y_i, s=50, c='b')
+            polar_poly = toPolarCoord(Point(x_i, y_i), polygon, n)
+            new_x, new_y = toEuclideanCoord_old(polar_poly, x_i, y_i)
+            tooth_func = getToothFuc(n, tooth_num=100, height=10)
             normals = [(new_y[i]-new_y[i+1] , new_x[i+1]-new_x[i]) for i in range(n-1)] # compute normals perpendicular to countour
             normals.append((new_y[n-1] - new_y[0], new_x[0] - new_x[n-1]))
             normals = [ (normals[i][0] / math.sqrt( normals[i][0]*normals[i][0] + normals[i][1]*normals[i][1]) , normals[i][1] / math.sqrt( normals[i][0]*normals[i][0] + normals[i][1]*normals[i][1]))
@@ -188,5 +250,5 @@ def add_tooth():
 
 
 if __name__ == '__main__':
-    a = (1, 2, 3)
-    add_tooth()
+
+    add_tooth2()
