@@ -13,7 +13,6 @@ from shapely.geometry import Point
 def computeEuclideanCoord_x(r, theta):
     return r * sin(theta)
 
-
 def computeEuclideanCoord_y(r, theta):
     return r * cos(theta)
 
@@ -33,8 +32,6 @@ sample usage:
 polar_shape = [2, 1, 2, 1, 2, 1, 2, 1]
 x, y = toEuclideanCoord(polar_shape)
 '''
-
-
 def toEuclideanCoord(polar_r, center_x, center_y):
     thetas = [theta * 2 * math.pi / len(polar_r) for theta in range(0, len(polar_r))]
     return list(map(lambda n: n + center_x, map(computeEuclideanCoord_x, polar_r, thetas))), list(
@@ -51,8 +48,6 @@ def getIntersDist(p: Point, theta, poly: Polygon, MAX_R):
 '''
 convert euclidean coordinate shape to polar coordinate
 '''
-
-
 def toPolarCoord(p: Point, poly: Polygon, n: int):
     assert isAllVisible(p, poly)
     vtx = list(poly.exterior.coords)
@@ -138,7 +133,7 @@ def getToothFuc(n: int, tooth_num: int, height: float):
     return [toothShape((i % tooth_num) / tooth_num, height) - height for i in range(n)]
 
 
-def different_center():
+def gen_shapes_different_center():
     x, y = getSVGShape(filename="../silhouette/mahou.txt")
 
     polygon = Polygon(zip(x, y))
@@ -155,8 +150,43 @@ def different_center():
             plot_sampled_function((polar_poly, driven_gear), (phi,), None, 100, 0.001, [(0, 0), (center_distance, 0)],
                                   (8, 8), ((-800, 1600), (-1200, 1200)))
 
+def add_tooth():
+    x, y = getSVGShape(filename="../silhouette/mahou.txt")
+    n = 4096
+
+    polygon = Polygon(zip(x, y))
+    poly_bound = polygon.bounds
+
+    plt.figure(figsize=(8, 8))
+    plt.axis('equal')
+    # plt.fill(x, y, "b", alpha=0.1)
+    for i in range(1000):
+        x_i = (poly_bound[2] - poly_bound[0]) * np.random.random_sample() + poly_bound[0]
+        y_i = (poly_bound[3] - poly_bound[1]) * np.random.random_sample() + poly_bound[1]
+
+        if isAllVisible(Point(x_i, y_i), polygon):
+            plt.scatter(x_i, y_i, s=50, c='b')
+            polar_poly = toPolarCoord(Point(x_i, y_i), polygon, n)
+            new_x, new_y = toEuclideanCoord(polar_poly, x_i, y_i)
+            tooth_func = getToothFuc(n, tooth_num=100, height=30)
+            normals = [(new_y[i]-new_y[i+1] , new_x[i+1]-new_x[i]) for i in range(n-1)] # compute normals perpendicular to countour
+            normals.append((new_y[n-1] - new_y[0], new_x[0] - new_x[n-1]))
+            normals = [ (normals[i][0] / math.sqrt( normals[i][0]*normals[i][0] + normals[i][1]*normals[i][1]) , normals[i][1] / math.sqrt( normals[i][0]*normals[i][0] + normals[i][1]*normals[i][1]))
+                        for i in range(n)] # normalization
+            deviation = [(normals[i][0]*tooth_func[i], normals[i][1]*tooth_func[i]) for i in range(n)]
+
+            #plt.fill(new_x, new_y, "b", alpha=0.3)
+            new_x = [new_x[i] + deviation[i][0] for i in range(n)]
+            new_y = [new_y[i] + deviation[i][1] for i in range(n)]
+
+            plt.fill(new_x, new_y, "r", alpha=0.3)
+            plt.show()
+            input("Stop")
+        # else:
+        # plt.scatter(x_i, y_i, s=50, c='g')
+    plt.show()
+
 
 if __name__ == '__main__':
-    # testSampleVisibleCenters()
-    # testConvertCoordinate()
-    different_center()
+    a = (1, 2, 3)
+    add_tooth()
