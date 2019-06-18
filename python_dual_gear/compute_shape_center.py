@@ -163,7 +163,7 @@ def gen_shapes_different_center():
 
 def add_tooth():
     x, y = getSVGShape(filename="../silhouette/mahou.txt")
-    n = 4096
+    n = 1024
 
     polygon = Polygon(zip(x, y))
     poly_bound = polygon.bounds
@@ -179,7 +179,23 @@ def add_tooth():
             plt.scatter(x_i, y_i, s=50, c='b')
             polar_poly = toPolarCoord(Point(x_i, y_i), polygon, n)
             new_x, new_y = toEuclideanCoord(polar_poly, x_i, y_i)
-            tooth_func = getToothFuc(n, tooth_num=100, height=10)
+            polygon = Polygon(zip(x, y))
+            plt.figure(figsize=(8, 8))
+            plt.axis('equal')
+            xx = []
+            yy = []
+            for i in range(n):
+                p = getCoordinate(i / n, polygon)
+                #plt.scatter(p[0], p[1], s=50, c='b')
+                xx.append(p[0])
+                yy.append(p[1])
+
+            new_x = xx
+            new_y = yy
+            #plt.fill(new_x, new_y, "r", alpha=0.3)
+
+
+            tooth_func = getToothFuc(n, tooth_num=20, height=20)
             normals = [(new_y[i]-new_y[i+1] , new_x[i+1]-new_x[i]) for i in range(n-1)] # compute normals perpendicular to countour
             normals.append((new_y[n-1] - new_y[0], new_x[0] - new_x[n-1]))
             normals = [ (normals[i][0] / math.sqrt( normals[i][0]*normals[i][0] + normals[i][1]*normals[i][1]) , normals[i][1] / math.sqrt( normals[i][0]*normals[i][0] + normals[i][1]*normals[i][1]))
@@ -214,4 +230,5 @@ def testUniformSampleOnContour():
     input("xxx")
 
 if __name__ == '__main__':
-    testUniformSampleOnContour()
+    #testUniformSampleOnContour()
+    add_tooth()
