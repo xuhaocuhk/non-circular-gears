@@ -88,24 +88,31 @@ def rotate_and_cut(drive_gear, center_distance, phi):
     driven_polygon = to_polygon([center_distance] * len(drive_gear))
     delta_theta = 2 * pi / len(drive_gear)
     driven_polygon = translate(driven_polygon, center_distance)
-    phi_incremental = phi[0] + [phi[i] - phi[i - 1] for i in range(1, len(phi))]
+    phi_incremental = [phi[0]] + [phi[i] - phi[i - 1] for i in range(1, len(phi))]
+    angle_sum = 0
 
+    plt.ion()
     for angle in phi_incremental:
-        drive_polygon = rotate(drive_polygon, delta_theta, use_radians=True)
+        angle_sum += delta_theta
+        _drive_polygon = rotate(drive_polygon, angle_sum, use_radians=True)
         driven_polygon = rotate(driven_polygon, angle, use_radians=True)
-        driven_polygon = driven_polygon.difference(drive_polygon)
-        _plot_polygon((drive_polygon, driven_polygon))
+        driven_polygon = driven_polygon.difference(_drive_polygon)
+        _plot_polygon((_drive_polygon, driven_polygon))
+        plt.pause(0.001)
+
+    plt.ioff()
 
     return driven_polygon
 
 
 def _plot_polygon(polygons):
+    plt.clf()
     for poly in polygons:
         poly_x, poly_y = poly.exterior.xy
         plt.plot(poly_x, poly_y)
     plt.axis('tight')
     plt.axis('equal')
-    plt.show()
+    plt.draw()
 
 
 if __name__ == '__main__':
