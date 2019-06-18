@@ -8,8 +8,8 @@ def generate_2d_obj(filename, points):
         for point in points:
             x, y = point
             print(f'v {x} {y} 0', file=file)
-        print('o spline', file=file)
-        print('g segment1', file=file)
+        print('o Spine', file=file)
+        print('g Segment1', file=file)
         print('l', end=' ', file=file)
         for i in range(len(points)):
             print(i + 1, end=' ', file=file)
