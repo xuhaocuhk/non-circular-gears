@@ -186,6 +186,13 @@ def toothShape(x: float, height: float):
         return 0.0
 
 
+def toothShape_smooth(x: float, height: float):
+    assert 0 <= x <= 1
+    if x < 0.6:
+        return height * math.sin(x / 0.6 * math.pi)
+    else:
+        return 0.0
+
 # generate teeth in polar coordinate
 def getToothFuc(n: int, tooth_num: int, height: float):
     return [toothShape((i % tooth_num) / tooth_num, height) - height for i in range(n)]

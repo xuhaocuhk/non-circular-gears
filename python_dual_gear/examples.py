@@ -33,15 +33,11 @@ def cut_gear(input_file, sample_count, center):
     polar_poly = toExteriorPolarCoord(Point(center[0], center[1]), contour, sample_count)
     driven_gear, center_distance, phi = compute_dual_gear(polar_poly, 1)
 
-    for i in range(len(phi) - 1):
-        plt.scatter(i, (phi[i + 1] - phi[i]) / pi, s=5, c='b')
-    plt.show()
-    # plt.pause(60)
     print(center_distance)
     # add teeth
     contour = toEuclideanCoordAsNp(polar_poly, center[0], center[1])
     contour = getUniformContourSampledShape(contour, sample_count)
-    # contour = addToothToContour(contour, height=20, tooth_num=64)
+    contour = addToothToContour(contour, height=50, tooth_num=32)
 
     # contour -= np.array(center)
     new_contour = []
@@ -56,6 +52,6 @@ def cut_gear(input_file, sample_count, center):
 
 
 if __name__ == '__main__':
-    pick_center_point('test', 4096, (0, 0))
+    pick_center_point('mahou', 512, (546, 619))
     # input('mahou hao fan')
-    cut_gear('test', 8192, (0, 0))
+    cut_gear('mahou', 512, (546, 619))
