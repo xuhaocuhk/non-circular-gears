@@ -1,6 +1,6 @@
 from math import pi, isclose, cos, sin
 import numpy as np
-from shapely.geometry import Polygon
+from shapely.geometry import Polygon, MultiPolygon
 
 
 def compute_dual_gear(x: [float], k: int = 1) -> ([float], float, [float]):
@@ -88,25 +88,50 @@ def rotate_and_cut(drive_gear, center_distance, phi):
     driven_polygon = to_polygon([center_distance] * len(drive_gear))
     delta_theta = 2 * pi / len(drive_gear)
     driven_polygon = translate(driven_polygon, center_distance)
-    phi_incremental = phi[0] + [phi[i] - phi[i - 1] for i in range(1, len(phi))]
+    phi_incremental = [phi[0]] + [phi[i] - phi[i - 1] for i in range(1, len(phi))]
+    angle_sum = 0
 
+    plt.ion()
     for angle in phi_incremental:
-        drive_polygon = rotate(drive_polygon, delta_theta)
-        driven_polygon = rotate(driven_polygon, angle)
-        driven_polygon = driven_polygon.difference(drive_polygon)
+        angle_sum += delta_theta
+        _drive_polygon = rotate(drive_polygon, angle_sum, use_radians=True)
+        driven_polygon = rotate(driven_polygon, angle, use_radians=True, origin=(center_distance, 0))
+        driven_polygon = driven_polygon.difference(_drive_polygon)
+        _plot_polygon((_drive_polygon, driven_polygon))
+        plt.pause(0.001)
 
+    plt.ioff()
+
+    driven_polygon = translate(driven_polygon, -center_distance)
     return driven_polygon
+
+
+def _plot_polygon(polygons):
+    plt.clf()
+    for poly in polygons:
+        _draw_single_polygon(poly)
+    plt.axis('tight')
+    plt.axis('equal')
+    plt.draw()
+
+
+def _draw_single_polygon(polygon):
+    if not isinstance(polygon, MultiPolygon):
+        polygon = polygon,
+    for poly in polygon:
+        xs, ys = poly.exterior.xy
+        plt.plot(xs, ys)
 
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
     from drive_gears.ellipse_gear import generate_gear
+    from shapely.affinity import translate
 
     drive_gear = generate_gear(8192)
     y, center_distance, phi = compute_dual_gear(drive_gear)
     poly = rotate_and_cut(drive_gear, center_distance, phi)
-    poly_x, poly_y = poly.exterior.xy
-    plt.plot(poly_x, poly_y)
-    plt.axis('tight')
-    plt.axis('equal')
+    poly = translate(poly, center_distance)
+    _plot_polygon((to_polygon(drive_gear), poly))
+    plt.savefig('dual_gear_shapely.png')
     plt.show()
