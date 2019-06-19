@@ -37,6 +37,7 @@ def compute_dual_gear(x: [float], k: int = 1) -> ([float], float, [float]):
         else:
             bound_left = bound_middle
     center_distance = (bound_left + bound_right) / 2
+    assert isclose(bound_left, bound_right, rel_tol=float_tolerance)
 
     # sum up to get phi
     phi = cumulative_sum([delta_alpha * xi / (center_distance - xi) for xi in x])
@@ -101,6 +102,7 @@ def rotate_and_cut(drive_polygon, center_distance, phi):
         driven_polygon = driven_polygon.difference(_drive_polygon)
         _plot_polygon((_drive_polygon, driven_polygon))
         plt.pause(0.001)
+    assert isclose(angle_sum, 2 * pi, rel_tol=1e-5)
 
     plt.ioff()
 
