@@ -78,6 +78,8 @@ def plot_frame(subplot, sample_functions: ([float],), range_start: float, range_
     for patch in gear_system(sample_functions, sample_points,
                              sync_rotation(phi_functions, drive_rotation, len(sample_functions[0])), gear_positions):
         subplot.add_patch(patch)
+    for gear_position in gear_positions:
+        plt.scatter(gear_position[0], gear_position[1], s=5, c='b')
     plt.draw()
     if save is not None:
         # WARNING: saving to png will cause the animation to be not smooth (due to IO and image processing)

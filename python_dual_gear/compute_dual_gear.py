@@ -1,6 +1,7 @@
 from math import pi, isclose, cos, sin
 import numpy as np
 from shapely.geometry import Polygon, MultiPolygon
+import matplotlib.pyplot as plt
 
 
 def compute_dual_gear(x: [float], k: int = 1) -> ([float], float, [float]):
@@ -82,11 +83,10 @@ def to_polygon(sample_function, theta_range=(0, 2 * pi)) -> Polygon:
                     zip(sample_function, np.linspace(range_start, range_end, len(sample_function), endpoint=False))])
 
 
-def rotate_and_cut(drive_gear, center_distance, phi):
+def rotate_and_cut(drive_polygon, center_distance, phi):
     from shapely.affinity import translate, rotate
-    drive_polygon = to_polygon(drive_gear)
-    driven_polygon = to_polygon([center_distance] * len(drive_gear))
-    delta_theta = 2 * pi / len(drive_gear)
+    driven_polygon = to_polygon([center_distance] * len(phi))
+    delta_theta = 2 * pi / len(phi)
     driven_polygon = translate(driven_polygon, center_distance)
     phi_incremental = [phi[0]] + [phi[i] - phi[i - 1] for i in range(1, len(phi))]
     angle_sum = 0
@@ -95,6 +95,8 @@ def rotate_and_cut(drive_gear, center_distance, phi):
     for angle in phi_incremental:
         angle_sum += delta_theta
         _drive_polygon = rotate(drive_polygon, angle_sum, use_radians=True)
+        plt.scatter(0, 0, s=5, c='b')
+        plt.scatter(center_distance, 0, s=5, c='b')
         driven_polygon = rotate(driven_polygon, angle, use_radians=True, origin=(center_distance, 0))
         driven_polygon = driven_polygon.difference(_drive_polygon)
         _plot_polygon((_drive_polygon, driven_polygon))
@@ -128,9 +130,9 @@ if __name__ == '__main__':
     from drive_gears.ellipse_gear import generate_gear
     from shapely.affinity import translate
 
-    drive_gear = generate_gear(8192)
+    drive_gear = generate_gear(256)
     y, center_distance, phi = compute_dual_gear(drive_gear)
-    poly = rotate_and_cut(drive_gear, center_distance, phi)
+    poly = rotate_and_cut(to_polygon(drive_gear), center_distance, phi)
     poly = translate(poly, center_distance)
     _plot_polygon((to_polygon(drive_gear), poly))
     plt.savefig('dual_gear_shapely.png')
