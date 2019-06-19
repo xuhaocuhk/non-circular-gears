@@ -8,6 +8,8 @@ from shapely.geometry import Point
 
 
 def polar_to_rectangular(sample_function: [float], sample_points: [float]) -> [(float, float)]:
+    if sample_points is None:
+        sample_points = np.linspace(0, 2 * pi, len(sample_function), endpoint=False)
     assert len(sample_points) == len(sample_function)
     return [
         (r * cos(theta), - r * sin(theta))  # theta is clockwise
