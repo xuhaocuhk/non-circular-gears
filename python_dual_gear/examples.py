@@ -9,6 +9,8 @@ from math import pi
 
 def pick_center_point(input_file, sample_count, center=None):
     contour = getSVGShapeAsNp(filename=f"../silhouette/{input_file}.txt")
+    # convert to uniform coordinate
+    contour = getUniformContourSampledShape(contour, sample_count)
     if center is None:
         for i in range(1000):
             center = getVisiblePoint(contour)
@@ -25,8 +27,10 @@ def pick_center_point(input_file, sample_count, center=None):
                               (8, 8), ((-800, 1600), (-1200, 1200)))
 
 
-def cut_gear(input_file, sample_count, center):
+def cut_gear(input_file, sample_count, center, tooth_height, tooth_num):
     contour = getSVGShapeAsNp(filename=f"../silhouette/{input_file}.txt")
+    # convert to uniform coordinate
+    contour = getUniformContourSampledShape(contour, sample_count)
     print(f'center={center}')
 
     # get phi
@@ -35,9 +39,7 @@ def cut_gear(input_file, sample_count, center):
 
     print(center_distance)
     # add teeth
-    contour = toEuclideanCoordAsNp(polar_poly, center[0], center[1])
-    contour = getUniformContourSampledShape(contour, sample_count)
-    contour = addToothToContour(contour, height=50, tooth_num=32)
+    contour = addToothToContour(contour, height=tooth_height, tooth_num=tooth_num)
 
     # contour -= np.array(center)
     new_contour = []
@@ -52,6 +54,13 @@ def cut_gear(input_file, sample_count, center):
 
 
 if __name__ == '__main__':
-    pick_center_point('mahou', 512, (546, 619))
-    # input('mahou hao fan')
-    cut_gear('mahou', 512, (546, 619))
+    models = [('mahou2', 512, (390, 229), 10, 32),
+              ('mahou', 512, (710, 437), 15, 32),
+              ('wolf', 512, (300, 300) ,10 , 32),
+              ('man', 4096, (93, 180), 1, 128)]
+    chosen = 1
+    if models[chosen][2] is None:
+        pick_center_point(models[chosen][0], models[chosen][1], models[chosen][2])
+
+    cut_gear(models[chosen][0], models[chosen][1], models[chosen][2] , models[chosen][3], models[chosen][4])
+

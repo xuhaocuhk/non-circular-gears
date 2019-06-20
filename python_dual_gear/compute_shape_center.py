@@ -95,6 +95,7 @@ convert euclidean coordinate shape to polar coordinate
 '''
 def toExteriorPolarCoord(p: Point, contour: np.array, n: int):
     poly = Polygon(contour)
+    assert poly.contains(p)
     vtx = list(poly.exterior.coords)
     distances = [p.distance(Point(v[0], v[1])) for v in vtx]
     MAX_R = max(distances) + 10
@@ -118,14 +119,11 @@ def toothShape(x: float, height: float):
 
 def toothShape_smooth(x: float, height: float):
     assert 0 <= x <= 1
-    if x < 0.6:
-        return height * math.sin(x / 0.6 * math.pi)
-    else:
-        return 0.0
+    return height * math.sin(x * 2 * math.pi)
 
 # generate teeth in polar coordinate
 def getToothFuc(n: int, tooth_num: int, height: float):
-    return [toothShape((i % tooth_num) / tooth_num, height) - height for i in range(n)]
+    return [toothShape_smooth((i % tooth_num) / tooth_num, height) for i in range(n)]
 
 def getVisiblePoint(contour):
     polygon = Polygon(contour)
@@ -159,13 +157,13 @@ def addToothToContour(contour: np.array, height: int, tooth_num: int):
 
 
 def getShapeExample():
-    n = 2048
+    n = 4096*2
 
     plt.figure(figsize=(8, 8))
     plt.axis('equal')
 
     # read raw polygon from file
-    contour = getSVGShapeAsNp(filename="../silhouette/mahou.txt")
+    contour = getSVGShapeAsNp(filename="../silhouette/man.txt")
     plt.fill(contour[:, 0], contour[:, 1], "b", alpha=0.3)
 
     # convert to uniform coordinate
@@ -175,18 +173,18 @@ def getShapeExample():
 
 
     # get center visible point
-    center = getVisiblePoint(contour)
+    # center = getVisiblePoint(contour)
     # convert to polar coordinate
-    polar_poly = toPolarCoord(Point(center[0], center[1]), contour, n)
-    center = (565, 289)
-    polar_poly = toExteriorPolarCoord(Point(center[0], center[1]), contour, n)
+    # polar_poly = toPolarCoord(Point(center[0], center[1]), contour, n)
+    # center = (565, 289)
+    # polar_poly = toExteriorPolarCoord(Point(center[0], center[1]), contour, n)
     # convert to euclidean coordinate to test
-    contour = toEuclideanCoordAsNp(polar_poly, center[0], center[1])
+    # contour = toEuclideanCoordAsNp(polar_poly, center[0], center[1])
 
 
 
     # add tooth
-    contour = addToothToContour(contour, height=20, tooth_num=64)
+    contour = addToothToContour(contour, height=5, tooth_num=64)
 
     plt.fill(contour[:, 0], contour[:, 1], "g", alpha=0.3)
     #lt.scatter(center[0], center[1], s=5, c='b')
