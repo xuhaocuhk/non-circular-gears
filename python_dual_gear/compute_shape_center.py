@@ -12,13 +12,6 @@ from scipy.interpolate import interp1d
 import shapely
 
 
-def computeEuclideanCoord_x(r, theta):
-    return r * sin(theta)
-
-
-def computeEuclideanCoord_y(r, theta):
-    return r * cos(theta)
-
 
 def isAllVisible(p: Point, poly: Polygon):
     vtx = list(poly.exterior.coords)
@@ -28,14 +21,12 @@ def isAllVisible(p: Point, poly: Polygon):
             return False
     return True
 
+def computeEuclideanCoord_x(r, theta):
+    return r * sin(theta)
 
-'''
-convert polar to euclidean coordinate
-sample usage:
-polar_shape = [2, 1, 2, 1, 2, 1, 2, 1]
-x, y = toEuclideanCoord(polar_shape)
-'''
 
+def computeEuclideanCoord_y(r, theta):
+    return r * cos(theta)
 
 def toEuclideanCoord(polar_r, center_x, center_y):
     thetas = [theta * 2 * math.pi / len(polar_r) for theta in range(0, len(polar_r))]
@@ -82,15 +73,13 @@ def getUniformCoordinateFunction(contour: np.array):
     distance = [np.linalg.norm(coord[i] - coord[i - 1]) for i in range(len(coord))]
     cumsum_dist = np.cumsum(distance)
     cumsum_dist = cumsum_dist / cumsum_dist[-1]
-    f = interp1d(cumsum_dist, coord, axis=0)
+    f = interp1d(cumsum_dist, coord, axis=0, kind='cubic')
     return f
 
 
 '''
 convert euclidean coordinate shape to polar coordinate
 '''
-
-
 def toPolarCoord(p: Point, contour: np.array, n: int):
     poly = Polygon(contour)
     assert isAllVisible(p, poly)
@@ -104,8 +93,6 @@ def toPolarCoord(p: Point, contour: np.array, n: int):
 '''
 convert euclidean coordinate shape to polar coordinate
 '''
-
-
 def toExteriorPolarCoord(p: Point, contour: np.array, n: int):
     poly = Polygon(contour)
     vtx = list(poly.exterior.coords)
@@ -113,63 +100,6 @@ def toExteriorPolarCoord(p: Point, contour: np.array, n: int):
     MAX_R = max(distances) + 10
     sample_distances = [getMaxIntersDist(p, i * 2 * math.pi / n, poly, MAX_R) for i in range(n)]
     return sample_distances
-
-
-# read coutour from a local file
-def getSVGShape(filename):
-    for line in open(filename):
-        listWords = line.split(",")
-    x_coords = list(map(lambda word: float(word.split(" ")[0]), listWords))
-    y_coords = list(map(lambda word: float(word.split(" ")[1]), listWords))
-    return x_coords, y_coords
-
-
-def testSampleVisibleCenters():
-    x, y = getSVGShape(filename="../silhouette/mahou.txt")
-
-    polygon = Polygon(zip(x, y))
-    poly_bound = polygon.bounds
-
-    plt.figure(figsize=(8, 8))
-    plt.axis('equal')
-    plt.fill(x, y, "b", alpha=0.3)
-    for i in range(1000):
-        x_i = (poly_bound[2] - poly_bound[0]) * np.random.random_sample() + poly_bound[0]
-        y_i = (poly_bound[3] - poly_bound[1]) * np.random.random_sample() + poly_bound[1]
-
-        if isAllVisible(Point(x_i, y_i), polygon):
-            plt.scatter(x_i, y_i, s=50, c='b')
-        else:
-            plt.scatter(x_i, y_i, s=50, c='g')
-
-    plt.show()
-
-
-def testConvertCoordinate():
-    x, y = getSVGShape(filename="../silhouette/man.txt")
-    n = 4096
-
-    polygon = Polygon(zip(x, y))
-    poly_bound = polygon.bounds
-
-    plt.figure(figsize=(8, 8))
-    plt.axis('equal')
-    # plt.fill(x, y, "b", alpha=0.1)
-    for i in range(1000):
-        x_i = (poly_bound[2] - poly_bound[0]) * np.random.random_sample() + poly_bound[0]
-        y_i = (poly_bound[3] - poly_bound[1]) * np.random.random_sample() + poly_bound[1]
-
-        if isAllVisible(Point(x_i, y_i), polygon):
-            plt.scatter(x_i, y_i, s=50, c='b')
-            polar_poly = toPolarCoord(Point(x_i, y_i), polygon, n)
-            new_x, new_y = toEuclideanCoord(polar_poly, x_i, y_i)
-            plt.fill(new_x, new_y, "r", alpha=0.3)
-            plt.show()
-            input("Stop")
-        # else:
-        # plt.scatter(x_i, y_i, s=50, c='g')
-    plt.show()
-
 
 def toothShape(x: float, height: float):
     assert 0 <= x <= 1
@@ -196,95 +126,6 @@ def toothShape_smooth(x: float, height: float):
 # generate teeth in polar coordinate
 def getToothFuc(n: int, tooth_num: int, height: float):
     return [toothShape((i % tooth_num) / tooth_num, height) - height for i in range(n)]
-
-
-def gen_shapes_different_center():
-    x, y = getSVGShape(filename="../silhouette/mahou.txt")
-
-    polygon = Polygon(zip(x, y))
-    poly_bound = polygon.bounds
-
-    for i in range(1000):
-        x_i = (poly_bound[2] - poly_bound[0]) * np.random.random_sample() + poly_bound[0]
-        y_i = (poly_bound[3] - poly_bound[1]) * np.random.random_sample() + poly_bound[1]
-
-        if isAllVisible(Point(x_i, y_i), polygon):
-            # plt.scatter(x_i, y_i, s=50, c='b')
-            polar_poly = toPolarCoord(Point(x_i, y_i), polygon, 8192)
-            driven_gear, center_distance, phi = compute_dual_gear(polar_poly, 1)
-            plot_sampled_function((polar_poly, driven_gear), (phi,), None, 100, 0.001, [(0, 0), (center_distance, 0)],
-                                  (8, 8), ((-800, 1600), (-1200, 1200)))
-
-
-def add_tooth():
-    x, y = getSVGShape(filename="../silhouette/mahou.txt")
-    n = 1024
-
-    polygon = Polygon(zip(x, y))
-    poly_bound = polygon.bounds
-
-    plt.figure(figsize=(8, 8))
-    plt.axis('equal')
-    # plt.fill(x, y, "b", alpha=0.1)
-    for i in range(1000):
-        x_i = (poly_bound[2] - poly_bound[0]) * np.random.random_sample() + poly_bound[0]
-        y_i = (poly_bound[3] - poly_bound[1]) * np.random.random_sample() + poly_bound[1]
-
-        if isAllVisible(Point(x_i, y_i), polygon):
-            plt.scatter(x_i, y_i, s=50, c='b')
-            polar_poly = toPolarCoord(Point(x_i, y_i), polygon, n)
-            new_x, new_y = toEuclideanCoord(polar_poly, x_i, y_i)
-            polygon = Polygon(zip(x, y))
-            plt.figure(figsize=(8, 8))
-            plt.axis('equal')
-            xx = []
-            yy = []
-            for i in range(n):
-                p = getUniformCoordinateFunction(i / n, polygon)
-                # plt.scatter(p[0], p[1], s=50, c='b')
-                xx.append(p[0])
-                yy.append(p[1])
-
-            new_x = xx
-            new_y = yy
-            # plt.fill(new_x, new_y, "r", alpha=0.3)
-
-            tooth_func = getToothFuc(n, tooth_num=20, height=20)
-            normals = [(new_y[i] - new_y[i + 1], new_x[i + 1] - new_x[i]) for i in
-                       range(n - 1)]  # compute normals perpendicular to countour
-            normals.append((new_y[n - 1] - new_y[0], new_x[0] - new_x[n - 1]))
-            normals = [(normals[i][0] / math.sqrt(normals[i][0] * normals[i][0] + normals[i][1] * normals[i][1]),
-                        normals[i][1] / math.sqrt(normals[i][0] * normals[i][0] + normals[i][1] * normals[i][1]))
-                       for i in range(n)]  # normalization
-            deviation = [(normals[i][0] * tooth_func[i], normals[i][1] * tooth_func[i]) for i in range(n)]
-
-            # plt.fill(new_x, new_y, "b", alpha=0.3)
-            new_x = [new_x[i] + deviation[i][0] for i in range(n)]
-            new_y = [new_y[i] + deviation[i][1] for i in range(n)]
-
-            plt.fill(new_x, new_y, "r", alpha=0.3)
-            plt.show()
-            input("Stop")
-        # else:
-        # plt.scatter(x_i, y_i, s=50, c='g')
-    plt.show()
-
-
-def testUniformSampleOnContour():
-    x, y = getSVGShape(filename="../silhouette/mahou.txt")
-    n = 4096
-
-    polygon = Polygon(zip(x, y))
-    poly_bound = polygon.bounds
-
-    plt.figure(figsize=(8, 8))
-    plt.axis('equal')
-    for i in range(1000):
-        p = getUniformCoordinateFunction(i / 1000, polygon)
-        plt.scatter(p[0], p[1], s=50, c='b')
-    plt.show()
-    input("xxx")
-
 
 def getVisiblePoint(contour):
     polygon = Polygon(contour)
@@ -325,32 +166,34 @@ def getShapeExample():
 
     # read raw polygon from file
     contour = getSVGShapeAsNp(filename="../silhouette/mahou.txt")
-    assert contour.shape == (len(contour), 2)
     plt.fill(contour[:, 0], contour[:, 1], "b", alpha=0.3)
-    # get center visible point
-    center = getVisiblePoint(contour)
-
-    # convert to polar coordinate
-    # polar_poly = toPolarCoord(Point(center[0], center[1]), contour, n)
-    # center = (565, 289)
-    polar_poly = toExteriorPolarCoord(Point(center[0], center[1]), contour, n)
-
-    # convert to euclidean coordinate to test
-    contour = toEuclideanCoordAsNp(polar_poly, center[0], center[1])
 
     # convert to uniform coordinate
     contour = getUniformContourSampledShape(contour, n)
+    plt.fill(contour[:, 0], contour[:, 1], "r", alpha=0.3)
+
+
+
+    # get center visible point
+    center = getVisiblePoint(contour)
+    # convert to polar coordinate
+    polar_poly = toPolarCoord(Point(center[0], center[1]), contour, n)
+    center = (565, 289)
+    polar_poly = toExteriorPolarCoord(Point(center[0], center[1]), contour, n)
+    # convert to euclidean coordinate to test
+    contour = toEuclideanCoordAsNp(polar_poly, center[0], center[1])
+
+
 
     # add tooth
     contour = addToothToContour(contour, height=20, tooth_num=64)
 
-    plt.fill(contour[:, 0], contour[:, 1], "r", alpha=0.3)
-    plt.scatter(center[0], center[1], s=5, c='b')
-    for p in contour:
-        plt.scatter(p[0], p[1], s=10, c='b')
-    # plt.fill(new_x, new_y, "r", alpha=0.3)
+    plt.fill(contour[:, 0], contour[:, 1], "g", alpha=0.3)
+    #lt.scatter(center[0], center[1], s=5, c='b')
+    #for p in contour:
+    #    plt.scatter(p[0], p[1], s=10, c='b')
     plt.show()
-    # input()
+    input()
 
 
 if __name__ == '__main__':
