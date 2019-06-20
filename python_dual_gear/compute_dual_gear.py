@@ -97,11 +97,11 @@ def rotate_and_cut(drive_polygon, center_distance, phi):
     for angle in phi_incremental:
         angle_sum += delta_theta
         _drive_polygon = rotate(drive_polygon, angle_sum, use_radians=True)
-        plt.scatter(0, 0, s=5, c='b')
-        plt.scatter(center_distance, 0, s=5, c='b')
         driven_polygon = rotate(driven_polygon, angle, use_radians=True, origin=(center_distance, 0))
         driven_polygon = driven_polygon.difference(_drive_polygon)
         _plot_polygon((_drive_polygon, driven_polygon))
+        plt.scatter(0, 0, s=20, c='b')
+        plt.scatter(center_distance, 0, s=20, c='b')
         plt.pause(0.001)
     assert isclose(angle_sum, 2 * pi, rel_tol=1e-5)
 

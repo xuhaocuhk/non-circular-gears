@@ -57,8 +57,11 @@ if __name__ == '__main__':
     models = [('mahou2', 512, (390, 229), 10, 32),
               ('mahou', 512, (710, 437), 15, 32),
               ('wolf', 512, (300, 300) ,10 , 32),
+              ('irregular_circle', 512, (480, 214), 8, 32),
+              ('ellipse', 512, (438, 204), 8, 32),
+              ('spiral_circle_convex', 512, (470, 206), 8, 32),
               ('man', 4096, (93, 180), 1, 128)]
-    chosen = 1
+    chosen = 4
     if models[chosen][2] is None:
         pick_center_point(models[chosen][0], models[chosen][1], models[chosen][2])
 
