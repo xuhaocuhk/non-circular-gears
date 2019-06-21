@@ -1,10 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from math import sin, cos, pi
-from functools import reduce
 from matplotlib import patches
-from shapely.geometry import Polygon
-from shapely.geometry import Point
+import os
 
 
 def polar_to_rectangular(sample_function: [float], sample_points: [float]) -> [(float, float)]:
@@ -103,14 +101,14 @@ def plot_sampled_function(sample_functions, phi_functions, filename_prefix, fram
             plot_frame(subplot, sample_functions, range_start, range_end, phi_functions, drive_rotation, gear_positions)
         else:
             plot_frame(subplot, sample_functions, range_start, range_end, phi_functions, drive_rotation, gear_positions,
-                       '%s-%05d' % (filename_prefix, frame_count))
+                       os.path.join(filename_prefix, 'cut-%05d' % (frame_count)))
         plt.pause(frame_pause)
     plt.ioff()
     plt.close(fig)
 
 
 if __name__ == '__main__':
-    from compute_dual_gear import compute_dual_gear
+    from core.compute_dual_gear import compute_dual_gear
     from drive_gears.ellipse_gear import generate_gear
 
     drive_gear = generate_gear(8192)

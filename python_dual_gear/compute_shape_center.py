@@ -1,16 +1,12 @@
-import matplotlib
 from math import sin, cos
 import math
 import numpy as np
 import matplotlib.pyplot as plt
 from shapely.geometry import LineString
-from compute_dual_gear import compute_dual_gear
-from plot_sampled_function import plot_sampled_function
 from shapely.geometry import Polygon
 from shapely.geometry import Point
 from scipy.interpolate import interp1d
 import shapely
-
 
 
 def isAllVisible(p: Point, poly: Polygon):
@@ -180,7 +176,6 @@ def getShapeExample():
     # polar_poly = toExteriorPolarCoord(Point(center[0], center[1]), contour, n)
     # convert to euclidean coordinate to test
     # contour = toEuclideanCoordAsNp(polar_poly, center[0], center[1])
-
 
 
     # add tooth

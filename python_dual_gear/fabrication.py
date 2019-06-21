@@ -17,7 +17,7 @@ def generate_2d_obj(filename, points):
 
 
 if __name__ == '__main__':
-    from plot_sampled_function import polar_to_rectangular
+    from core.plot_sampled_function import polar_to_rectangular
     from drive_gears.ellipse_gear import generate_gear
 
     generate_2d_obj('test.obj', polar_to_rectangular(generate_gear(8192), None))

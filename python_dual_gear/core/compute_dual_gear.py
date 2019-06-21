@@ -2,7 +2,8 @@ from math import pi, isclose, cos, sin
 import numpy as np
 from shapely.geometry import Polygon, MultiPolygon
 import matplotlib.pyplot as plt
-
+from debug_util import MyDebugger
+import os
 
 def compute_dual_gear(x: [float], k: int = 1) -> ([float], float, [float]):
     """
@@ -85,7 +86,7 @@ def to_polygon(sample_function, theta_range=(0, 2 * pi)) -> Polygon:
                     zip(sample_function, np.linspace(range_start, range_end, len(sample_function), endpoint=False))])
 
 
-def rotate_and_cut(drive_polygon, center_distance, phi):
+def rotate_and_cut(drive_polygon, center_distance, phi, debugger: MyDebugger):
     from shapely.affinity import translate, rotate
     driven_polygon = to_polygon([center_distance] * len(phi))
     delta_theta = 2 * pi / len(phi)
@@ -94,7 +95,7 @@ def rotate_and_cut(drive_polygon, center_distance, phi):
     angle_sum = 0
 
     plt.ion()
-    for angle in phi_incremental:
+    for index, angle in enumerate(phi_incremental):
         angle_sum += delta_theta
         _drive_polygon = rotate(drive_polygon, angle_sum, use_radians=True)
         driven_polygon = rotate(driven_polygon, angle, use_radians=True, origin=(center_distance, 0))
@@ -102,6 +103,7 @@ def rotate_and_cut(drive_polygon, center_distance, phi):
         _plot_polygon((_drive_polygon, driven_polygon))
         plt.scatter(0, 0, s=20, c='b')
         plt.scatter(center_distance, 0, s=20, c='b')
+        plt.savefig(os.path.join(debugger.get_cutting_debug_dir_name(), f'cutting_{index}.png'))
         plt.pause(0.001)
     assert isclose(angle_sum, 2 * pi, rel_tol=1e-5)
 
