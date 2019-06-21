@@ -96,7 +96,7 @@ def rotate_and_cut(drive_polygon, center_distance, phi, debugger: MyDebugger):
 
     fig, subplot = plt.subplots()
 
-    #plt.ion()
+    plt.ion()
     for index, angle in enumerate(phi_incremental):
         angle_sum += delta_theta
         _drive_polygon = rotate(drive_polygon, angle_sum, use_radians=True)

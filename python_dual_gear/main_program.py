@@ -44,7 +44,6 @@ if __name__ == '__main__':
     plts[1][0].scatter(center[0], center[1], s=10, c='b')
     plts[1][0].set_title('Polar shape')
 
-
     # generate and draw the dual shape
     driven_gear, center_distance, phi = compute_dual_gear(polar_poly, 1)
     polar_contour = toEuclideanCoordAsNp(driven_gear, 0, 0)
@@ -78,5 +77,5 @@ if __name__ == '__main__':
 
 
     fig.set_size_inches(16, 9)
-    plt.savefig(os.path.join(debugger.get_root_debug_dir_name(), 'shapes.pdf'))
+    fig.savefig(os.path.join(debugger.get_root_debug_dir_name(), 'shapes.pdf'))
 
