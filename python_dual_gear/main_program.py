@@ -18,13 +18,15 @@ if __name__ == '__main__':
     # read the contour shape
     contour = getSVGShapeAsNp(filename=f"../silhouette/{model.name}.txt")
     fig, plts = plt.subplots(2, 3)
-    plts[0][0].fill(contour[:, 0], contour[:, 1], "g", alpha=0.3)
+    plt.ion()
+    plt.show()
+    plts[0][0].fill(contour[:, 0], contour[:, 1], "g", facecolor='lightsalmon', edgecolor='orangered', linewidth=3, alpha=0.3)
     plts[0][0].set_title('Input Polygon')
 
 
     # convert to uniform coordinate
     contour = getUniformContourSampledShape(contour, model.sample_num)
-    plts[0][1].fill(contour[:, 0], contour[:, 1], "g", alpha=0.3)
+    plts[0][1].fill(contour[:, 0], contour[:, 1], "g",facecolor='lightsalmon', edgecolor='orangered', linewidth=3, alpha=0.3)
     plts[0][1].set_title('Uniform boundary sampling')
 
     # convert to polar coordinate shape
@@ -62,8 +64,6 @@ if __name__ == '__main__':
     plts[1][1].fill(contour[:, 0], contour[:, 1], "g", alpha=0.3)
     plts[1][1].set_title('Add Tooth')
 
-    plt.show()
-
     # cut and generate the cutting dual shape
     new_contour = []
     for x, y in contour:
@@ -74,7 +74,7 @@ if __name__ == '__main__':
     cutted_gear_contour = np.array(translated_driven_gear.exterior.coords);
     plts[1][2].fill(cutted_gear_contour[:, 0], cutted_gear_contour[:, 1], "g", alpha=0.3)
     plts[1][2].set_title('Dual Shape(Cut)')
-
+    plt.show()
 
     fig.set_size_inches(16, 9)
     fig.savefig(os.path.join(debugger.get_root_debug_dir_name(), 'shapes.pdf'))
