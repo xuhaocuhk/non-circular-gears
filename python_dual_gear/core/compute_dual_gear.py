@@ -94,15 +94,17 @@ def rotate_and_cut(drive_polygon, center_distance, phi, debugger: MyDebugger):
     phi_incremental = [phi[0]] + [phi[i] - phi[i - 1] for i in range(1, len(phi))]
     angle_sum = 0
 
-    plt.ion()
+    fig, subplot = plt.subplots()
+
+    #plt.ion()
     for index, angle in enumerate(phi_incremental):
         angle_sum += delta_theta
         _drive_polygon = rotate(drive_polygon, angle_sum, use_radians=True)
         driven_polygon = rotate(driven_polygon, angle, use_radians=True, origin=(center_distance, 0))
         driven_polygon = driven_polygon.difference(_drive_polygon)
         _plot_polygon((_drive_polygon, driven_polygon))
-        plt.scatter(0, 0, s=20, c='b')
-        plt.scatter(center_distance, 0, s=20, c='b')
+        subplot.scatter(0, 0, s=20, c='b')
+        subplot.scatter(center_distance, 0, s=20, c='b')
         plt.savefig(os.path.join(debugger.get_cutting_debug_dir_name(), f'cutting_{index}.png'))
         plt.pause(0.001)
     assert isclose(angle_sum, 2 * pi, rel_tol=1e-5)

@@ -13,8 +13,8 @@ class Model():
 
 our_models = [Model('mahou2', 512, (390, 229), 10, 32),
               Model('mahou', 512, (710, 437), 15, 32),
-              Model('wolf', 512, (300, 300), 10, 32),
+              Model('wolf', 512, (300, 300), 5, 128),
               Model('irregular_circle', 512, (480, 214), 8, 32),
-              Model('ellipse', 512, (438, 204), 8, 32),
+              Model('ellipse', 32, (438, 204), 8, 32),
               Model('spiral_circle_convex', 512, (470, 206), 8, 32),
               Model('man', 4096, (93, 180), 1, 128)]

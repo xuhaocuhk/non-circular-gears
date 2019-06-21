@@ -7,27 +7,6 @@ from models import Model
 from core.plot_sampled_function import plot_sampled_function
 
 
-def pick_center_point(model: Model, debugger: MyDebugger):
-    contour = getSVGShapeAsNp(filename=f"../silhouette/{model.name}.txt")
-    # convert to uniform coordinate
-    contour = getUniformContourSampledShape(contour, model.sample_num)
-    center = model.center_point
-    if center is None:
-        for i in range(1000):
-            center = getVisiblePoint(contour)
-            print(f'center={center}')
-            polar_poly = toExteriorPolarCoord(Point(center[0], center[1]), contour, model.sample_num)
-            driven_gear, center_distance, phi = compute_dual_gear(polar_poly, 1)
-            plot_sampled_function((polar_poly, driven_gear), (phi,), debugger.get_root_debug_dir_name(), 100, 0.001, [(0, 0), (center_distance, 0)],
-                                  (8, 8), ((-800, 1600), (-1200, 1200)))
-    else:
-        polar_poly = toExteriorPolarCoord(Point(center[0], center[1]), contour, model.sample_num)
-        driven_gear, center_distance, phi = compute_dual_gear(polar_poly, 1)
-        print(center_distance)
-        plot_sampled_function((polar_poly, driven_gear), (phi,), debugger.get_math_debug_dir_name(), 100, 0.001, [(0, 0), (center_distance, 0)],
-                              (8, 8), ((-800, 1600), (-1200, 1200)))
-
-
 def cut_gear(model: Model, debugger: MyDebugger ):
     contour = getSVGShapeAsNp(filename=f"../silhouette/{model.name}.txt")
     # convert to uniform coordinate

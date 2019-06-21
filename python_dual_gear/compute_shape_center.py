@@ -124,7 +124,7 @@ def getToothFuc(n: int, tooth_num: int, height: float):
 def getVisiblePoint(contour):
     polygon = Polygon(contour)
     poly_bound = polygon.bounds
-    for i in range(1000):
+    for i in range(100):
         x_i = (poly_bound[2] - poly_bound[0]) * np.random.random_sample() + poly_bound[0]
         y_i = (poly_bound[3] - poly_bound[1]) * np.random.random_sample() + poly_bound[1]
 
