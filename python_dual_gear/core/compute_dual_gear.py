@@ -87,10 +87,11 @@ def to_polygon(sample_function, theta_range=(0, 2 * pi)) -> Polygon:
                     zip(sample_function, np.linspace(range_start, range_end, len(sample_function), endpoint=False))])
 
 
-def rotate_and_cut(drive_polygon, center_distance, phi, debugger: MyDebugger = None, replay_animation: bool = False):
+def rotate_and_cut(drive_polygon, center_distance, phi, k=1, debugger: MyDebugger = None,
+                   replay_animation: bool = False):
     from shapely.affinity import translate, rotate
     driven_polygon = to_polygon([center_distance] * len(phi))
-    delta_theta = 2 * pi / len(phi)
+    delta_theta = 2 * pi / len(phi) * k
     driven_polygon = translate(driven_polygon, center_distance)
     complete_phi = phi + [phi[0]]  # so that it rotates back
     phi_incremental = [complete_phi[0]] + [complete_phi[i] - complete_phi[i - 1] for i in range(1, len(complete_phi))]
@@ -111,7 +112,7 @@ def rotate_and_cut(drive_polygon, center_distance, phi, debugger: MyDebugger = N
         if debugger is not None:
             fig.savefig(os.path.join(debugger.get_cutting_debug_dir_name(), f'cutting_{index}.png'))
         plt.pause(0.001)
-    assert isclose(angle_sum, 2 * pi, rel_tol=1e-5)
+    assert isclose(angle_sum, 2 * pi * k, rel_tol=1e-5)
     plt.ioff()
 
     if replay_animation:
@@ -158,7 +159,7 @@ if __name__ == '__main__':
     y, center_distance, phi = compute_dual_gear(drive_gear, 3)
     plot_sampled_function((drive_gear, y), (phi,), None, 200, 0.001, ((0, 0), (center_distance, 0)), (8, 8),
                           ((-5, 15), (-10, 10)))
-    poly = rotate_and_cut(to_polygon(drive_gear), center_distance, phi, replay_animation=True)
+    poly = rotate_and_cut(to_polygon(drive_gear), center_distance, phi, 3, replay_animation=True)
     poly = translate(poly, center_distance)
     _plot_polygon((to_polygon(drive_gear), poly))
     plt.savefig('dual_gear_shapely.png')
