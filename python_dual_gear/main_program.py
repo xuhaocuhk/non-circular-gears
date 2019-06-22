@@ -74,7 +74,8 @@ if __name__ == '__main__':
     # generate tooths
     plts[1][2].fill(contour[:, 0], contour[:, 1], "g", alpha=0.3)
     plts[1][2].set_title('Add Tooth')
-    contour = addToothToContour(contour, normals, height=model.tooth_height, tooth_num=model.tooth_num, plt_axis=plts[1][1])
+    contour = addToothToContour(contour, normals, height=model.tooth_height, tooth_num=model.tooth_num,
+                                plt_axis=plts[1][1])
     # plts[1][1].axis('equal')
     plts[1][2].axis('equal')
 
@@ -83,7 +84,8 @@ if __name__ == '__main__':
     for x, y in contour:
         new_contour.append((y - center[1], x - center[0]))
     drive_gear = Polygon(new_contour)
-    driven_gear, cut_fig, subplot = rotate_and_cut(drive_gear, center_distance, phi, debugger=debugger, replay_animation=True)
+    driven_gear, cut_fig, subplot = rotate_and_cut(drive_gear, center_distance, phi, debugger=debugger,
+                                                   replay_animation=True)
     translated_driven_gear = translate(driven_gear, center_distance)
     cutted_gear_contour = np.array(translated_driven_gear.exterior.coords);
     subplot.set_title('Dual Shape(Cut)')
