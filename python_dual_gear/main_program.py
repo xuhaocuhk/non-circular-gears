@@ -12,7 +12,7 @@ import logging
 from matplotlib.lines import Line2D
 
 if __name__ == '__main__':
-    model = our_models[4]
+    model = our_models[1]
     debugger = MyDebugger(model.name)
 
     # read the contour shape
@@ -21,13 +21,15 @@ if __name__ == '__main__':
     fig.set_size_inches(16, 9)
     plt.ion()
     plt.show()
-    plts[0][0].fill(contour[:, 0], contour[:, 1], "g", facecolor='lightsalmon', edgecolor='orangered', linewidth=3, alpha=0.3)
+    plts[0][0].fill(contour[:, 0], contour[:, 1], "g", facecolor='lightsalmon', edgecolor='orangered', linewidth=3,
+                    alpha=0.3)
     plts[0][0].set_title('Input Polygon')
     plts[0][0].axis('equal')
 
     # convert to uniform coordinate
     contour = getUniformContourSampledShape(contour, model.sample_num)
-    plts[0][1].fill(contour[:, 0], contour[:, 1], "g",facecolor='lightsalmon', edgecolor='orangered', linewidth=3, alpha=0.3)
+    plts[0][1].fill(contour[:, 0], contour[:, 1], "g", facecolor='lightsalmon', edgecolor='orangered', linewidth=3,
+                    alpha=0.3)
     plts[0][1].set_title('Uniform boundary sampling')
     plts[0][1].axis('equal')
 
@@ -37,12 +39,12 @@ if __name__ == '__main__':
         center = getVisiblePoint(contour)
         if center is None:
             logging.error("No visible point found, need manually assign one!")
-            os._exit()
+            exit(1)
 
     polar_poly = toExteriorPolarCoord(Point(center[0], center[1]), contour, model.sample_num)
     polar_contour = toEuclideanCoordAsNp(polar_poly, center[0], center[1])
     plts[1][0].fill(polar_contour[:, 0], polar_contour[:, 1], "g", alpha=0.3)
-    for p in polar_contour[1:-1: int(len(polar_contour)/32)]:
+    for p in polar_contour[1:-1: int(len(polar_contour) / 32)]:
         l = Line2D([center[0], p[0]], [center[1], p[1]], linewidth=1)
         plts[1][0].add_line(l)
     plts[1][0].scatter(center[0], center[1], s=10, c='b')
@@ -72,7 +74,8 @@ if __name__ == '__main__':
     # generate tooths
     plts[1][2].fill(contour[:, 0], contour[:, 1], "g", alpha=0.3)
     plts[1][2].set_title('Add Tooth')
-    contour = addToothToContour(contour, normals, height=model.tooth_height, tooth_num=model.tooth_num, plt_axis=plts[1][1])
+    contour = addToothToContour(contour, normals, height=model.tooth_height, tooth_num=model.tooth_num,
+                                plt_axis=plts[1][1])
     # plts[1][1].axis('equal')
     plts[1][2].axis('equal')
 
@@ -81,7 +84,8 @@ if __name__ == '__main__':
     for x, y in contour:
         new_contour.append((y - center[1], x - center[0]))
     drive_gear = Polygon(new_contour)
-    driven_gear, cut_fig, subplot = rotate_and_cut(drive_gear, center_distance, phi, debugger)
+    driven_gear, cut_fig, subplot = rotate_and_cut(drive_gear, center_distance, phi, debugger=debugger,
+                                                   replay_animation=True)
     translated_driven_gear = translate(driven_gear, center_distance)
     cutted_gear_contour = np.array(translated_driven_gear.exterior.coords);
     subplot.set_title('Dual Shape(Cut)')
@@ -91,4 +95,3 @@ if __name__ == '__main__':
 
     cut_fig.savefig(os.path.join(debugger.get_root_debug_dir_name(), 'cut_final.pdf'))
     fig.savefig(os.path.join(debugger.get_root_debug_dir_name(), 'shapes.pdf'))
-
