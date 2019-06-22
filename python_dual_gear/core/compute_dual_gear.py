@@ -113,7 +113,7 @@ def rotate_and_cut(drive_polygon, center_distance, phi, debugger: MyDebugger = N
     plt.ioff()
 
     driven_polygon = translate(driven_polygon, -center_distance)
-    return driven_polygon
+    return driven_polygon, fig, subplot
 
 
 def _plot_polygon(polygons):
