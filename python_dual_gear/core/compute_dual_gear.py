@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from debug_util import MyDebugger
 import os
 
+
 def compute_dual_gear(x: [float], k: int = 1) -> ([float], float, [float]):
     """
     compute the dual gear with the gear given
@@ -86,7 +87,7 @@ def to_polygon(sample_function, theta_range=(0, 2 * pi)) -> Polygon:
                     zip(sample_function, np.linspace(range_start, range_end, len(sample_function), endpoint=False))])
 
 
-def rotate_and_cut(drive_polygon, center_distance, phi, debugger: MyDebugger):
+def rotate_and_cut(drive_polygon, center_distance, phi, debugger: MyDebugger = None):
     from shapely.affinity import translate, rotate
     driven_polygon = to_polygon([center_distance] * len(phi))
     delta_theta = 2 * pi / len(phi)
@@ -105,10 +106,10 @@ def rotate_and_cut(drive_polygon, center_distance, phi, debugger: MyDebugger):
         _plot_polygon((_drive_polygon, driven_polygon))
         subplot.scatter(0, 0, s=20, c='b')
         subplot.scatter(center_distance, 0, s=20, c='b')
-        fig.savefig(os.path.join(debugger.get_cutting_debug_dir_name(), f'cutting_{index}.png'))
+        if debugger is not None:
+            fig.savefig(os.path.join(debugger.get_cutting_debug_dir_name(), f'cutting_{index}.png'))
         plt.pause(0.001)
     assert isclose(angle_sum, 2 * pi, rel_tol=1e-5)
-
     plt.ioff()
 
     driven_polygon = translate(driven_polygon, -center_distance)
@@ -137,7 +138,7 @@ if __name__ == '__main__':
     from drive_gears.ellipse_gear import generate_gear
     from shapely.affinity import translate
 
-    drive_gear = generate_gear(256)
+    drive_gear = generate_gear(1024)
     y, center_distance, phi = compute_dual_gear(drive_gear)
     poly = rotate_and_cut(to_polygon(drive_gear), center_distance, phi)
     poly = translate(poly, center_distance)
