@@ -107,8 +107,7 @@ def rotate_and_cut(drive_polygon, center_distance, phi, k=1, debugger: MyDebugge
         driven_polygon = rotate(driven_polygon, angle, use_radians=True, origin=(center_distance, 0))
         driven_polygon = driven_polygon.difference(_drive_polygon)
         _plot_polygon((_drive_polygon, driven_polygon))
-        subplot.scatter(0, 0, s=20, c='b')
-        subplot.scatter(center_distance, 0, s=20, c='b')
+        plt.scatter((0, center_distance), (0, 0), s=100, c='b')
         if debugger is not None:
             fig.savefig(os.path.join(debugger.get_cutting_debug_dir_name(), f'cutting_{index}.png'))
         plt.pause(0.001)
@@ -126,8 +125,7 @@ def rotate_and_cut(drive_polygon, center_distance, phi, k=1, debugger: MyDebugge
             _drive_polygon = rotate(drive_polygon, theta, (0, 0), True)
             _driven_polygon = rotate(driven_polygon, angle, (center_distance, 0), True)
             _plot_polygon((_drive_polygon, _driven_polygon))
-            subplot.scatter(0, 0, s=20, c='b')
-            subplot.scatter(center_distance, 0, s=20, c='b')
+            plt.scatter((0, center_distance), (0, 0), s=100, c='b')
             plt.pause(0.001)
         plt.ioff()
 
@@ -160,9 +158,9 @@ if __name__ == '__main__':
 
     drive_gear = generate_gear(256)
     y, center_distance, phi = compute_dual_gear(drive_gear, 1)
-    plot_sampled_function((drive_gear, y), (phi,), None, 200, 0.001, ((0, 0), (center_distance, 0)), (8, 8),
-                          ((-5, 15), (-10, 10)))
-    poly = rotate_and_cut(to_polygon(drive_gear), center_distance, phi, 1, replay_animation=True)
+    # plot_sampled_function((drive_gear, y), (phi,), None, 200, 0.001, ((0, 0), (center_distance, 0)), (8, 8),
+    #                       ((-5, 15), (-10, 10)))
+    poly, *_ = rotate_and_cut(to_polygon(drive_gear), center_distance, phi, 1, replay_animation=True)
     poly = translate(poly, center_distance)
     poly = rotate(poly, phi[0])
     _plot_polygon((to_polygon(drive_gear), poly))
