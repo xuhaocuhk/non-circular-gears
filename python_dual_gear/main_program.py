@@ -1,4 +1,3 @@
-from debug_util import MyDebugger
 from models import our_models
 from examples import cut_gear
 from compute_shape_center import *
@@ -22,7 +21,6 @@ if __name__ == '__main__':
     fig, plts = plt.subplots(2, 3)
     fig.set_size_inches(16, 9)
     plt.ion()
-    plt.show()
     plts[0][0].fill(contour[:, 0], contour[:, 1], "g", facecolor='lightsalmon', edgecolor='orangered', linewidth=3,
                     alpha=0.3)
     plts[0][0].set_title('Input Polygon')
@@ -84,6 +82,8 @@ if __name__ == '__main__':
     new_contour = []
     for x, y in contour:
         new_contour.append((y - center[1], x - center[0]))
+    # BUG: I DON'T KNOW WHAT HAPPENED BUT ORIGINAL DRIVE_GEAR YOU GAVE IN THE MATH CUT AND SHAPELY CUT WERE DIFFERENT
+    new_contour = [(x, -y) for x, y in new_contour]
     drive_gear = Polygon(new_contour)
     driven_gear, cut_fig, subplot = rotate_and_cut(drive_gear, center_distance, phi,
                                                    debugger=debugger if debug_mode else None, replay_animation=True)
