@@ -12,6 +12,8 @@ import logging
 from matplotlib.lines import Line2D
 
 if __name__ == '__main__':
+    debug_mode = False
+
     model = our_models[1]
     debugger = MyDebugger(model.name)
 
@@ -61,9 +63,8 @@ if __name__ == '__main__':
     plts[0][2].scatter(0, 0, s=10, c='b')
     plts[0][2].set_title('Dual shape(Math)')
     plts[0][2].axis('equal')
-    plot_sampled_function((polar_poly, driven_gear), (phi,), debugger.get_math_debug_dir_name(), 100, 0.001,
-                          [(0, 0), (center_distance, 0)],
-                          (8, 8), ((-800, 1600), (-1200, 1200)))
+    plot_sampled_function((polar_poly, driven_gear), (phi,), debugger.get_math_debug_dir_name() if debug_mode else None,
+                          100, 0.001, [(0, 0), (center_distance, 0)], (8, 8), ((-800, 1600), (-1200, 1200)))
 
     # calculate normals
     plts[1][1].fill(contour[:, 0], contour[:, 1], "g", alpha=0.3)
@@ -84,8 +85,8 @@ if __name__ == '__main__':
     for x, y in contour:
         new_contour.append((y - center[1], x - center[0]))
     drive_gear = Polygon(new_contour)
-    driven_gear, cut_fig, subplot = rotate_and_cut(drive_gear, center_distance, phi, debugger=debugger,
-                                                   replay_animation=True)
+    driven_gear, cut_fig, subplot = rotate_and_cut(drive_gear, center_distance, phi,
+                                                   debugger=debugger if debug_mode else None, replay_animation=True)
     translated_driven_gear = translate(driven_gear, center_distance)
     cutted_gear_contour = np.array(translated_driven_gear.exterior.coords)
     subplot.set_title('Dual Shape(Cut)')
