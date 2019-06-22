@@ -158,8 +158,8 @@ if __name__ == '__main__':
 
     drive_gear = generate_gear(256)
     y, center_distance, phi = compute_dual_gear(drive_gear, 1)
-    # plot_sampled_function((drive_gear, y), (phi,), None, 200, 0.001, ((0, 0), (center_distance, 0)), (8, 8),
-    #                       ((-5, 15), (-10, 10)))
+    plot_sampled_function((drive_gear, y), (phi,), None, 200, 0.001, ((0, 0), (center_distance, 0)), (8, 8),
+                          ((-5, 15), (-10, 10)))
     poly, *_ = rotate_and_cut(to_polygon(drive_gear), center_distance, phi, 1, replay_animation=False)
     poly = translate(poly, center_distance)
     poly = rotate(poly, phi[0], origin=(center_distance, 0), use_radians=True)

@@ -18,11 +18,11 @@ def isAllVisible(p: Point, poly: Polygon):
     return True
 
 def computeEuclideanCoord_x(r, theta):
-    return r * sin(theta)
+    return r * cos(theta)
 
 
 def computeEuclideanCoord_y(r, theta):
-    return r * cos(theta)
+    return -r * sin(theta)
 
 def toEuclideanCoord(polar_r, center_x, center_y):
     thetas = [theta * 2 * math.pi / len(polar_r) for theta in range(0, len(polar_r))]
