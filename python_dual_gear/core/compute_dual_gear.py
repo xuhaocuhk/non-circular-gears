@@ -151,15 +151,15 @@ def _draw_single_polygon(polygon):
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
-    from drive_gears.ellipse_gear import generate_gear
+    from drive_gears.focal_ellipse_gear import generate_gear
     from shapely.affinity import translate
     from core.plot_sampled_function import plot_sampled_function
 
     drive_gear = generate_gear(256)
-    y, center_distance, phi = compute_dual_gear(drive_gear, 3)
+    y, center_distance, phi = compute_dual_gear(drive_gear, 1)
     plot_sampled_function((drive_gear, y), (phi,), None, 200, 0.001, ((0, 0), (center_distance, 0)), (8, 8),
                           ((-5, 15), (-10, 10)))
-    poly = rotate_and_cut(to_polygon(drive_gear), center_distance, phi, 3, replay_animation=True)
+    poly = rotate_and_cut(to_polygon(drive_gear), center_distance, phi, 1, replay_animation=True)
     poly = translate(poly, center_distance)
     _plot_polygon((to_polygon(drive_gear), poly))
     plt.savefig('dual_gear_shapely.png')
