@@ -99,6 +99,8 @@ def rotate_and_cut(drive_polygon: Polygon, center_distance, phi, k=1, debugger: 
     angle_sum = 0
 
     fig, subplot = plt.subplots()
+    subplot.set_title('Dual Shape(Cut)')
+    subplot.axis('equal')
 
     plt.ion()
     for index, angle in enumerate(phi_incremental):

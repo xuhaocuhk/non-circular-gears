@@ -1,19 +1,17 @@
 from models import our_models
-from examples import cut_gear
 from compute_shape_center import *
 from core.compute_dual_gear import compute_dual_gear, rotate_and_cut, _plot_polygon
 from shapely.affinity import translate
 from debug_util import MyDebugger
-from models import Model
-from core.plot_sampled_function import plot_sampled_function
 import os
 import logging
 from matplotlib.lines import Line2D
+from fabrication import generate_2d_obj
 
 if __name__ == '__main__':
     debug_mode = False
 
-    model = our_models[1]
+    model = our_models[6]
     debugger = MyDebugger(model.name)
 
     # set up the plotting window
@@ -55,7 +53,7 @@ if __name__ == '__main__':
     plts[1][0].axis('equal')
 
     # generate and draw the dual shape
-    driven_gear, center_distance, phi = compute_dual_gear(polar_poly, 1)
+    driven_gear, center_distance, phi = compute_dual_gear(polar_poly, k=model.k)
     dual_shape = toEuclideanCoordAsNp(driven_gear, 0, 0)
     plts[0][2].set_title('Dual shape(Math)')
     plts[0][2].fill(dual_shape[:, 0], dual_shape[:, 1], "g", alpha=0.3)
@@ -64,8 +62,10 @@ if __name__ == '__main__':
         plts[0][2].add_line(l)
     plts[0][2].scatter(0, 0, s=10, c='b')
     plts[0][2].axis('equal')
-    plot_sampled_function((polar_poly, driven_gear), (phi,), debugger.get_math_debug_dir_name() if debug_mode else None,
-                         100, 0.001, [(0, 0), (center_distance, 0)], (8, 8), ((-800, 1600), (-1200, 1200)))
+    with open(os.path.join(debugger.get_root_debug_dir_name(),'info.txt'), 'a') as the_file:
+        the_file.write(f'Center Distance = {center_distance}\n')
+    # plot_sampled_function((polar_poly, driven_gear), (phi,), debugger.get_math_debug_dir_name() if debug_mode else None,
+    #                      100, 0.001, [(0, 0), (center_distance, 0)], (8, 8), ((-800, 1600), (-1200, 1200)))
 
     # calculate normals
     plts[1][1].set_title('Cal Normals')
@@ -83,21 +83,23 @@ if __name__ == '__main__':
     # cut and generate the cutting dual shape
     new_contour = []
     for x, y in contour:
-        new_contour.append(( x - center[0], y - center[1]))
-    # for x, y in contour:
-    #     new_contour.append((y - center[1], x - center[0]))
-    # BUG: I DON'T KNOW WHAT HAPPENED BUT ORIGINAL DRIVE_GEAR YOU GAVE IN THE MATH CUT AND SHAPELY CUT WERE DIFFERENT
-    # new_contour = [(x, -y) for x, y in new_contour]
+        new_contour.append((x - center[0], y - center[1]))
     drive_gear = Polygon(new_contour)
-    drive_gear = drive_gear.buffer(2) # resolve invalid polygon issues
-    driven_gear, cut_fig, subplot = rotate_and_cut(drive_gear, center_distance, phi, k = model.k,
+    drive_gear = drive_gear.buffer(0)  # resolve invalid polygon issues
+    driven_gear_cut, cut_fig, subplot = rotate_and_cut(drive_gear, center_distance, phi, k=model.k,
                                                    debugger=debugger if debug_mode else None, replay_animation=False)
-    translated_driven_gear = translate(driven_gear, center_distance)
-    # final_polygon = max(translated_driven_gear, key=lambda a: a.area)
-    # cutted_gear_contour = np.array(translated_driven_gear.exterior.coords)
-    subplot.set_title('Dual Shape(Cut)')
-    subplot.axis('equal')
+    final_polygon = translate(driven_gear_cut, center_distance)
+    if final_polygon.geom_type == 'MultiPolygon':
+        final_polygon = max(final_polygon, key=lambda a: a.area)
+    final_gear_contour = np.array(final_polygon.exterior.coords)
 
+    # generate fabrication files
+    generate_2d_obj(os.path.join(debugger.get_root_debug_dir_name(), 'drive.obj'),
+                    toEuclideanCoordAsNp(polar_poly, 0, 0))
+    generate_2d_obj(os.path.join(debugger.get_root_debug_dir_name(),'driven_math.obj'),
+                    toEuclideanCoordAsNp(driven_gear, 0, 0+center_distance))
+    generate_2d_obj(os.path.join(debugger.get_root_debug_dir_name(), 'driven_cut.obj'),
+                    final_gear_contour)
 
     cut_fig.savefig(os.path.join(debugger.get_root_debug_dir_name(), 'cut_final.pdf'))
     fig.savefig(os.path.join(debugger.get_root_debug_dir_name(), 'shapes.pdf'))
