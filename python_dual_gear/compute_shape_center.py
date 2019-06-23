@@ -18,11 +18,10 @@ def isAllVisible(p: Point, poly: Polygon):
     return True
 
 def computeEuclideanCoord_x(r, theta):
-    return r * sin(theta)
-
+    return r * cos(theta)
 
 def computeEuclideanCoord_y(r, theta):
-    return r * cos(theta)
+    return -r * sin(theta)
 
 def toEuclideanCoord(polar_r, center_x, center_y):
     thetas = [theta * 2 * math.pi / len(polar_r) for theta in range(0, len(polar_r))]
@@ -46,14 +45,14 @@ def getSVGShapeAsNp(filename):
 
 
 def getIntersDist(p: Point, theta, poly: Polygon, MAX_R):
-    outer_point = Point(p.x + MAX_R * sin(theta), p.y + MAX_R * cos(theta))
+    outer_point = Point(p.x + MAX_R * cos(theta), p.y - MAX_R * sin(theta))
     ring = LineString(list(poly.exterior.coords))
     inters_pt = ring.intersection(LineString([p, outer_point]))
     return p.distance(inters_pt)
 
 
 def getMaxIntersDist(p: Point, theta, poly: Polygon, MAX_R):
-    outer_point = Point(p.x + MAX_R * sin(theta), p.y + MAX_R * cos(theta))
+    outer_point = Point(p.x + MAX_R * cos(theta), p.y - MAX_R * sin(theta))
     ring = LineString(list(poly.exterior.coords))
     inters_pt = ring.intersection(LineString([p, outer_point]))
     if isinstance(inters_pt, shapely.geometry.multipoint.MultiPoint):
@@ -137,14 +136,20 @@ def getUniformContourSampledShape(contour: np.array, n: int):
     func = getUniformCoordinateFunction(contour)
     return np.array([[func(i / n)[0], func(i / n)[1]] for i in range(n)])
 
-def getNormals(contour: np.array,  plt_axis):
+def getNormals(contour: np.array,  plt_axis, center):
     n = len(contour)
+    # compute normals perpendicular to countour
     normals = [(contour[i][1] - contour[i + 1][1], contour[i + 1][0] - contour[i][0]) for i in
-               range(n - 1)]  # compute normals perpendicular to countour
+               range(n - 1)]
     normals.append((contour[n - 1][1] - contour[0][1], contour[0][0] - contour[n - 1][0]))
+    # normalization
     normals = [(normals[i][0] / math.sqrt(normals[i][0] * normals[i][0] + normals[i][1] * normals[i][1]),
                 normals[i][1] / math.sqrt(normals[i][0] * normals[i][0] + normals[i][1] * normals[i][1]))
-               for i in range(n)]  # normalization
+               for i in range(n)]
+    # make steep normals 0
+    # normals = [(normals[i][0] / math.sqrt(normals[i][0] * normals[i][0] + normals[i][1] * normals[i][1]),
+    #             normals[i][1] / math.sqrt(normals[i][0] * normals[i][0] + normals[i][1] * normals[i][1]))
+    #            for i in range(n)]
 
     for i, normal in enumerate(normals):
         start = contour[i]

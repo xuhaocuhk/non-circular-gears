@@ -87,15 +87,15 @@ def to_polygon(sample_function, theta_range=(0, 2 * pi)) -> Polygon:
                     zip(sample_function, np.linspace(range_start, range_end, len(sample_function), endpoint=False))])
 
 
-def rotate_and_cut(drive_polygon, center_distance, phi, k=1, debugger: MyDebugger = None,
+def rotate_and_cut(drive_polygon: Polygon, center_distance, phi, k=1, debugger: MyDebugger = None,
                    replay_animation: bool = False):
     from shapely.affinity import translate, rotate
     driven_polygon = to_polygon([center_distance] * len(phi))
     delta_theta = 2 * pi / len(phi) * k
     driven_polygon = translate(driven_polygon, center_distance)
     complete_phi = phi + [phi[0]]  # so that it rotates back
-    phi_incremental = [complete_phi[0]] + [complete_phi[i] - complete_phi[i - 1] for i in range(1, len(complete_phi))]
-    assert isclose(sum(phi_incremental), pi, rel_tol=1e-5)
+    phi_incremental = [0.0] + [complete_phi[i] - complete_phi[i - 1] for i in range(1, len(complete_phi))]
+    assert isclose(sum(phi_incremental) % (2 * pi), 0, rel_tol=1e-5)
     angle_sum = 0
 
     fig, subplot = plt.subplots()
@@ -107,13 +107,15 @@ def rotate_and_cut(drive_polygon, center_distance, phi, k=1, debugger: MyDebugge
         driven_polygon = rotate(driven_polygon, angle, use_radians=True, origin=(center_distance, 0))
         driven_polygon = driven_polygon.difference(_drive_polygon)
         _plot_polygon((_drive_polygon, driven_polygon))
-        subplot.scatter(0, 0, s=20, c='b')
-        subplot.scatter(center_distance, 0, s=20, c='b')
+        plt.scatter((0, center_distance), (0, 0), s=100, c='b')
         if debugger is not None:
             fig.savefig(os.path.join(debugger.get_cutting_debug_dir_name(), f'cutting_{index}.png'))
         plt.pause(0.001)
     assert isclose(angle_sum, 2 * pi * k, rel_tol=1e-5)
     plt.ioff()
+
+    driven_polygon = rotate(driven_polygon, -complete_phi[-1], use_radians=True,
+                            origin=(center_distance, 0))  # de-rotate to match phi
 
     if replay_animation:
         # replay the animation
@@ -123,8 +125,7 @@ def rotate_and_cut(drive_polygon, center_distance, phi, k=1, debugger: MyDebugge
             _drive_polygon = rotate(drive_polygon, theta, (0, 0), True)
             _driven_polygon = rotate(driven_polygon, angle, (center_distance, 0), True)
             _plot_polygon((_drive_polygon, _driven_polygon))
-            subplot.scatter(0, 0, s=20, c='b')
-            subplot.scatter(center_distance, 0, s=20, c='b')
+            plt.scatter((0, center_distance), (0, 0), s=100, c='b')
             plt.pause(0.001)
         plt.ioff()
 
@@ -151,16 +152,18 @@ def _draw_single_polygon(polygon):
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
-    from drive_gears.ellipse_gear import generate_gear
-    from shapely.affinity import translate
+    from drive_gears.focal_ellipse_gear import generate_gear
+    from shapely.affinity import translate, rotate
     from core.plot_sampled_function import plot_sampled_function
 
     drive_gear = generate_gear(256)
-    y, center_distance, phi = compute_dual_gear(drive_gear, 3)
+    y, center_distance, phi = compute_dual_gear(drive_gear, 1)
     plot_sampled_function((drive_gear, y), (phi,), None, 200, 0.001, ((0, 0), (center_distance, 0)), (8, 8),
                           ((-5, 15), (-10, 10)))
-    poly = rotate_and_cut(to_polygon(drive_gear), center_distance, phi, 3, replay_animation=True)
+    poly, *_ = rotate_and_cut(to_polygon(drive_gear), center_distance, phi, 1, replay_animation=False)
     poly = translate(poly, center_distance)
+    poly = rotate(poly, phi[0], origin=(center_distance, 0), use_radians=True)
     _plot_polygon((to_polygon(drive_gear), poly))
+    plt.scatter((0, center_distance), (0, 0), s=100, c='b')
     plt.savefig('dual_gear_shapely.png')
     plt.show()
