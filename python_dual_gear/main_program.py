@@ -6,13 +6,14 @@ from core.compute_dual_gear import compute_dual_gear, rotate_and_cut, _plot_poly
 from shapely.affinity import translate
 from debug_util import MyDebugger
 from models import Model
-from core.plot_sampled_function import plot_sampled_function
+from core.plot_sampled_function import plot_sampled_function, polar_to_rectangular
 import os
 import logging
 from matplotlib.lines import Line2D
+from fabrication import generate_2d_obj
 
 if __name__ == '__main__':
-    model = our_models[4]
+    model = our_models[6]
     debugger = MyDebugger(model.name)
 
     # read the contour shape
@@ -51,6 +52,11 @@ if __name__ == '__main__':
 
     # generate and draw the dual shape
     driven_gear, center_distance, phi = compute_dual_gear(polar_poly, 1)
+
+    generate_2d_obj('driven.obj', toEuclideanCoordAsNp(driven_gear, 0, 0+center_distance))
+    generate_2d_obj('drive.obj', toEuclideanCoordAsNp(polar_poly, 0 ,0 ))
+
+
     polar_contour = toEuclideanCoordAsNp(driven_gear, 0, 0)
     plts[0][2].fill(polar_contour[:, 0], polar_contour[:, 1], "g", alpha=0.3)
     for p in polar_contour[1:-1: int(len(polar_contour) / 32)]:
@@ -59,9 +65,9 @@ if __name__ == '__main__':
     plts[0][2].scatter(0, 0, s=10, c='b')
     plts[0][2].set_title('Dual shape(Math)')
     plts[0][2].axis('equal')
-    # plot_sampled_function((polar_poly, driven_gear), (phi,), debugger.get_math_debug_dir_name(), 100, 0.001,
-    #                       [(0, 0), (center_distance, 0)],
-    #                       (8, 8), ((-800, 1600), (-1200, 1200)))
+    plot_sampled_function((polar_poly, driven_gear), (phi,), debugger.get_math_debug_dir_name(), 100, 0.001,
+                          [(0, 0), (center_distance, 0)],
+                          (8, 8), ((-800, 1600), (-1200, 1200)))
 
     # calculate normals
     plts[1][1].fill(contour[:, 0], contour[:, 1], "g", alpha=0.3)
