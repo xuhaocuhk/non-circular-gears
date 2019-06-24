@@ -11,7 +11,7 @@ from fabrication import generate_2d_obj
 if __name__ == '__main__':
     debug_mode = False
 
-    model = our_models[6]
+    model = our_models[4]
     debugger = MyDebugger(model.name)
 
     # set up the plotting window
@@ -96,6 +96,8 @@ if __name__ == '__main__':
     # generate fabrication files
     generate_2d_obj(os.path.join(debugger.get_root_debug_dir_name(), 'drive.obj'),
                     toEuclideanCoordAsNp(polar_poly, 0, 0))
+    generate_2d_obj(os.path.join(debugger.get_root_debug_dir_name(), 'drive_tooth.obj'),
+                    new_contour)
     generate_2d_obj(os.path.join(debugger.get_root_debug_dir_name(),'driven_math.obj'),
                     toEuclideanCoordAsNp(driven_gear, 0, 0+center_distance))
     generate_2d_obj(os.path.join(debugger.get_root_debug_dir_name(), 'driven_cut.obj'),
