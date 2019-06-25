@@ -4,7 +4,6 @@ from math import sin, cos, pi
 from matplotlib import patches
 import os
 
-
 def polar_to_rectangular(sample_function: [float], sample_points: [float]) -> [(float, float)]:
     if sample_points is None:
         sample_points = np.linspace(0, 2 * pi, len(sample_function), endpoint=False)

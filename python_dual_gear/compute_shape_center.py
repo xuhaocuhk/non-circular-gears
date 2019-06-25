@@ -8,6 +8,15 @@ from shapely.geometry import Point
 from scipy.interpolate import interp1d
 import shapely
 from matplotlib.lines import Line2D
+import multiprocessing
+import time
+
+
+
+try:
+    cpus = multiprocessing.cpu_count()
+except NotImplementedError:
+    cpus = 2   # arbitrary default
 
 def isAllVisible(p: Point, poly: Polygon):
     vtx = list(poly.exterior.coords)
