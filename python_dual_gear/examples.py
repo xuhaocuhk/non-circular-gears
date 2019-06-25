@@ -1,5 +1,5 @@
 
-from compute_shape_center import *
+from shape_processor import *
 from core.compute_dual_gear import compute_dual_gear, rotate_and_cut, _plot_polygon
 from shapely.affinity import translate
 from debug_util import MyDebugger

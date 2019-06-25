@@ -13,8 +13,8 @@ class Model():
 
 
 our_models = [Model(name = 'mahou2',               sample_num=512,  center_point = (390, 229), tooth_height= 10, tooth_num= 3    ),
-              Model(name = 'mahou',                sample_num=512,  center_point = (710, 437), tooth_height= 15, tooth_num= 32, k=2   ),
-              Model(name = 'wolf',                 sample_num=4096,  center_point = (653, 341), tooth_height= 6,  tooth_num= 192  ),
+              Model(name = 'mahou',                sample_num=2048,  center_point = (710, 437), tooth_height= 20, tooth_num= 32   ),
+              Model(name = 'wolf',                 sample_num=2048,  center_point = (653, 341), tooth_height= 12,  tooth_num= 128  ),
               Model(name = 'irregular_circle',     sample_num=512,  center_point = (480, 214), tooth_height= 8,  tooth_num= 32   ),
               Model(name = 'ellipse',              sample_num=32,   center_point = (320, 204), tooth_height= 8,  tooth_num= 32   ),
               Model(name = 'spiral_circle',        sample_num=512,  center_point = (522, 148), tooth_height= 8,  tooth_num= 32   ),
