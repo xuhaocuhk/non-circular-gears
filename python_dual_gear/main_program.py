@@ -6,12 +6,12 @@ from debug_util import MyDebugger
 import os
 import logging
 from matplotlib.lines import Line2D
-from fabrication import generate_2d_obj
+from fabrication import generate_2d_obj, generate_printable_spline
 
 if __name__ == '__main__':
-    debug_mode = False
+    debug_mode = True
 
-    model = our_models[2]
+    model = our_models[4]
     debugger = MyDebugger(model.name)
 
     # set up the plotting window
@@ -62,7 +62,7 @@ if __name__ == '__main__':
         plts[0][2].add_line(l)
     plts[0][2].scatter(0, 0, s=10, c='b')
     plts[0][2].axis('equal')
-    with open(os.path.join(debugger.get_root_debug_dir_name(),'info.txt'), 'a') as the_file:
+    with open(os.path.join(debugger.get_root_debug_dir_name(), 'info.txt'), 'a') as the_file:
         the_file.write(f'Center Distance = {center_distance}\n')
     # plot_sampled_function((polar_poly, driven_gear), (phi,), debugger.get_math_debug_dir_name() if debug_mode else None,
     #                      100, 0.001, [(0, 0), (center_distance, 0)], (8, 8), ((-800, 1600), (-1200, 1200)))
@@ -87,21 +87,19 @@ if __name__ == '__main__':
     drive_gear = Polygon(new_contour)
     drive_gear = drive_gear.buffer(0)  # resolve invalid polygon issues
     driven_gear_cut, cut_fig, subplot = rotate_and_cut(drive_gear, center_distance, phi, k=model.k,
-                                                   debugger=debugger if debug_mode else None, replay_animation=False)
+                                                       debugger=debugger if debug_mode else None,
+                                                       replay_animation=False)
     final_polygon = translate(driven_gear_cut, center_distance)
     if final_polygon.geom_type == 'MultiPolygon':
         final_polygon = max(final_polygon, key=lambda a: a.area)
     final_gear_contour = np.array(final_polygon.exterior.coords)
 
     # generate fabrication files
-    generate_2d_obj(os.path.join(debugger.get_root_debug_dir_name(), 'drive.obj'),
-                    toEuclideanCoordAsNp(polar_poly, 0, 0))
-    generate_2d_obj(os.path.join(debugger.get_root_debug_dir_name(), 'drive_tooth.obj'),
-                    new_contour)
-    generate_2d_obj(os.path.join(debugger.get_root_debug_dir_name(),'driven_math.obj'),
-                    toEuclideanCoordAsNp(driven_gear, 0, 0+center_distance))
-    generate_2d_obj(os.path.join(debugger.get_root_debug_dir_name(), 'driven_cut.obj'),
-                    final_gear_contour)
+    generate_2d_obj(debugger, 'drive.obj', toEuclideanCoordAsNp(polar_poly, 0, 0))
+    generate_2d_obj(debugger, 'drive_tooth.obj', new_contour)
+    generate_2d_obj(debugger, 'driven_math.obj', toEuclideanCoordAsNp(driven_gear, 0, 0 + center_distance))
+    generate_2d_obj(debugger, 'driven_cut.obj', final_gear_contour)
+    generate_printable_spline(debugger, new_contour, final_gear_contour, center_distance)
 
     cut_fig.savefig(os.path.join(debugger.get_root_debug_dir_name(), 'cut_final.pdf'))
     fig.savefig(os.path.join(debugger.get_root_debug_dir_name(), 'shapes.pdf'))
