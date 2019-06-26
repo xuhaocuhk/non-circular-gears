@@ -1,5 +1,5 @@
 from models import our_models
-from compute_shape_center import *
+from shape_processor import *
 from core.compute_dual_gear import compute_dual_gear, rotate_and_cut, _plot_polygon
 from shapely.affinity import translate
 from debug_util import MyDebugger
@@ -11,7 +11,7 @@ from fabrication import generate_2d_obj
 if __name__ == '__main__':
     debug_mode = False
 
-    model = our_models[6]
+    model = our_models[2]
     debugger = MyDebugger(model.name)
 
     # set up the plotting window
@@ -96,6 +96,7 @@ if __name__ == '__main__':
 
     # generate fabrication files
     generate_2d_obj(debugger.file_path('drive.obj'), toEuclideanCoordAsNp(polar_poly, 0, 0))
+    generate_2d_obj(debugger.file_path('drive_tooth.obj'), new_contour)
     generate_2d_obj(debugger.file_path('driven_math.obj'), toEuclideanCoordAsNp(driven_gear, 0, 0 + center_distance))
     generate_2d_obj(debugger.file_path('driven_cut.obj'), final_gear_contour)
 

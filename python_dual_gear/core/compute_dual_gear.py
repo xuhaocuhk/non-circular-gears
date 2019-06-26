@@ -49,7 +49,6 @@ def compute_dual_gear(x: [float], k: int = 1) -> ([float], float, [float]):
     # calculate the inverse function of phi
     uniform_k_value_points = np.linspace(0, target_final_phi, n + 1, endpoint=True)  # final point for simplicity
     phi_inv = np.interp(uniform_k_value_points, phi + [target_final_phi], np.linspace(0, 2 * pi, n + 1, endpoint=True))
-    print(phi_inv[0])
     assert isclose(phi_inv[0], 0, rel_tol=float_tolerance)
 
     # calculate the driven gear curve
