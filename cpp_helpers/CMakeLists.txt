@@ -4,4 +4,4 @@ project(cpp_helpers)
 set(CMAKE_CXX_STANDARD 14)
 
 link_libraries(-static) # statically link to avoid dlls
-add_executable(echo echo.cpp)
+add_executable(endian_test endian_test.cpp)
