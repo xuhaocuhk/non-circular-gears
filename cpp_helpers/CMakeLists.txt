@@ -5,3 +5,4 @@ set(CMAKE_CXX_STANDARD 14)
 
 link_libraries(-static) # statically link to avoid dlls
 add_executable(endian_test endian_test.cpp)
+add_executable(turning_function turning_function.cpp)
