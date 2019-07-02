@@ -15,6 +15,9 @@ class MyDebugger():
             f'%Y-%m-%d_%H-%M-%S_{model_name}'))
         self._init_debug_dir()
 
+    def file_path(self, file_name):
+        return os.path.join(self._debug_dir_name, file_name)
+
     def get_root_debug_dir_name(self):
         return self._debug_dir_name
 

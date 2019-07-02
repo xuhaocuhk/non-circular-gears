@@ -2,37 +2,27 @@ from models import our_models
 from shape_processor import *
 from core.compute_dual_gear import compute_dual_gear, rotate_and_cut, _plot_polygon
 from shapely.affinity import translate
-from debug_util import MyDebugger
 import os
 import logging
 from matplotlib.lines import Line2D
-from fabrication import generate_2d_obj, generate_printable_spline
+from fabrication import generate_2d_obj
+import shape_factory
 
-if __name__ == '__main__':
-    debug_mode = False
 
-    model = our_models[4]
-    debugger = MyDebugger(model.name)
-
+def init_plot():
+    global fig, plts
     # set up the plotting window
     fig, plts = plt.subplots(2, 3)
     fig.set_size_inches(16, 9)
     plt.ion()
     plt.show()
 
-    # read the contour shape
-    contour = getSVGShapeAsNp(filename=f"../silhouette/{model.name}.txt")
-    plts[0][0].set_title('Input Polygon')
-    plts[0][0].fill(contour[:, 0], contour[:, 1], "g", facecolor='lightsalmon', edgecolor='orangered', linewidth=3,
-                    alpha=0.3)
-    plts[0][0].axis('equal')
 
-    # convert to uniform coordinate
-    contour = getUniformContourSampledShape(contour, model.sample_num)
-    plts[0][1].set_title('Uniform boundary sampling')
-    plts[0][1].fill(contour[:, 0], contour[:, 1], "g", facecolor='lightsalmon', edgecolor='orangered', linewidth=3,
-                    alpha=0.3)
-    plts[0][1].axis('equal')
+if __name__ == '__main__':
+    debug_mode = False
+    model = our_models[2]
+    init_plot()
+    contour, debugger = shape_factory.getShapeContour(model, True, plts)
 
     # convert to polar coordinate shape
     center = model.center_point
@@ -62,7 +52,7 @@ if __name__ == '__main__':
         plts[0][2].add_line(l)
     plts[0][2].scatter(0, 0, s=10, c='b')
     plts[0][2].axis('equal')
-    with open(os.path.join(debugger.get_root_debug_dir_name(), 'info.txt'), 'a') as the_file:
+    with open(debugger.file_path('info.txt'), 'a') as the_file:
         the_file.write(f'Center Distance = {center_distance}\n')
     # plot_sampled_function((polar_poly, driven_gear), (phi,), debugger.get_math_debug_dir_name() if debug_mode else None,
     #                      100, 0.001, [(0, 0), (center_distance, 0)], (8, 8), ((-800, 1600), (-1200, 1200)))
@@ -97,11 +87,10 @@ if __name__ == '__main__':
     final_gear_contour = np.array(final_polygon.exterior.coords)
 
     # generate fabrication files
-    generate_2d_obj(debugger, 'drive.obj', toEuclideanCoordAsNp(polar_poly, 0, 0))
-    generate_2d_obj(debugger, 'drive_tooth.obj', new_contour)
-    generate_2d_obj(debugger, 'driven_math.obj', toEuclideanCoordAsNp(driven_gear, 0, 0 + center_distance))
-    generate_2d_obj(debugger, 'driven_cut.obj', final_gear_contour)
-    generate_printable_spline(debugger, new_contour, final_gear_contour, center_distance)
+    generate_2d_obj(debugger.file_path('drive.obj'), toEuclideanCoordAsNp(polar_poly, 0, 0))
+    generate_2d_obj(debugger.file_path('drive_tooth.obj'), new_contour)
+    generate_2d_obj(debugger.file_path('driven_math.obj'), toEuclideanCoordAsNp(driven_gear, 0, 0 + center_distance))
+    generate_2d_obj(debugger.file_path('driven_cut.obj'), final_gear_contour)
 
-    cut_fig.savefig(os.path.join(debugger.get_root_debug_dir_name(), 'cut_final.pdf'))
-    fig.savefig(os.path.join(debugger.get_root_debug_dir_name(), 'shapes.pdf'))
+    cut_fig.savefig(debugger.file_path('cut_final.pdf'))
+    fig.savefig(debugger.file_path('shapes.pdf'))

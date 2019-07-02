@@ -16,7 +16,7 @@ def polygon_compare(contour, target_contour):
     y_range = max(contour[:, 1]) - min(contour[:, 1])
     target_x_range = max(target_contour[:, 0]) - min(target_contour[:, 0])
     target_y_range = max(target_contour[:, 1]) - min(target_contour[:, 1])
-    return ((x_range/y_range) - (target_x_range/target_y_range))**2
+    return ((x_range / y_range) - (target_x_range / target_y_range)) ** 2
 
 
 '''
@@ -26,6 +26,7 @@ args[2]: k
 '''
 
 step = 0
+
 
 def obj_func(center, *args):
     drive_polygon = args[0]
@@ -49,10 +50,11 @@ def obj_func(center, *args):
         score = 1e8
 
     plts[0].set_title('Input shape')
-    plts[0].fill(drive_contour[:, 0], drive_contour[:, 1], "g", facecolor='lightsalmon', edgecolor='orangered', linewidth=3,
+    plts[0].fill(drive_contour[:, 0], drive_contour[:, 1], "g", facecolor='lightsalmon', edgecolor='orangered',
+                 linewidth=3,
                  alpha=0.3)
     plts[0].axis('equal')
-    plts[0].scatter(center[0], center[1],  s=10, c='r')
+    plts[0].scatter(center[0], center[1], s=10, c='r')
     if not dual_shape is None:
         plts[1].set_title('Dual shape(Math)')
         plts[1].fill(dual_shape[:, 0], dual_shape[:, 1], "g", alpha=0.3)
@@ -74,6 +76,7 @@ def obj_func(center, *args):
     step = step + 1
 
     return score
+
 
 if __name__ == '__main__':
     debug_mode = False
@@ -101,8 +104,6 @@ if __name__ == '__main__':
 
     lb = [poly_bound[0], poly_bound[1]]
     ub = [poly_bound[2], poly_bound[3]]
-    ret = dual_annealing(obj_func, args=(polygon, target_contour, 1, plts, fig), bounds=list(zip(lb, ub)), seed=3, maxiter = 200)
-    print( f"global minimum: xmin = {ret.x}, f(xmin) = {ret.fun}" )
-
-
-
+    ret = dual_annealing(obj_func, args=(polygon, target_contour, 1, plts, fig), bounds=list(zip(lb, ub)), seed=3,
+                         maxiter=200)
+    print(f"global minimum: xmin = {ret.x}, f(xmin) = {ret.fun}")
