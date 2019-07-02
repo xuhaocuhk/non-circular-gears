@@ -9,7 +9,7 @@ from matplotlib.lines import Line2D
 from fabrication import generate_2d_obj, generate_printable_spline
 
 if __name__ == '__main__':
-    debug_mode = True
+    debug_mode = False
 
     model = our_models[4]
     debugger = MyDebugger(model.name)
@@ -90,6 +90,8 @@ if __name__ == '__main__':
                                                        debugger=debugger if debug_mode else None,
                                                        replay_animation=False)
     final_polygon = translate(driven_gear_cut, center_distance)
+    final_polygon = final_polygon.buffer(1)
+    final_polygon = final_polygon.simplify(0.2) # for 3d printing
     if final_polygon.geom_type == 'MultiPolygon':
         final_polygon = max(final_polygon, key=lambda a: a.area)
     final_gear_contour = np.array(final_polygon.exterior.coords)

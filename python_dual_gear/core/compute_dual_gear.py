@@ -109,9 +109,7 @@ def rotate_and_cut(drive_polygon: Polygon, center_distance, phi, k=1, debugger: 
         driven_polygon = driven_polygon.difference(_drive_polygon)
         _plot_polygon((_drive_polygon, driven_polygon))
         plt.scatter((0, center_distance), (0, 0), s=100, c='b')
-        if debugger is not None:
-            fig.savefig(os.path.join(debugger.get_cutting_debug_dir_name(), f'cutting_{index}.png'))
-        plt.pause(0.001)
+        plt.pause(0.00001)
     assert isclose(angle_sum, 2 * pi * k, rel_tol=1e-5)
     plt.ioff()
 
@@ -127,6 +125,8 @@ def rotate_and_cut(drive_polygon: Polygon, center_distance, phi, k=1, debugger: 
             _driven_polygon = rotate(driven_polygon, angle, (center_distance, 0), True)
             _plot_polygon((_drive_polygon, _driven_polygon))
             plt.scatter((0, center_distance), (0, 0), s=100, c='b')
+            if debugger is not None:
+                fig.savefig(os.path.join(debugger.get_cutting_debug_dir_name(), f'cutting_{index}.png'))
             plt.pause(0.001)
         plt.ioff()
 

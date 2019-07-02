@@ -13,10 +13,10 @@ class Model():
 
 
 our_models = [Model(name = 'mahou2',               sample_num=512,  center_point = (390, 229), tooth_height= 10, tooth_num= 3    ),
-              Model(name = 'mahou',                sample_num=2048,  center_point = (710, 437), tooth_height= 20, tooth_num= 32   ),
+              Model(name = 'mahou',                sample_num=1024,  center_point = (710, 437), tooth_height= 20, tooth_num= 32   ),
               Model(name = 'wolf',                 sample_num=4096,  center_point = (653, 341), tooth_height= 12,  tooth_num= 128  ),
               Model(name = 'irregular_circle',     sample_num=512,  center_point = (480, 214), tooth_height= 8,  tooth_num= 32   ),
-              Model(name = 'ellipse',              sample_num=32,   center_point = (320, 204), tooth_height= 8,  tooth_num= 32   ),
+              Model(name = 'ellipse',              sample_num=1024,   center_point = (370, 204), tooth_height= 8,  tooth_num= 32   ),
               Model(name = 'spiral_circle',        sample_num=512,  center_point = (522, 148), tooth_height= 8,  tooth_num= 32   ),
               Model(name = 'trump',                sample_num=1024,  center_point = (400, 250), tooth_height= 3,  tooth_num= 64),
               Model(name = 'man',                  sample_num=4096, center_point = (93, 180),  tooth_height= 7,  tooth_num= 32  )]
