@@ -14,9 +14,8 @@ from plot.plot_sampled_function import plot_sampled_function
 logging.basicConfig(filename='debug\\info.log', level=logging.INFO)
 logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
-if __name__ == '__main__':
-    debug_mode = False
-    model = our_models[2]
+
+def generate_gear(model, show_math_anim=False, save_math_anim = False, show_cut_anim = False, save_cut_anim=False):
     debugger = MyDebugger(model.name)
 
     fig, plts = init_plot()
@@ -35,10 +34,13 @@ if __name__ == '__main__':
 
     # generate and draw the dual shape
     driven_gear, center_distance, phi = compute_dual_gear(polar_contour, k=model.k)
-    plot_polar_shape(plts[0][2], 'Dual shape(Math)', driven_gear, (0,0), model.sample_num)
+    plot_polar_shape(plts[0][2], 'Dual shape(Math)', driven_gear, (0, 0), model.sample_num)
     logging.info(f'Center Distance = {center_distance}\n')
-    #plot_sampled_function((polar_contour, driven_gear), (phi,), debugger.get_math_debug_dir_name() if debug_mode else None,
-    #                     100, 0.001, [(0, 0), (center_distance, 0)], (8, 8), ((-0.5, 1.5), (-1.1, 1.1)))
+
+    if show_math_anim:
+        plot_sampled_function((polar_contour, driven_gear), (phi,),
+                              debugger.get_math_debug_dir_name() if save_math_anim else None,
+                              100, 0.001, [(0, 0), (center_distance, 0)], (8, 8), ((-0.5, 1.5), (-1.1, 1.1)))
 
     # calculate normals
     plot_cartesian_shape(plts[1][1], "Normals", contour)
@@ -50,26 +52,34 @@ if __name__ == '__main__':
     plot_cartesian_shape(plts[1][2], 'Add Tooth', contour)
 
     # cut and generate the cutting dual shape
-    new_contour = []
+    drive_tooth_contour = []
     for x, y in contour:
-        new_contour.append((x - center[0], y - center[1]))
-    drive_gear = Polygon(new_contour)
+        drive_tooth_contour.append((x - center[0], y - center[1]))
+    drive_gear = Polygon(drive_tooth_contour)
     drive_gear = drive_gear.buffer(0)  # resolve invalid polygon issues
     driven_gear_cut, cut_fig, subplot = rotate_and_cut(drive_gear, center_distance, phi, k=model.k,
-                                                       debugger=debugger if debug_mode else None,
-                                                       replay_animation=False)
+                                                       debugger=debugger if save_cut_anim else None,
+                                                       replay_animation=show_cut_anim)
     final_polygon = translate(driven_gear_cut, center_distance)
     final_polygon = final_polygon.buffer(1)
-    final_polygon = final_polygon.simplify(0.2) # for 3d printing
+    final_polygon = final_polygon.simplify(0.2)  # for 3d printing
     if final_polygon.geom_type == 'MultiPolygon':
         final_polygon = max(final_polygon, key=lambda a: a.area)
     final_gear_contour = np.array(final_polygon.exterior.coords)
 
-    # generate fabrication files
-    fabrication.generate_2d_obj(debugger, 'drive.obj', toCartesianCoordAsNp(polar_contour, 0, 0))
-    fabrication.generate_2d_obj(debugger, 'drive_tooth.obj', new_contour)
-    fabrication.generate_2d_obj(debugger, 'driven_math.obj', toCartesianCoordAsNp(driven_gear, 0, 0 + center_distance))
-    fabrication.generate_2d_obj(debugger, 'driven_cut.obj', final_gear_contour)
-
     cut_fig.savefig(debugger.file_path('cut_final.pdf'))
     fig.savefig(debugger.file_path('shapes.pdf'))
+
+    fabrication.generate_2d_obj(debugger, 'drive.obj', toCartesianCoordAsNp(polar_contour, 0, 0))
+    fabrication.generate_2d_obj(debugger, 'driven_math.obj', toCartesianCoordAsNp(driven_gear, 0, 0 + center_distance))
+
+    return drive_tooth_contour, final_gear_contour, debugger
+
+
+if __name__ == '__main__':
+    model = our_models[2]
+    drive_tooth_contour, final_gear_contour, debugger = generate_gear(model)
+
+    # generate fabrication files
+    fabrication.generate_2d_obj(debugger, 'drive_tooth.obj', drive_tooth_contour)
+    fabrication.generate_2d_obj(debugger, 'driven_cut.obj', final_gear_contour)

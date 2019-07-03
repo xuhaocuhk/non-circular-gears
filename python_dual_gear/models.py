@@ -11,7 +11,7 @@ class Model():
 
 our_models = [Model(name='circular', sample_num=32, center_point=(0, 0), tooth_height=0.03, tooth_num=32),
               Model(name='ellipse', sample_num=1024, center_point=(0, 0), tooth_height=0.03, tooth_num=32),
-              Model(name='focal_ellipse', sample_num=512, center_point=(0,0), tooth_height=0.03, tooth_num=32),
+              Model(name='focal_ellipse', sample_num=32, center_point=(0,0), tooth_height=0.03, tooth_num=32),
               Model(name='irregular_circle', sample_num=512, center_point=(0, 0), tooth_height=0.03, tooth_num=32),
               Model(name='irregular_ellipse', sample_num=1024, center_point=(0, 0), tooth_height=0.03, tooth_num=32),
               Model(name='spiral_circle', sample_num=512, center_point=(0, 0), tooth_height=0.03, tooth_num=32),
