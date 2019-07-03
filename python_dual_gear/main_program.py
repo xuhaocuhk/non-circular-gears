@@ -4,7 +4,7 @@ from shape_processor import *
 from core.compute_dual_gear import compute_dual_gear, rotate_and_cut, _plot_polygon
 from shapely.affinity import translate
 import os
-from fabrication import generate_2d_obj
+import fabrication
 import shape_factory
 from plot.plot_util import plot_cartesian_shape, plot_polar_shape, init_plot
 import logging
@@ -66,10 +66,10 @@ if __name__ == '__main__':
     final_gear_contour = np.array(final_polygon.exterior.coords)
 
     # generate fabrication files
-    generate_2d_obj(debugger, 'drive.obj', toCartesianCoordAsNp(polar_contour, 0, 0))
-    generate_2d_obj(debugger, 'drive_tooth.obj', new_contour)
-    generate_2d_obj(debugger, 'driven_math.obj', toCartesianCoordAsNp(driven_gear, 0, 0 + center_distance))
-    generate_2d_obj(debugger, 'driven_cut.obj', final_gear_contour)
+    fabrication.generate_2d_obj(debugger, 'drive.obj', toCartesianCoordAsNp(polar_contour, 0, 0))
+    fabrication.generate_2d_obj(debugger, 'drive_tooth.obj', new_contour)
+    fabrication.generate_2d_obj(debugger, 'driven_math.obj', toCartesianCoordAsNp(driven_gear, 0, 0 + center_distance))
+    fabrication.generate_2d_obj(debugger, 'driven_cut.obj', final_gear_contour)
 
     cut_fig.savefig(debugger.file_path('cut_final.pdf'))
     fig.savefig(debugger.file_path('shapes.pdf'))
