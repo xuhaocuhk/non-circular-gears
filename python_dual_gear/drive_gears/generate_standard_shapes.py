@@ -6,7 +6,7 @@ from shape_processor import toCartesianCoordAsNp
 
 def gen_focal_ellipse(number_of_samples: int) -> [float]:
     sample_points = np.linspace(0, 2 * pi, number_of_samples, endpoint=False)
-    a, e = 1.5, 0.5
+    a, e = 2, 0.5
 
     def _radius(theta):
         return a * (1 - e * e) / (1 + e * cos(theta))

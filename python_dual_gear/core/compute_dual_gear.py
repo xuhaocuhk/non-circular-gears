@@ -1,9 +1,9 @@
 from math import pi, isclose, cos, sin
 import numpy as np
 from shapely.geometry import Polygon, MultiPolygon
-import matplotlib.pyplot as plt
 from debug_util import MyDebugger
 import os
+import matplotlib.pyplot as plt
 
 
 def compute_dual_gear(x: [float], k: int = 1) -> ([float], float, [float]):
@@ -138,8 +138,10 @@ def _plot_polygon(polygons):
     plt.clf()
     for poly in polygons:
         _draw_single_polygon(poly)
-    plt.axis('tight')
+
+    plt.axis([-1,2,-1,1])
     plt.axis('equal')
+
     plt.draw()
 
 
@@ -155,7 +157,7 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
     from drive_gears.focal_ellipse_gear import generate_gear
     from shapely.affinity import translate, rotate
-    from core.plot_sampled_function import plot_sampled_function
+    from plot.plot_sampled_function import plot_sampled_function
 
     drive_gear = generate_gear(256)
     y, center_distance, phi = compute_dual_gear(drive_gear, 1)

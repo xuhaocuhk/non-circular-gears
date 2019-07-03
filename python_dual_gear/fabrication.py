@@ -1,7 +1,7 @@
 """
 functions related to 3D modelling and fabrication
 """
-import os
+
 
 def generate_2d_obj(debugger, filename, points):
     filename = debugger.file_path(filename)
@@ -26,7 +26,7 @@ def generate_printable_spline(debugger, contour1, contour2, center_dist, target_
 
 
 if __name__ == '__main__':
-    from core.plot_sampled_function import polar_to_rectangular
+    from plot.plot_sampled_function import polar_to_rectangular
     from drive_gears.ellipse_gear import generate_gear
 
     generate_2d_obj('test.obj', polar_to_rectangular(generate_gear(1024), None))

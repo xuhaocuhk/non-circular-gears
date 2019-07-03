@@ -3,7 +3,6 @@ from core.compute_dual_gear import compute_dual_gear, rotate_and_cut, _plot_poly
 from shapely.affinity import translate
 from debug_util import MyDebugger
 from models import Model
-from core.plot_sampled_function import plot_sampled_function
 
 
 def cut_gear(model: Model, debugger: MyDebugger ):

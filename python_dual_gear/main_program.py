@@ -9,13 +9,14 @@ import shape_factory
 from plot.plot_util import plot_cartesian_shape, plot_polar_shape, init_plot
 import logging
 import sys
+from plot.plot_sampled_function import plot_sampled_function
 
 logging.basicConfig(filename='debug\\info.log', level=logging.INFO)
 logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
 if __name__ == '__main__':
     debug_mode = False
-    model = our_models[0]
+    model = our_models[2]
     debugger = MyDebugger(model.name)
 
     fig, plts = init_plot()
@@ -36,8 +37,8 @@ if __name__ == '__main__':
     driven_gear, center_distance, phi = compute_dual_gear(polar_contour, k=model.k)
     plot_polar_shape(plts[0][2], 'Dual shape(Math)', driven_gear, (0,0), model.sample_num)
     logging.info(f'Center Distance = {center_distance}\n')
-    # plot_sampled_function((polar_poly, driven_gear), (phi,), debugger.get_math_debug_dir_name() if debug_mode else None,
-    #                      100, 0.001, [(0, 0), (center_distance, 0)], (8, 8), ((-800, 1600), (-1200, 1200)))
+    #plot_sampled_function((polar_contour, driven_gear), (phi,), debugger.get_math_debug_dir_name() if debug_mode else None,
+    #                     100, 0.001, [(0, 0), (center_distance, 0)], (8, 8), ((-0.5, 1.5), (-1.1, 1.1)))
 
     # calculate normals
     plts[1][1].set_title('Cal Normals')
