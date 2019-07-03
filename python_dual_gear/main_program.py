@@ -41,17 +41,13 @@ if __name__ == '__main__':
     #                     100, 0.001, [(0, 0), (center_distance, 0)], (8, 8), ((-0.5, 1.5), (-1.1, 1.1)))
 
     # calculate normals
-    plts[1][1].set_title('Cal Normals')
-    plts[1][1].fill(contour[:, 0], contour[:, 1], "g", alpha=0.3)
+    plot_cartesian_shape(plts[1][1], "Normals", contour)
     normals = getNormals(contour, plts[1][1], model.center_point)
-    plts[1][1].axis('equal')
 
     # generate teeth
     contour = addToothToContour(contour, normals, height=model.tooth_height, tooth_num=model.tooth_num,
                                 plt_axis=plts[1][1])
-    plts[1][2].set_title('Add Tooth')
-    plts[1][2].fill(contour[:, 0], contour[:, 1], "g", alpha=0.3)
-    plts[1][2].axis('equal')
+    plot_cartesian_shape(plts[1][2], 'Add Tooth', contour)
 
     # cut and generate the cutting dual shape
     new_contour = []

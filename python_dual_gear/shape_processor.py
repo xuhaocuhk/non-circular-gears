@@ -152,14 +152,10 @@ def getNormals(contour: np.array,  plt_axis, center):
     normals = [(normals[i][0] / math.sqrt(normals[i][0] * normals[i][0] + normals[i][1] * normals[i][1]),
                 normals[i][1] / math.sqrt(normals[i][0] * normals[i][0] + normals[i][1] * normals[i][1]))
                for i in range(n)]
-    # make steep normals 0
-    # normals = [(normals[i][0] / math.sqrt(normals[i][0] * normals[i][0] + normals[i][1] * normals[i][1]),
-    #             normals[i][1] / math.sqrt(normals[i][0] * normals[i][0] + normals[i][1] * normals[i][1]))
-    #            for i in range(n)]
 
     for i, normal in enumerate(normals):
         start = contour[i]
-        normal_l = [normal[0] * 10, normal[1] * 10]
+        normal_l = [normal[0] * 0.05, normal[1] * 0.05]
         end = start + normal_l
         l = Line2D([start[0], end[0]], [start[1], end[1]], linewidth=1)
         plt_axis.add_line(l)
