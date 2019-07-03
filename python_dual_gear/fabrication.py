@@ -4,7 +4,7 @@ functions related to 3D modelling and fabrication
 import os
 
 def generate_2d_obj(debugger, filename, points):
-    filename = os.path.join(debugger.get_root_debug_dir_name(), filename)
+    filename = debugger.file_path(filename)
     with open(filename, 'w') as file:
         for point in points:
             x, y = point

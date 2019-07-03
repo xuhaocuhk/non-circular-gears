@@ -29,14 +29,14 @@ def computeEuclideanCoord_x(r, theta):
 def computeEuclideanCoord_y(r, theta):
     return -r * sin(theta)
 
-def toEuclideanCoord(polar_r, center_x, center_y):
+def toCartesianCoord(polar_r, center_x, center_y):
     thetas = [theta * 2 * math.pi / len(polar_r) for theta in range(0, len(polar_r))]
     return list(map(lambda n: n + center_x, map(computeEuclideanCoord_x, polar_r, thetas))), list(
         map(lambda n: n + center_y, map(computeEuclideanCoord_y, polar_r, thetas)))
 
 
-def toEuclideanCoordAsNp(polar_r, center_x, center_y):
-    new_x, new_y = toEuclideanCoord(polar_r, center_x, center_y)
+def toCartesianCoordAsNp(polar_r, center_x, center_y):
+    new_x, new_y = toCartesianCoord(polar_r, center_x, center_y)
     contour = np.concatenate((np.array(new_x).reshape(len(new_x), 1), np.array(new_y).reshape(len(new_y), 1)), axis=1)
     return contour
 

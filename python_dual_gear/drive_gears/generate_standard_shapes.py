@@ -1,7 +1,7 @@
 from math import sin, cos, pi, sqrt
 from scipy.spatial import distance
 import numpy as np
-from shape_processor import toEuclideanCoordAsNp
+from shape_processor import toCartesianCoordAsNp
 
 
 def gen_focal_ellipse(number_of_samples: int) -> [float]:
@@ -39,4 +39,4 @@ def generate_std_shapes(type: str, n: int, center_point):
     if type not in std_shapes:
         print(f"Type Error! No {type} found!")
     else:
-        return toEuclideanCoordAsNp(std_shapes[type](n), center_point[0], center_point[1])
+        return toCartesianCoordAsNp(std_shapes[type](n), center_point[0], center_point[1])

@@ -44,7 +44,7 @@ def obj_func(center, *args):
         polar_poly = toExteriorPolarCoord(Point(center[0], center[1]), drive_contour, model.sample_num)
         # generate and draw the dual shape
         driven_gear, center_distance, phi = compute_dual_gear(polar_poly, k=k)
-        dual_shape = toEuclideanCoordAsNp(driven_gear, 0, 0)
+        dual_shape = toCartesianCoordAsNp(driven_gear, 0, 0)
         score = polygon_compare(dual_shape, target_shape)
     else:
         score = 1e8

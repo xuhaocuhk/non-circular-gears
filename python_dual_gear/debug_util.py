@@ -3,17 +3,20 @@ import datetime
 import os
 import logging
 
-logging.basicConfig(level=logging.INFO)
-
 
 class MyDebugger():
     pre_fix = 'debug'
 
     def __init__(self, model_name: str):
+
         self.model_name = model_name
         self._debug_dir_name = os.path.join(MyDebugger.pre_fix, datetime.datetime.fromtimestamp(time.time()).strftime(
             f'%Y-%m-%d_%H-%M-%S_{model_name}'))
+        logging.info("=================== Program Start ====================")
+        logging.info(f"Ourput directory: {self._debug_dir_name}")
         self._init_debug_dir()
+
+
 
     def file_path(self, file_name):
         return os.path.join(self._debug_dir_name, file_name)
@@ -40,5 +43,9 @@ class MyDebugger():
 
 
 if __name__ == '__main__':
-    # debugger = MyDebugger("xuhao")
-    print(debugger.get_root_debug_dir_name())
+    import logging
+
+    LOG_FILENAME = 'debug\\2019-07-03_17-43-27_circular\\info.log'
+    logging.basicConfig(filename=LOG_FILENAME, level=logging.DEBUG)
+
+    logging.debug('This message should go to the log file')
