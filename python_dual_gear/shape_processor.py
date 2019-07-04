@@ -104,9 +104,6 @@ def toExteriorPolarCoord(p: Point, contour: np.array, n: int):
     sample_distances = [getMaxIntersDist(p, i * 2 * math.pi / n, poly, MAX_R) for i in range(n)]
     return sample_distances
 
-# generate teeth in polar coordinate
-def getToothFuc(n: int, samplenum_per_teeth: int, height: float):
-    return [gear_tooth.teeth_involute_sin((i % samplenum_per_teeth) / samplenum_per_teeth, height, width=0.75) for i in range(n)]
 
 def getVisiblePoint(contour):
     polygon = Polygon(contour)
@@ -157,16 +154,26 @@ def getNormals(contour: np.array,  plt_axis, center, normal_filter = True):
         l = Line2D([start[0], end[0]], [start[1], end[1]], linewidth=1)
         plt_axis.add_line(l)
 
-
     return normals
 
 
-def addToothToContour(contour: np.array, normals, height: int, tooth_num: int, plt_axis):
+def addToothToContour(contour: np.array, polar_contour, center_dist, normals, height: int, tooth_num: int, plt_axis, consider_driving_torque = False, consider_driving_continue = False):
     n = len(contour)
-    tooth_func = getToothFuc(n, samplenum_per_teeth=n / tooth_num, height=height)
+    assert len(polar_contour) == n
+    samplenum_per_teeth = n / tooth_num
+
+    widths = np.full(n, 0.75)
+
+    if consider_driving_torque:
+        driving_ratios = [d/(center_dist-d) for d in polar_contour]
+        ratio_mean = np.mean(driving_ratios)
+        widths = [ widths[i]*(driving_ratios[i]/ratio_mean) for i in range(n)]
+        widths = np.clip(widths, 0.5, 1.0)
+
+    tooth_func = [gear_tooth.teeth_involute_sin((i % samplenum_per_teeth) / samplenum_per_teeth, height, width=widths[i]) for i in range(n)]
+
     deviations = np.array([[normals[i][0] * tooth_func[i], normals[i][1] * tooth_func[i]] for i in range(n)])
     return contour + deviations
-
 
 def getShapeExample():
     n = 4096*2

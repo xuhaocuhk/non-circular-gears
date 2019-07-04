@@ -35,7 +35,7 @@ def teeth_involute(x: float, height: float, width: float):
 
 def teeth_involute_sin(x: float, height: float, width: float):
     assert 0 <= x <= 1
-    assert 0 < width < 1
+    assert 0 < width <= 1
     fake_height = height / math.sin(math.pi/3)
     if x < width/3:
         y = fake_height* math.sin(x/width * math.pi)
