@@ -105,8 +105,8 @@ def toExteriorPolarCoord(p: Point, contour: np.array, n: int):
     return sample_distances
 
 # generate teeth in polar coordinate
-def getToothFuc(n: int, tooth_num: int, height: float):
-    return [gear_tooth.teeth_involute((i % tooth_num) / tooth_num, height, width=0.6) for i in range(n)]
+def getToothFuc(n: int, samplenum_per_teeth: int, height: float):
+    return [gear_tooth.teeth_involute_sin((i % samplenum_per_teeth) / samplenum_per_teeth, height, width=0.75) for i in range(n)]
 
 def getVisiblePoint(contour):
     polygon = Polygon(contour)
@@ -163,7 +163,7 @@ def getNormals(contour: np.array,  plt_axis, center, normal_filter = True):
 
 def addToothToContour(contour: np.array, normals, height: int, tooth_num: int, plt_axis):
     n = len(contour)
-    tooth_func = getToothFuc(n, tooth_num=n / tooth_num, height=height)
+    tooth_func = getToothFuc(n, samplenum_per_teeth=n / tooth_num, height=height)
     deviations = np.array([[normals[i][0] * tooth_func[i], normals[i][1] * tooth_func[i]] for i in range(n)])
     return contour + deviations
 
