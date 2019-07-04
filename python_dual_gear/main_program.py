@@ -10,7 +10,9 @@ from plot.plot_util import plot_cartesian_shape, plot_polar_shape, init_plot
 import logging
 import sys
 from plot.plot_sampled_function import plot_sampled_function
+from shapely.validation import explain_validity
 
+# writing log to file
 logging.basicConfig(filename='debug\\info.log', level=logging.INFO)
 logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
@@ -73,12 +75,24 @@ def generate_gear(model, show_math_anim=False, save_math_anim = False, show_cut_
     fabrication.generate_2d_obj(debugger, 'drive.obj', toCartesianCoordAsNp(polar_contour, 0, 0))
     fabrication.generate_2d_obj(debugger, 'driven_math.obj', toCartesianCoordAsNp(driven_gear, 0, 0 + center_distance))
 
+    plt.close('all')
+
     return drive_tooth_contour, final_gear_contour, debugger
 
 
+def generate_all_models():
+    for model in our_models:
+        drive_tooth_contour, final_gear_contour, debugger = generate_gear(model, True, True, True, True)
+
+        # generate fabrication files
+        fabrication.generate_2d_obj(debugger, 'drive_tooth.obj', drive_tooth_contour)
+        fabrication.generate_2d_obj(debugger, 'driven_cut.obj', final_gear_contour)
+
 if __name__ == '__main__':
-    model = our_models[2]
-    drive_tooth_contour, final_gear_contour, debugger = generate_gear(model)
+    # generate_all_models()
+
+    model = our_models[1]
+    drive_tooth_contour, final_gear_contour, debugger = generate_gear(model, show_cut_anim = True, save_cut_anim = True)
 
     # generate fabrication files
     fabrication.generate_2d_obj(debugger, 'drive_tooth.obj', drive_tooth_contour)

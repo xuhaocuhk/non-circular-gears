@@ -9,6 +9,7 @@ from scipy.interpolate import interp1d
 import shapely
 from matplotlib.lines import Line2D
 import multiprocessing
+import gear_tooth
 
 try:
     cpus = multiprocessing.cpu_count()
@@ -103,28 +104,9 @@ def toExteriorPolarCoord(p: Point, contour: np.array, n: int):
     sample_distances = [getMaxIntersDist(p, i * 2 * math.pi / n, poly, MAX_R) for i in range(n)]
     return sample_distances
 
-def toothShape(x: float, height: float):
-    assert 0 <= x <= 1
-    if x < 0.2:
-        assert 0 <= x < 0.2
-        return height * (x / 0.2)
-    elif x < 0.5:
-        assert 0.2 <= x < 0.5
-        return height
-    elif x < 0.7:
-        assert 0.5 <= x < 0.7
-        return height * (0.7 - x) / 0.2
-    else:
-        return 0.0
-
-
-def toothShape_smooth(x: float, height: float):
-    assert 0 <= x <= 1
-    return height * math.sin(x * 2 * math.pi)
-
 # generate teeth in polar coordinate
 def getToothFuc(n: int, tooth_num: int, height: float):
-    return [toothShape_smooth((i % tooth_num) / tooth_num, height) for i in range(n)]
+    return [gear_tooth.teeth_involute((i % tooth_num) / tooth_num, height, width=0.6) for i in range(n)]
 
 def getVisiblePoint(contour):
     polygon = Polygon(contour)
@@ -142,7 +124,7 @@ def getUniformContourSampledShape(contour: np.array, n: int):
     func = getUniformCoordinateFunction(contour)
     return np.array([[func(i / n)[0], func(i / n)[1]] for i in range(n)])
 
-def getNormals(contour: np.array,  plt_axis, center):
+def getNormals(contour: np.array,  plt_axis, center, normal_filter = True):
     n = len(contour)
     # compute normals perpendicular to countour
     normals = [(contour[i][1] - contour[i + 1][1], contour[i + 1][0] - contour[i][0]) for i in
@@ -152,13 +134,29 @@ def getNormals(contour: np.array,  plt_axis, center):
     normals = [(normals[i][0] / math.sqrt(normals[i][0] * normals[i][0] + normals[i][1] * normals[i][1]),
                 normals[i][1] / math.sqrt(normals[i][0] * normals[i][0] + normals[i][1] * normals[i][1]))
                for i in range(n)]
+    # normal filtering
+    if normal_filter:
+        directions = [(contour[i][0] - center[0], contour[i][1] - center[1]) for i in range(n)]
+        normals = [ normal if dir[0]*normal[0]+dir[1]*normal[1] > 0 else [normal[0]/1000, normal[1]/1000] for dir, normal in zip(directions, normals) ]
 
+    # moving average for normal smoothing
+    SMOOTH_RANGE = 10
+    normal_smoothed = []
+    extended_normal =  normals[-SMOOTH_RANGE:] + normals + normals[:SMOOTH_RANGE]
+    for i in range(n):
+        avg_norm = np.mean([ math.sqrt( n[0]**2 + n[1]**2 ) for n in extended_normal[i: i+2*SMOOTH_RANGE]])
+        current_norm = math.sqrt( extended_normal[i+SMOOTH_RANGE][0]**2 + extended_normal[i+SMOOTH_RANGE][1]**2 )
+        normal_smoothed.append([extended_normal[i+SMOOTH_RANGE][0] / current_norm * avg_norm, extended_normal[i+SMOOTH_RANGE][1] / current_norm * avg_norm])
+    normals = normal_smoothed
+
+    # normal visualization
     for i, normal in enumerate(normals):
         start = contour[i]
         normal_l = [normal[0] * 0.05, normal[1] * 0.05]
         end = start + normal_l
         l = Line2D([start[0], end[0]], [start[1], end[1]], linewidth=1)
         plt_axis.add_line(l)
+
 
     return normals
 

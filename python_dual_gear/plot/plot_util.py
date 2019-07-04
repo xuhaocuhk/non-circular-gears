@@ -15,6 +15,7 @@ def plot_cartesian_shape(ax, title, contour):
     ax.set_title(title)
     ax.fill(contour[:, 0], contour[:, 1], "g", facecolor='lightsalmon', edgecolor='orangered', linewidth=3,
                     alpha=0.3)
+    ax.axis('equal')
 
 def plot_polar_shape(ax, title, polar_contour, center, sample_num):
     cartesian_contour = toCartesianCoordAsNp(polar_contour, center[0], center[1])

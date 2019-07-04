@@ -12,12 +12,12 @@ def getShapeContour(model: Model, uniform_contour: bool, plts):
         # read the contour shape
         contour = getSVGShapeAsNp(filename=f"../silhouette/{model.name}.txt")
 
-    plot_cartesian_shape(plts[0][0], "Input Shape", contour)
-
     # shape normalization
     poly_bound = Polygon(contour).bounds
     max_axis = max((poly_bound[2] - poly_bound[0]), (poly_bound[3] - poly_bound[1]))
     contour = contour / max_axis
+
+    plot_cartesian_shape(plts[0][0], "Input Shape", contour)
 
     # unifrom vertex on contour
     if uniform_contour:
