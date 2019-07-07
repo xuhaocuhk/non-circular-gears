@@ -50,7 +50,7 @@ def generate_gear(model, show_math_anim=False, save_math_anim = False, show_cut_
 
     # generate teeth
     contour = addToothToContour(contour, polar_contour, center_distance, normals, height=model.tooth_height, tooth_num=model.tooth_num,
-                                plt_axis=plts[1][1], consider_driving_torque=False, consider_driving_continue=True)
+                                plt_axis=plts[1][1], consider_driving_torque=True, consider_driving_continue=True)
     plot_cartesian_shape(plts[1][2], 'Add Tooth', contour)
 
     # cut and generate the cutting dual shape

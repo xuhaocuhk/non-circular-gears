@@ -164,11 +164,16 @@ def addToothToContour(contour: np.array, polar_contour, center_dist, normals, he
 
     widths = np.full(n, 0.75)
 
+    # TODO: rewrite this function, making tooth non-uniformly distributed.
     if consider_driving_torque:
         driving_ratios = [d/(center_dist-d) for d in polar_contour]
         ratio_mean = np.mean(driving_ratios)
         widths = [ widths[i]*(driving_ratios[i]/ratio_mean) for i in range(n)]
-        widths = np.clip(widths, 0.5, 1.0)
+        widths = np.clip(widths, 0.5, 1.0) # clip into upper and lower bound of teeth width
+
+    # TODO: finish
+    if consider_driving_continue:
+        pass
 
     tooth_func = [gear_tooth.teeth_involute_sin((i % samplenum_per_teeth) / samplenum_per_teeth, height, width=widths[i]) for i in range(n)]
 
