@@ -49,7 +49,7 @@ def generate_gear(model, show_math_anim=False, save_math_anim = False, show_cut_
     normals = getNormals(contour, plts[1][1], model.center_point)
 
     # generate teeth
-    contour = addToothToContour(contour, polar_contour, center_distance, normals, height=model.tooth_height, tooth_num=model.tooth_num,
+    contour = addToothToContour(contour, center, center_distance, normals, height=model.tooth_height, tooth_num=model.tooth_num,
                                 plt_axis=plts[1][1], consider_driving_torque=True, consider_driving_continue=True)
     plot_cartesian_shape(plts[1][2], 'Add Tooth', contour)
 
@@ -72,6 +72,7 @@ def generate_gear(model, show_math_anim=False, save_math_anim = False, show_cut_
     cut_fig.savefig(debugger.file_path('cut_final.pdf'))
     fig.savefig(debugger.file_path('shapes.pdf'))
 
+    #TODO: consider tolarence when fabricate
     fabrication.generate_2d_obj(debugger, 'drive.obj', toCartesianCoordAsNp(polar_contour, 0, 0))
     fabrication.generate_2d_obj(debugger, 'driven_math.obj', toCartesianCoordAsNp(driven_gear, 0, 0 + center_distance))
 

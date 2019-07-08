@@ -1,4 +1,5 @@
 import math
+import numpy as np
 
 def teeth_straight(x: float, height: float, width: float):
     assert 0 <= x <= 1
@@ -46,3 +47,20 @@ def teeth_involute_sin(x: float, height: float, width: float):
     else:
         y = 0
     return y-height/2
+
+
+# return the average driving ratio of the given range
+def sample_avg(start, end, polar_contour, center_dist):
+    return np.average([d / (center_dist - d) for d in polar_contour[start:end]])
+
+
+# return a value in [0,1] the map the teeth height
+def get_value_on_tooth_domain(i : int, _tooth_samples):
+    assert i < _tooth_samples[-1]
+    idx = np.argmax(_tooth_samples > i)
+    if idx == 0:
+        value = i/_tooth_samples[0]
+    else:
+        value =  (i - _tooth_samples[idx-1])/ (_tooth_samples[idx] - _tooth_samples[idx-1])
+    assert 0 <= value <= 1
+    return value
