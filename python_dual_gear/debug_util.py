@@ -4,19 +4,16 @@ import os
 import logging
 
 
-class MyDebugger():
+class MyDebugger:
     pre_fix = 'debug'
 
     def __init__(self, model_name: str):
-
         self.model_name = model_name
         self._debug_dir_name = os.path.join(MyDebugger.pre_fix, datetime.datetime.fromtimestamp(time.time()).strftime(
             f'%Y-%m-%d_%H-%M-%S_{model_name}'))
         logging.info("=================== Program Start ====================")
-        logging.info(f"Ourput directory: {self._debug_dir_name}")
+        logging.info(f"Output directory: {self._debug_dir_name}")
         self._init_debug_dir()
-
-
 
     def file_path(self, file_name):
         return os.path.join(self._debug_dir_name, file_name)

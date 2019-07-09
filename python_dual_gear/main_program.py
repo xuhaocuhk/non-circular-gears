@@ -17,11 +17,11 @@ logging.basicConfig(filename='debug\\info.log', level=logging.INFO)
 logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
 
-def generate_gear(model, show_math_anim=False, save_math_anim = False, show_cut_anim = False, save_cut_anim=False):
+def generate_gear(model, show_math_anim=False, save_math_anim=False, show_cut_anim=False, save_cut_anim=False):
     debugger = MyDebugger(model.name)
 
     fig, plts = init_plot()
-    contour = shape_factory.getShapeContour(model, True, plts, smooth=model.smooth)
+    contour = shape_factory.get_shape_contour(model, True, plts, smooth=model.smooth)
 
     # convert to polar coordinate shape
     center = model.center_point
@@ -49,7 +49,8 @@ def generate_gear(model, show_math_anim=False, save_math_anim = False, show_cut_
     normals = getNormals(contour, plts[1][1], model.center_point)
 
     # generate teeth
-    contour = addToothToContour(contour, center, center_distance, normals, height=model.tooth_height, tooth_num=model.tooth_num,
+    contour = addToothToContour(contour, center, center_distance, normals, height=model.tooth_height,
+                                tooth_num=model.tooth_num,
                                 plt_axis=plts[1][1], consider_driving_torque=False, consider_driving_continue=False)
     plot_cartesian_shape(plts[1][2], 'Add Tooth', contour)
 
@@ -72,7 +73,7 @@ def generate_gear(model, show_math_anim=False, save_math_anim = False, show_cut_
     cut_fig.savefig(debugger.file_path('cut_final.pdf'))
     fig.savefig(debugger.file_path('shapes.pdf'))
 
-    #TODO: consider tolarence when fabricate
+    # TODO: consider tolarence when fabricate
     fabrication.generate_2d_obj(debugger, 'drive.obj', toCartesianCoordAsNp(polar_contour, 0, 0))
     fabrication.generate_2d_obj(debugger, 'driven_math.obj', toCartesianCoordAsNp(driven_gear, 0, 0 + center_distance))
 
@@ -89,11 +90,12 @@ def generate_all_models():
         fabrication.generate_2d_obj(debugger, 'drive_tooth.obj', drive_tooth_contour)
         fabrication.generate_2d_obj(debugger, 'driven_cut.obj', final_gear_contour)
 
+
 if __name__ == '__main__':
     # generate_all_models()
 
     model = our_models[2]
-    drive_tooth_contour, final_gear_contour, debugger = generate_gear(model, show_cut_anim = True, save_cut_anim = True)
+    drive_tooth_contour, final_gear_contour, debugger = generate_gear(model, show_cut_anim=True, save_cut_anim=True)
 
     # generate fabrication files
     fabrication.generate_2d_obj(debugger, 'drive_tooth.obj', drive_tooth_contour)
