@@ -7,30 +7,39 @@ using std::vector;
 struct Point {
     double x, y;
 };
-vector<Point> targetPolygon;
-vector<Point> gearPolygon;
+typedef vector<Point> Polygon;
 
-int main() {
+const double EPS = 1e-5;
+
+void readPolygon(Polygon &polygon);
+void printPolygon(const char *name, const Polygon &polygon);
+
+int main(int argc, char **argv) {
     int targetSize, gearSize;
+    vector<Point> targetPolygon;
+    vector<Point> gearPolygon;
 
     freopen(nullptr, "rb", stdin);
 
-    fread(&targetSize, sizeof(targetSize), 1, stdin);
-    targetPolygon.resize(targetSize);
-    assert(sizeof(Point) == 2 * sizeof(double));
-    fread(targetPolygon.data(), sizeof(double), targetSize * 2, stdin);
+    readPolygon(targetPolygon);
+    readPolygon(gearPolygon);
 
-    fread(&gearSize, sizeof(gearSize), 1, stdin);
-    gearPolygon.resize(gearSize);
-    fread(gearPolygon.data(), sizeof(double), targetSize * 2, stdin);
-
-    printf("target polygon:\n");
-    for(const auto &point : targetPolygon)
-        printf("(%.4lf,%.4lf)\n", point.x, point.y);
-
-    printf("gear polygon:\n");
-    for(const auto &point : gearPolygon)
-        printf("(%.4lf,%.4lf)\n", point.x, point.y);
+    printPolygon("target polygon", targetPolygon);
+    printPolygon("gear polygon", gearPolygon);
 
     return 0;
+}
+
+void readPolygon(Polygon &polygon){
+    int size;
+    fread(&size, sizeof(int), 1, stdin);
+    polygon.resize(size);
+    assert(sizeof(Point) == 2 * sizeof(double));
+    fread(polygon.data(), sizeof(double), size * 2, stdin);
+}
+
+void printPolygon(const char *name, const Polygon &polygon){
+    printf("%s:\n",name);
+    for(const auto &point : polygon)
+        printf("(%.4lf,%.4lf)\n", point.x, point.y);
 }
