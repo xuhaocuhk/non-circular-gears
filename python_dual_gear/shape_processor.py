@@ -166,8 +166,8 @@ def addToothToContour(contour: np.array, center, center_dist, normals, height: i
 
     tooth_samples = np.full(tooth_num, samplenum_per_teeth, dtype=np.int_)
     tooth_samples = np.cumsum(tooth_samples)
+    heights = np.full(tooth_num, height)
 
-    # TODO: rewrite this function, making tooth non-uniformly distributed.
     if consider_driving_torque:
         for i in range(10):
             tooth_samples = np.insert(tooth_samples, 0, 0)
@@ -177,12 +177,21 @@ def addToothToContour(contour: np.array, center, center_dist, normals, height: i
             re_indexing = np.cumsum(driving_ratios)
             tooth_samples = np.round(re_indexing).astype('int32')
 
-    # TODO: finish
     if consider_driving_continue:
-        pass
+        tooth_widths = np.diff(np.insert(tooth_samples, 0, 0))
+        for j in range(tooth_num):
+            zero_front_tooth_samples = np.insert(tooth_samples, 0, 0)
+            curr_normal = gear_tooth.normal_mid(zero_front_tooth_samples[j], zero_front_tooth_samples[j + 1], normals)
+            curr_center_direction = gear_tooth.point_mid(zero_front_tooth_samples[j], zero_front_tooth_samples[j + 1], contour, center)
+            sin_theta = np.cross(curr_normal, curr_center_direction)/ (np.linalg.norm(curr_normal)*np.linalg.norm(curr_center_direction))
+            if sin_theta < 0:
+                pass # heights[j] = height
+            else:
+                heights[j] = tooth_widths[j]/100*(sin_theta/math.sqrt(1-sin_theta**2))
 
-    tooth_func = [ gear_tooth.teeth_involute_sin(gear_tooth.get_value_on_tooth_domain(i, tooth_samples), height, width=0.75) for i in range(n)]
-    # tooth_func = [gear_tooth.teeth_involute_sin((i % samplenum_per_teeth) / samplenum_per_teeth, height, width=0.75) for i in range(n)]
+    heights = np.clip(heights, height-0.01, height+0.03)
+
+    tooth_func = [ gear_tooth.teeth_involute_sin(gear_tooth.get_value_on_tooth_domain(i, tooth_samples), heights[gear_tooth.get_teeth_idx(i, tooth_samples)], width=0.5) for i in range(n)]
 
     deviations = np.array([[normals[i][0] * tooth_func[i], normals[i][1] * tooth_func[i]] for i in range(n)])
     return contour + deviations
