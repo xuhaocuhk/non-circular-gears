@@ -44,7 +44,7 @@ def obj_func(center, *args):
         polar_poly = toExteriorPolarCoord(Point(center[0], center[1]), drive_contour, model.sample_num)
         # generate and draw the dual shape
         driven_gear, center_distance, phi = compute_dual_gear(polar_poly, k=k)
-        dual_shape = toEuclideanCoordAsNp(driven_gear, 0, 0)
+        dual_shape = toCartesianCoordAsNp(driven_gear, 0, 0)
         score = polygon_compare(dual_shape, target_shape)
     else:
         score = 1e8
@@ -63,7 +63,7 @@ def obj_func(center, *args):
             plts[1].add_line(l)
         plts[1].scatter(0, 0, s=30, c='b')
         plts[1].axis('equal')
-    plts[1].text(0, 0, str(score), ha='left', rotation=15, wrap=True)
+    plts[1].text(0, 0, str(score), ha='left', rotation=0, wrap=True)
     # draw target shape
     plts[2].set_title('Target shape')
     plts[2].fill(target_shape[:, 0], target_shape[:, 1], "g", alpha=0.3)

@@ -9,12 +9,13 @@ from scipy.interpolate import interp1d
 import shapely
 from matplotlib.lines import Line2D
 import multiprocessing
-import time
+import gear_tooth
 
 try:
     cpus = multiprocessing.cpu_count()
 except NotImplementedError:
     cpus = 2  # arbitrary default
+
 
 def isAllVisible(p: Point, poly: Polygon):
     vtx = list(poly.exterior.coords)
@@ -24,20 +25,23 @@ def isAllVisible(p: Point, poly: Polygon):
             return False
     return True
 
+
 def computeEuclideanCoord_x(r, theta):
     return r * cos(theta)
+
 
 def computeEuclideanCoord_y(r, theta):
     return -r * sin(theta)
 
-def toEuclideanCoord(polar_r, center_x, center_y):
+
+def toCartesianCoord(polar_r, center_x, center_y):
     thetas = [theta * 2 * math.pi / len(polar_r) for theta in range(0, len(polar_r))]
     return list(map(lambda n: n + center_x, map(computeEuclideanCoord_x, polar_r, thetas))), list(
         map(lambda n: n + center_y, map(computeEuclideanCoord_y, polar_r, thetas)))
 
 
-def toEuclideanCoordAsNp(polar_r, center_x, center_y):
-    new_x, new_y = toEuclideanCoord(polar_r, center_x, center_y)
+def toCartesianCoordAsNp(polar_r, center_x, center_y):
+    new_x, new_y = toCartesianCoord(polar_r, center_x, center_y)
     contour = np.concatenate((np.array(new_x).reshape(len(new_x), 1), np.array(new_y).reshape(len(new_y), 1)), axis=1)
     return contour
 
@@ -82,6 +86,8 @@ def getUniformCoordinateFunction(contour: np.array):
 '''
 convert euclidean coordinate shape to polar coordinate
 '''
+
+
 def toPolarCoord(p: Point, contour: np.array, n: int):
     poly = Polygon(contour)
     assert isAllVisible(p, poly)
@@ -95,6 +101,8 @@ def toPolarCoord(p: Point, contour: np.array, n: int):
 '''
 convert euclidean coordinate shape to polar coordinate
 '''
+
+
 def toExteriorPolarCoord(p: Point, contour: np.array, n: int):
     poly = Polygon(contour)
     assert poly.contains(p)
@@ -104,28 +112,6 @@ def toExteriorPolarCoord(p: Point, contour: np.array, n: int):
     sample_distances = [getMaxIntersDist(p, i * 2 * math.pi / n, poly, MAX_R) for i in range(n)]
     return sample_distances
 
-def toothShape(x: float, height: float):
-    assert 0 <= x <= 1
-    if x < 0.2:
-        assert 0 <= x < 0.2
-        return height * (x / 0.2)
-    elif x < 0.5:
-        assert 0.2 <= x < 0.5
-        return height
-    elif x < 0.7:
-        assert 0.5 <= x < 0.7
-        return height * (0.7 - x) / 0.2
-    else:
-        return 0.0
-
-
-def toothShape_smooth(x: float, height: float):
-    assert 0 <= x <= 1
-    return height * math.sin(x * 2 * math.pi)
-
-# generate teeth in polar coordinate
-def getToothFuc(n: int, tooth_num: int, height: float):
-    return [toothShape_smooth((i % tooth_num) / tooth_num, height) for i in range(n)]
 
 def getVisiblePoint(contour):
     polygon = Polygon(contour)
@@ -143,7 +129,8 @@ def getUniformContourSampledShape(contour: np.array, n: int):
     func = getUniformCoordinateFunction(contour)
     return np.array([[func(i / n)[0], func(i / n)[1]] for i in range(n)])
 
-def getNormals(contour: np.array,  plt_axis, center):
+
+def getNormals(contour: np.array, plt_axis, center, normal_filter=True):
     n = len(contour)
     # compute normals perpendicular to countour
     normals = [(contour[i][1] - contour[i + 1][1], contour[i + 1][0] - contour[i][0]) for i in
@@ -153,14 +140,27 @@ def getNormals(contour: np.array,  plt_axis, center):
     normals = [(normals[i][0] / math.sqrt(normals[i][0] * normals[i][0] + normals[i][1] * normals[i][1]),
                 normals[i][1] / math.sqrt(normals[i][0] * normals[i][0] + normals[i][1] * normals[i][1]))
                for i in range(n)]
-    # make steep normals 0
-    # normals = [(normals[i][0] / math.sqrt(normals[i][0] * normals[i][0] + normals[i][1] * normals[i][1]),
-    #             normals[i][1] / math.sqrt(normals[i][0] * normals[i][0] + normals[i][1] * normals[i][1]))
-    #            for i in range(n)]
+    # normal filtering
+    if normal_filter:
+        directions = [(contour[i][0] - center[0], contour[i][1] - center[1]) for i in range(n)]
+        normals = [normal if dir[0] * normal[0] + dir[1] * normal[1] > 0 else [normal[0] / 1000, normal[1] / 1000] for
+                   dir, normal in zip(directions, normals)]
 
+    # moving average for normal smoothing
+    SMOOTH_RANGE = 10
+    normal_smoothed = []
+    extended_normal = normals[-SMOOTH_RANGE:] + normals + normals[:SMOOTH_RANGE]
+    for i in range(n):
+        avg_norm = np.mean([math.sqrt(n[0] ** 2 + n[1] ** 2) for n in extended_normal[i: i + 2 * SMOOTH_RANGE]])
+        current_norm = math.sqrt(extended_normal[i + SMOOTH_RANGE][0] ** 2 + extended_normal[i + SMOOTH_RANGE][1] ** 2)
+        normal_smoothed.append([extended_normal[i + SMOOTH_RANGE][0] / current_norm * avg_norm,
+                                extended_normal[i + SMOOTH_RANGE][1] / current_norm * avg_norm])
+    normals = normal_smoothed
+
+    # normal visualization
     for i, normal in enumerate(normals):
         start = contour[i]
-        normal_l = [normal[0] * 10, normal[1] * 10]
+        normal_l = [normal[0] * 0.05, normal[1] * 0.05]
         end = start + normal_l
         l = Line2D([start[0], end[0]], [start[1], end[1]], linewidth=1)
         plt_axis.add_line(l)
@@ -168,28 +168,66 @@ def getNormals(contour: np.array,  plt_axis, center):
     return normals
 
 
-def addToothToContour(contour: np.array, normals, height: int, tooth_num: int, plt_axis):
+def addToothToContour(contour: np.array, center, center_dist, normals, height: int, tooth_num: int, plt_axis,
+                      consider_driving_torque=False, consider_driving_continue=False):
     n = len(contour)
-    tooth_func = getToothFuc(n, tooth_num=n / tooth_num, height=height)
+    assert n % tooth_num == 0
+    samplenum_per_teeth = n / tooth_num
+
+    polar_contour = [np.linalg.norm(p - center) for p in contour]
+
+    tooth_samples = np.full(tooth_num, samplenum_per_teeth, dtype=np.int_)
+    tooth_samples = np.cumsum(tooth_samples)
+    heights = np.full(tooth_num, height)
+
+    if consider_driving_torque:
+        for i in range(10):
+            tooth_samples = np.insert(tooth_samples, 0, 0)
+            driving_ratios = np.array(
+                [gear_tooth.sample_avg(tooth_samples[j], tooth_samples[j + 1], polar_contour, center_dist) for j in
+                 range(tooth_num)],
+                dtype=np.float_)
+            driving_ratios = driving_ratios / np.sum(driving_ratios) * n
+            re_indexing = np.cumsum(driving_ratios)
+            tooth_samples = np.round(re_indexing).astype('int32')
+
+    if consider_driving_continue:
+        tooth_widths = np.diff(np.insert(tooth_samples, 0, 0))
+        for j in range(tooth_num):
+            zero_front_tooth_samples = np.insert(tooth_samples, 0, 0)
+            curr_normal = gear_tooth.normal_mid(zero_front_tooth_samples[j], zero_front_tooth_samples[j + 1], normals)
+            curr_center_direction = gear_tooth.point_mid(zero_front_tooth_samples[j], zero_front_tooth_samples[j + 1],
+                                                         contour, center)
+            sin_theta = np.cross(curr_normal, curr_center_direction) / (
+                    np.linalg.norm(curr_normal) * np.linalg.norm(curr_center_direction))
+            if sin_theta < 0:
+                pass  # heights[j] = height
+            else:
+                heights[j] = tooth_widths[j] / 100 * (sin_theta / math.sqrt(1 - sin_theta ** 2))
+
+    heights = np.clip(heights, height - 0.01, height + 0.03)
+
+    tooth_func = [gear_tooth.teeth_involute_sin(gear_tooth.get_value_on_tooth_domain(i, tooth_samples),
+                                                heights[gear_tooth.get_teeth_idx(i, tooth_samples)], width=0.5) for i in
+                  range(n)]
+
     deviations = np.array([[normals[i][0] * tooth_func[i], normals[i][1] * tooth_func[i]] for i in range(n)])
     return contour + deviations
 
 
 def getShapeExample():
-    n = 4096*2
+    n = 4096 * 2
 
     plt.figure(figsize=(8, 8))
     plt.axis('equal')
 
     # read raw polygon from file
     contour = getSVGShapeAsNp(filename="../silhouette/spiral_circle.txt")
-    #plt.fill(contour[:, 0], contour[:, 1], "b", alpha=0.3)
+    # plt.fill(contour[:, 0], contour[:, 1], "b", alpha=0.3)
 
     # convert to uniform coordinate
     contour = getUniformContourSampledShape(contour, n)
-    #plt.fill(contour[:, 0], contour[:, 1], "r", alpha=0.3)
-
-
+    # plt.fill(contour[:, 0], contour[:, 1], "r", alpha=0.3)
 
     # get center visible point
     # center = getVisiblePoint(contour)
@@ -200,13 +238,12 @@ def getShapeExample():
     # convert to euclidean coordinate to test
     # contour = toEuclideanCoordAsNp(polar_poly, center[0], center[1])
 
-
     # add tooth
     contour = addToothToContour(contour, height=5, tooth_num=64)
 
     plt.fill(contour[:, 0], contour[:, 1], "g", alpha=0.3)
-    #plt.scatter(center[0], center[1], s=5, c='b')
-    #for p in contour:
+    # plt.scatter(center[0], center[1], s=5, c='b')
+    # for p in contour:
     #    plt.scatter(p[0], p[1], s=10, c='b')
     plt.show()
     input()
