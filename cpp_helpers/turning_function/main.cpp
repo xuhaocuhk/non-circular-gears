@@ -1,21 +1,14 @@
 #include <cstdio>
-#include <vector>
 #include <cassert>
+#include "geometry.h"
 
 using std::vector;
 
-struct Point {
-    double x, y;
-};
-typedef vector<Point> Polygon;
-
-const double EPS = 1e-5;
-
 void readPolygon(Polygon &polygon);
+
 void printPolygon(const char *name, const Polygon &polygon);
 
 int main(int argc, char **argv) {
-    int targetSize, gearSize;
     vector<Point> targetPolygon;
     vector<Point> gearPolygon;
 
@@ -30,7 +23,7 @@ int main(int argc, char **argv) {
     return 0;
 }
 
-void readPolygon(Polygon &polygon){
+void readPolygon(Polygon &polygon) {
     int size;
     fread(&size, sizeof(int), 1, stdin);
     polygon.resize(size);
@@ -38,8 +31,8 @@ void readPolygon(Polygon &polygon){
     fread(polygon.data(), sizeof(double), size * 2, stdin);
 }
 
-void printPolygon(const char *name, const Polygon &polygon){
-    printf("%s:\n",name);
-    for(const auto &point : polygon)
+void printPolygon(const char *name, const Polygon &polygon) {
+    printf("%s:\n", name);
+    for (const auto &point : polygon)
         printf("(%.4lf,%.4lf)\n", point.x, point.y);
 }
