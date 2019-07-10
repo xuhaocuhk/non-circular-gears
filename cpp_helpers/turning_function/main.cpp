@@ -4,13 +4,13 @@
 
 using std::vector;
 
-void readPolygon(Polygon &polygon);
+void readPolygon(PointPolygon &polygon);
 
-void printPolygon(const char *name, const Polygon &polygon);
+void printPolygon(const char *name, const PointPolygon &polygon);
 
 int main(int argc, char **argv) {
-    vector<Point> targetPolygon;
-    vector<Point> gearPolygon;
+    PointPolygon targetPolygon;
+    PointPolygon gearPolygon;
 
     freopen(nullptr, "rb", stdin);
 
@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
     return 0;
 }
 
-void readPolygon(Polygon &polygon) {
+void readPolygon(PointPolygon &polygon) {
     int size;
     fread(&size, sizeof(int), 1, stdin);
     polygon.resize(size);
@@ -31,7 +31,7 @@ void readPolygon(Polygon &polygon) {
     fread(polygon.data(), sizeof(double), size * 2, stdin);
 }
 
-void printPolygon(const char *name, const Polygon &polygon) {
+void printPolygon(const char *name, const PointPolygon &polygon) {
     printf("%s:\n", name);
     for (const auto &point : polygon)
         printf("(%.4lf,%.4lf)\n", point.x, point.y);
