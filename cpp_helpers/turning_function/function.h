@@ -1,17 +1,17 @@
 #pragma once
 
-#include <map>
 #include "geometry.h"
+#include <algorithm>
 
 /**
  * Staircase Functions
  */
 struct Function {
-    std::map<double, double> data;
+    std::vector<double> points, values;
 
     inline explicit Function(double rangeStart = 0, double rangeEnd = 0) : rangeStart(rangeStart), rangeEnd(rangeEnd) {}
 
-    Function(const EdgePolygon &polygon); //generate turning function from polygon
+    Function(const EdgePolygon &polygon); //generate turning function from polygon NOLINT(google-explicit-constructor)
 
     inline double getRangeStart() const { return rangeStart; }
 
@@ -23,4 +23,12 @@ struct Function {
 
 private:
     double rangeStart, rangeEnd;
+
+    bool isDataLegal() const {
+        return (!points.empty()) &&
+               fabs(points[0] - rangeStart) <= EPS &&
+               fabs(points[points.size() - 1] - rangeEnd) <= EPS &&
+               points.size() == values.size() &&
+               std::is_sorted(points.begin(), points.end());
+    }
 };

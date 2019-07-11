@@ -1,15 +1,18 @@
 #include "function.h"
 #include <set>
 
+using namespace std;
+
 Function::Function(const EdgePolygon &polygon) {
     //TODO
 }
 
 double Function::at(double x) const {
     assert(x >= rangeStart - EPS && x <= rangeEnd + EPS);
-    assert(!data.empty());
-    x += EPS; //avoid map error
-    return data.lower_bound(x)->second;
+    assert(isDataLegal());
+    x += EPS; //avoid finding error
+    const auto &index = lower_bound(points.begin(), points.end(), x) - points.begin();
+    return values[index];
 }
 
 inline double squareDifference(const double &x, const double &y) {
@@ -18,17 +21,26 @@ inline double squareDifference(const double &x, const double &y) {
 }
 
 double Function::distanceTo(const Function &rhs) const {
-    //TODO: maybe we can use a list?
-    std::set<double> xPoints;
+    auto selfIter = points.begin();
+    auto otherIter = rhs.points.begin();
     double sum = 0;
-    assert(fabs(rhs.rangeStart - rangeStart) <= EPS && fabs(rhs.rangeEnd - rangeEnd) <= EPS);
-
-    for (const auto &datum:data) xPoints.insert(datum.first);
-    for (const auto &datum:rhs.data) xPoints.insert(datum.first);
-    for (auto iter = xPoints.begin(); iter != xPoints.end();) {
-        double x = *iter;
-        double nextX = (++iter) == xPoints.end() ? rangeEnd : *iter;
-        sum += squareDifference(rhs.at(x), this->at(x)) * (nextX - x);
+    double lastPoint = 0;
+    while (selfIter != points.end() && otherIter != rhs.points.end()) {
+        double current;
+        if (*selfIter < *otherIter) current = *selfIter, ++selfIter;
+        else current = *otherIter, ++otherIter;
+        sum += (current - lastPoint) * squareDifference(at(current), rhs.at(current));
+        lastPoint = current;
+    }
+    while (selfIter != points.end()) {
+        sum += (*selfIter - lastPoint) * squareDifference(at(*selfIter), rhs.at(*selfIter));
+        lastPoint = *selfIter;
+        ++selfIter;
+    }
+    while (otherIter != points.end()) {
+        sum += (*otherIter - lastPoint) * squareDifference(at(*otherIter), rhs.at(*otherIter));
+        lastPoint = *otherIter;
+        ++otherIter;
     }
     return sum;
 }
