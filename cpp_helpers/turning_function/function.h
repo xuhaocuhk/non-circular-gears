@@ -11,7 +11,8 @@ struct Function {
 
     inline explicit Function(double rangeStart = 0, double rangeEnd = 0) : rangeStart(rangeStart), rangeEnd(rangeEnd) {}
 
-    Function(const EdgePolygon &polygon); //generate turning function from polygon NOLINT(google-explicit-constructor)
+    //generate turning function from polygon
+    Function(const EdgePolygon &polygon, int startIndex = 0); //NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
 
     inline double getRangeStart() const { return rangeStart; }
 

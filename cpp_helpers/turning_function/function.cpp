@@ -3,8 +3,20 @@
 
 using namespace std;
 
-Function::Function(const EdgePolygon &polygon) {
-    //TODO
+Function::Function(const EdgePolygon &polygon, int startIndex) : rangeStart(0), rangeEnd(1) {
+    const double circumference = perimeter(polygon);
+    double accumulatedLength = 0;
+    double accumulatedAngle = 0;
+
+    points.reserve(polygon.size() + 1); // all points with the end point
+    values.reserve(polygon.size() + 1);
+
+    for (int i = 0; i < polygon.size(); i++) {
+        accumulatedAngle += turningAngle(polygon, i + startIndex);
+        points.push_back(accumulatedLength);
+        values.push_back(accumulatedAngle);
+        accumulatedLength += ::at(polygon, i + startIndex).length();
+    }
 }
 
 double Function::at(double x) const {
