@@ -19,6 +19,12 @@ def triangle_area(points, index, spacing):
 
 
 def triangle_area_representation(contour: np.ndarray, sample_count: int) -> np.ndarray:
+    """
+    calculate the TAR of a given contour
+    :param contour: counterclockwise [(x,y)] points
+    :param sample_count: number of points to be re-sampled
+    :return: TAR(n,ts) as a 2-dim array
+    """
     contour = getUniformContourSampledShape(contour, sample_count, False)
     # answer = np.empty((sample_count, (sample_count - 1) // 2))
     # for index in range(sample_count):
@@ -30,7 +36,7 @@ def triangle_area_representation(contour: np.ndarray, sample_count: int) -> np.n
     return answer / perimeter ** 2
 
 
-def tar_to_distance(tar_a: np.ndarray, tar_b: np.ndarray) -> np.ndarray:
+def tar_to_distance_matrix(tar_a: np.ndarray, tar_b: np.ndarray) -> np.ndarray:
     assert tar_a.shape == tar_b.shape
     ts = tar_a.shape[1]
     answer = np.empty(tar_a.shape[0], tar_b.shape[0])
@@ -75,8 +81,8 @@ if __name__ == '__main__':
         x, y = zip(*list(sampled), sampled[0])
         subplot_below.plot(x, y, color='red')
         subplot_below.axis('equal')
-    for contour, subplot in zip(contours, subplots[2]):
-        tar = triangle_area_representation(contour, 24)
-        tar = tar[:, 3]
+    tars = [triangle_area_representation(contour, 24) for contour in contours]
+    for tar, subplot in zip(tars, subplots[2]):
+        tar = tar[:, 0]
         subplot.plot(range(len(tar)), tar, color='blue')
     plt.axis('equal')
