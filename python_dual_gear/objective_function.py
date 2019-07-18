@@ -1,10 +1,13 @@
 from shape_processor import getUniformContourSampledShape
 import numpy as np
 from dtw import dtw
+import math
+import matplotlib.pyplot as plt
 
 
 def calculate_area(points):
-    assert len(tuple(points)) == 3
+    points = tuple(points)
+    assert len(points) == 3
     matrix = np.append(np.array(points), np.ones((3, 1), np.float64), axis=1)
     return 0.5 * np.linalg.det(matrix)
 
@@ -16,12 +19,15 @@ def triangle_area(points, index, spacing):
 
 
 def triangle_area_representation(contour: np.ndarray, sample_count: int) -> np.ndarray:
-    contour = getUniformContourSampledShape(contour, sample_count)
-    answer = np.empty((sample_count, (sample_count - 1) // 2))
-    for index in range(sample_count):
-        for ts in range(1, 1 + answer.shape[1]):
-            answer[index, ts] = triangle_area(contour, index, ts)
-    return answer
+    contour = getUniformContourSampledShape(contour, sample_count, False)
+    # answer = np.empty((sample_count, (sample_count - 1) // 2))
+    # for index in range(sample_count):
+    #     for ts in range(1, 1 + answer.shape[1]):
+    #         answer[index, ts - 1] = triangle_area(contour, index, ts)
+    perimeter = sum([np.linalg.norm(contour[i] - contour[i - 1]) for i in range(len(contour))])
+    answer = np.array([[triangle_area(contour, index, ts + 1) for ts in range((sample_count - 1) // 2)]
+                       for index in range(sample_count)])
+    return answer / perimeter ** 2
 
 
 def tar_to_distance(tar_a: np.ndarray, tar_b: np.ndarray) -> np.ndarray:
@@ -51,4 +57,26 @@ def dtw_distance(distance_matrix: np.ndarray, offset: int) -> float:
 
 
 if __name__ == '__main__':
-    pass
+    contours = [
+        np.array([(0, 0), (10, 0), (10, 10), (0, 10)]),
+        np.array([(0, 0), (5, 5 * math.sqrt(3)), (5 - 5 * math.sqrt(3), 5 + 5 * math.sqrt(3)), (-5 * math.sqrt(3), 5)]),
+        np.array([(-5, -5), (5, -5), (5, 5), (-5, 5)]),
+        np.array([(0, 0), (1, 0), (1, 1), (0, 1)]),
+        np.array([(5 * math.cos(theta), 5 * math.sin(theta))
+                  for theta in np.linspace(0, 2 * math.pi, 1024, endpoint=False)]),
+    ]
+    count_contours = len(contours)
+    fig, subplots = plt.subplots(3, count_contours)
+    for contour, subplot_above, subplot_below in zip(contours, subplots[0], subplots[1]):
+        x, y = zip(*list(contour), contour[0])
+        subplot_above.plot(x, y, color='orange')
+        subplot_above.axis('equal')
+        sampled = getUniformContourSampledShape(contour, 24, False)
+        x, y = zip(*list(sampled), sampled[0])
+        subplot_below.plot(x, y, color='red')
+        subplot_below.axis('equal')
+    for contour, subplot in zip(contours, subplots[2]):
+        tar = triangle_area_representation(contour, 24)
+        tar = tar[:, 3]
+        subplot.plot(range(len(tar)), tar, color='blue')
+    plt.axis('equal')
