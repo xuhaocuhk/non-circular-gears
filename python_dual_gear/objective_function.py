@@ -1,5 +1,6 @@
 from shape_processor import getUniformContourSampledShape
 import numpy as np
+from dtw import dtw
 
 
 def calculate_area(points):
@@ -37,5 +38,17 @@ def tar_to_distance(tar_a: np.ndarray, tar_b: np.ndarray) -> np.ndarray:
     return answer
 
 
+def dtw_distance(distance_matrix: np.ndarray, offset: int) -> float:
+    assert distance_matrix.shape[0] == distance_matrix.shape[1]
+    n = distance_matrix.shape[0]
+
+    def distance(index_a, index_b) -> float:
+        index_a = index_a % n
+        index_b = (index_b - offset) % n
+        return distance_matrix[index_a, index_b]
+
+    return dtw(distance_matrix.shape, distance)[0]
+
+
 if __name__ == '__main__':
-    print(calculate_area([(0, 1), (0, 0), (1, 0)]))
+    pass
