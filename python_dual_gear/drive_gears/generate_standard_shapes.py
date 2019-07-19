@@ -26,14 +26,17 @@ def gen_ellipse_gear(number_of_samples: int) -> [float]:
         for theta in sample_points
     ]
 
+
 def gen_circular_gear(number_of_samples: int) -> [float]:
     return [1.0] * number_of_samples
+
 
 std_shapes = {
     "circular": gen_circular_gear,
     "ellipse": gen_ellipse_gear,
     "focal_ellipse": gen_focal_ellipse,
 }
+
 
 def generate_std_shapes(type: str, n: int, center_point):
     if type not in std_shapes:

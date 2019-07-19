@@ -8,15 +8,13 @@ import os
 import logging
 from matplotlib.lines import Line2D
 from fabrication import generate_2d_obj
+from objective_function import shape_difference_rating
+import shape_factory
 
 
 # TODO: to be replaced by professor FU(sample FU)'s version
 def polygon_compare(contour, target_contour):
-    x_range = max(contour[:, 0]) - min(contour[:, 0])
-    y_range = max(contour[:, 1]) - min(contour[:, 1])
-    target_x_range = max(target_contour[:, 0]) - min(target_contour[:, 0])
-    target_y_range = max(target_contour[:, 1]) - min(target_contour[:, 1])
-    return ((x_range / y_range) - (target_x_range / target_y_range)) ** 2
+    return shape_difference_rating(contour, target_contour, 48)
 
 
 '''
@@ -49,6 +47,7 @@ def obj_func(center, *args):
     else:
         score = 1e8
 
+    plts = plts[1]
     plts[0].set_title('Input shape')
     plts[0].fill(drive_contour[:, 0], drive_contour[:, 1], "g", facecolor='lightsalmon', edgecolor='orangered',
                  linewidth=3,
@@ -82,18 +81,19 @@ if __name__ == '__main__':
     debug_mode = False
 
     model = our_models[7]
-    target_model = our_models[4]
+    target_model = our_models[2]
     debugger = MyDebugger(model.name)
 
     # set up the plotting window
-    fig, plts = plt.subplots(1, 3)
+    fig, plts = plt.subplots(3, 3)
     fig.set_size_inches(16, 7)
     plt.ion()
     plt.show()
 
     # read the contour shape
-    contour = getSVGShapeAsNp(filename=f"../silhouette/{model.name}.txt")
-    target_contour = getSVGShapeAsNp(filename=f"../silhouette/{target_model.name}.txt")
+    contour = shape_factory.get_shape_contour(model, True, plts, smooth=model.smooth)
+    target_contour = shape_factory.get_shape_contour(target_model, True, plts, smooth=model.smooth)
+
     # convert to uniform coordinate
     contour = getUniformContourSampledShape(contour, model.sample_num)
     target_contour = getUniformContourSampledShape(target_contour, target_model.sample_num)
