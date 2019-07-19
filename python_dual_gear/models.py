@@ -20,4 +20,5 @@ our_models = [Model(name='circular', sample_num=512, center_point=(0, 0), tooth_
               Model(name='mahou', sample_num=1024, center_point=(0.5, 0.5), tooth_height=0.02, tooth_num=32),
               Model(name='wolf', sample_num=4096, center_point=(0.5, 0.3), tooth_height=0.01, tooth_num=128),
               Model(name='trump', sample_num=1024, center_point=(0.8, 0.6), tooth_height=0.02, tooth_num=32),
-              Model(name='man', sample_num=4096, center_point=(0.5, 0.6), tooth_height=0.03, tooth_num=32)]
+              Model(name='man', sample_num=4096, center_point=(0.5, 0.6), tooth_height=0.03, tooth_num=32),
+              Model(name='square', sample_num=256, center_point=(0, 0), tooth_height=0.02, tooth_num=32)]

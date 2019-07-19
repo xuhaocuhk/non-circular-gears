@@ -10,6 +10,7 @@ from matplotlib.lines import Line2D
 from fabrication import generate_2d_obj
 from objective_function import shape_difference_rating
 import shape_factory
+import traceback
 
 
 # TODO: to be replaced by professor FU(sample FU)'s version
@@ -82,28 +83,34 @@ if __name__ == '__main__':
 
     model = our_models[7]
     target_model = our_models[2]
-    debugger = MyDebugger(model.name)
+    for model, target_model in zip(our_models, our_models):
+        # noinspection PyBroadException
+        try:
+            debugger = MyDebugger(model.name)
 
-    # set up the plotting window
-    fig, plts = plt.subplots(3, 3)
-    fig.set_size_inches(16, 7)
-    plt.ion()
-    plt.show()
+            # set up the plotting window
+            fig, plts = plt.subplots(3, 3)
+            fig.set_size_inches(16, 7)
+            plt.ion()
+            plt.show()
 
-    # read the contour shape
-    contour = shape_factory.get_shape_contour(model, True, plts, smooth=model.smooth)
-    target_contour = shape_factory.get_shape_contour(target_model, True, plts, smooth=model.smooth)
+            # read the contour shape
+            contour = shape_factory.get_shape_contour(model, True, plts, smooth=model.smooth)
+            target_contour = shape_factory.get_shape_contour(target_model, True, plts, smooth=model.smooth)
 
-    # convert to uniform coordinate
-    contour = getUniformContourSampledShape(contour, model.sample_num)
-    target_contour = getUniformContourSampledShape(target_contour, target_model.sample_num)
-    # plts[0].set_title('Uniform boundary sampling')
+            # convert to uniform coordinate
+            contour = getUniformContourSampledShape(contour, model.sample_num)
+            target_contour = getUniformContourSampledShape(target_contour, target_model.sample_num)
+            # plts[0].set_title('Uniform boundary sampling')
 
-    polygon = Polygon(contour)
-    poly_bound = polygon.bounds
+            polygon = Polygon(contour)
+            poly_bound = polygon.bounds
 
-    lb = [poly_bound[0], poly_bound[1]]
-    ub = [poly_bound[2], poly_bound[3]]
-    ret = dual_annealing(obj_func, args=(polygon, target_contour, 1, plts, fig), bounds=list(zip(lb, ub)), seed=3,
-                         maxiter=200)
-    print(f"global minimum: xmin = {ret.x}, f(xmin) = {ret.fun}")
+            lb = [poly_bound[0], poly_bound[1]]
+            ub = [poly_bound[2], poly_bound[3]]
+            ret = dual_annealing(obj_func, args=(polygon, target_contour, 1, plts, fig), bounds=list(zip(lb, ub)),
+                                 seed=3,
+                                 maxiter=200)
+            print(f"global minimum: xmin = {ret.x}, f(xmin) = {ret.fun}")
+        except Exception as error:
+            traceback.print_exc()
