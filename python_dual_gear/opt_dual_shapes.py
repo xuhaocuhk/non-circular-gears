@@ -1,4 +1,4 @@
-from models import our_models
+from models import our_models, Model
 from shape_processor import *
 from core.compute_dual_gear import compute_dual_gear, rotate_and_cut, _plot_polygon
 from shapely.affinity import translate
@@ -10,52 +10,36 @@ from matplotlib.lines import Line2D
 from fabrication import generate_2d_obj
 from objective_function import shape_difference_rating
 import shape_factory
-import traceback
-
-
-# TODO: to be replaced by professor FU(sample FU)'s version
-def polygon_compare(contour, target_contour):
-    return shape_difference_rating(contour, target_contour, 48)
-
-
-'''
-args[0]: contour1: Polygon
-args[1]: contour2: ndarray of shape(n,2)
-args[2]: k
-'''
+from typing import Union
 
 step = 0
 
 
-def obj_func(center, *args):
-    drive_polygon = args[0]
+def obj_func(center, drive_polygon, target_shape, k, objective_sample_count=32, subplots=None, figure=None, model=None):
     drive_contour = np.array(list(drive_polygon.exterior.coords))
-    target_shape = args[1]
-    k = args[2]
-    plts = args[3]
-    fig = args[4]
 
     dual_shape = None
     score = None
     global step
 
-    if polygon.contains(Point(center[0], center[1])):
+    if drive_polygon.contains(Point(center[0], center[1])):
         polar_poly = toExteriorPolarCoord(Point(center[0], center[1]), drive_contour, model.sample_num)
         # generate and draw the dual shape
         driven_gear, center_distance, phi = compute_dual_gear(polar_poly, k=k)
         dual_shape = toCartesianCoordAsNp(driven_gear, 0, 0)
-        score = polygon_compare(dual_shape, target_shape)
+        score = shape_difference_rating(dual_shape, target_shape, objective_sample_count)
     else:
         score = 1e8
 
-    plts = plts[1]
-    plts[0].set_title('Input shape')
-    plts[0].fill(drive_contour[:, 0], drive_contour[:, 1], "g", facecolor='lightsalmon', edgecolor='orangered',
-                 linewidth=3,
-                 alpha=0.3)
-    plts[0].axis('equal')
-    plts[0].scatter(center[0], center[1], s=10, c='r')
-    if not dual_shape is None:
+    if subplots is not None:
+        subplots[0].set_title('Input shape')
+        subplots[0].fill(drive_contour[:, 0], drive_contour[:, 1], "g", facecolor='lightsalmon', edgecolor='orangered',
+                         linewidth=3, alpha=0.3)
+        subplots[0].axis('equal')
+        subplots[0].scatter(center[0], center[1], s=10, c='r')
+
+    plts = subplots  # not trying to separate drawing and calculating below
+    if dual_shape is not None:
         plts[1].set_title('Dual shape(Math)')
         plts[1].fill(dual_shape[:, 0], dual_shape[:, 1], "g", alpha=0.3)
         for p in dual_shape[1:-1: int(len(dual_shape) / 32)]:
@@ -73,44 +57,44 @@ def obj_func(center, *args):
     plts[0].cla()
     plts[1].cla()
     plts[2].cla()
+
+    for subplot in subplots:
+        subplot.axis('equal')
+
     step = step + 1
 
     return score
 
 
+def optimize_shapes(our_model: Model, target_model: Model, seed: int, visualization: Union[None, tuple] = None):
+    # read the contour shape
+    contour = shape_factory.get_shape_contour(our_model, True, None, smooth=our_model.smooth)
+    target_contour = shape_factory.get_shape_contour(target_model, True, None, smooth=our_model.smooth)
+
+    if visualization is not None:
+        figure, subplots = visualization
+    else:
+        figure, subplots = None, None
+    polygon = Polygon(contour)
+    poly_bound = polygon.bounds
+
+    lb = [poly_bound[0], poly_bound[1]]
+    ub = [poly_bound[2], poly_bound[3]]
+
+    return dual_annealing(obj_func, args=(polygon, target_contour, 1, 32, subplots, figure, our_model),
+                          bounds=list(zip(lb, ub)), seed=seed, maxiter=100)
+
+
 if __name__ == '__main__':
     debug_mode = False
+    debugger = MyDebugger(['circle', 'square'])
 
-    model = our_models[7]
-    target_model = our_models[2]
-    for model, target_model in zip(our_models, our_models):
-        # noinspection PyBroadException
-        try:
-            debugger = MyDebugger(model.name)
+    # set up the plotting window
+    fig, plts = plt.subplots(1, 3)
+    fig.set_size_inches(16, 9)
+    plt.ion()
+    plt.show()
 
-            # set up the plotting window
-            fig, plts = plt.subplots(3, 3)
-            fig.set_size_inches(16, 7)
-            plt.ion()
-            plt.show()
+    ret = optimize_shapes(our_models[0], our_models[-1], 3, (fig, plts))
 
-            # read the contour shape
-            contour = shape_factory.get_shape_contour(model, True, plts, smooth=model.smooth)
-            target_contour = shape_factory.get_shape_contour(target_model, True, plts, smooth=model.smooth)
-
-            # convert to uniform coordinate
-            contour = getUniformContourSampledShape(contour, model.sample_num)
-            target_contour = getUniformContourSampledShape(target_contour, target_model.sample_num)
-            # plts[0].set_title('Uniform boundary sampling')
-
-            polygon = Polygon(contour)
-            poly_bound = polygon.bounds
-
-            lb = [poly_bound[0], poly_bound[1]]
-            ub = [poly_bound[2], poly_bound[3]]
-            ret = dual_annealing(obj_func, args=(polygon, target_contour, 1, plts, fig), bounds=list(zip(lb, ub)),
-                                 seed=3,
-                                 maxiter=200)
-            print(f"global minimum: xmin = {ret.x}, f(xmin) = {ret.fun}")
-        except Exception as error:
-            traceback.print_exc()
+    print(f"global minimum: xmin = {ret.x}, f(xmin) = {ret.fun}")
