@@ -1,100 +1,100 @@
-from models import our_models, Model
-from shape_processor import *
-from core.compute_dual_gear import compute_dual_gear, rotate_and_cut, _plot_polygon
-from shapely.affinity import translate
-from debug_util import MyDebugger
-from scipy.optimize import dual_annealing
+import numpy as np
+from typing import Union, Dict, List, Tuple
+import matplotlib.pyplot as plt
+from matplotlib.axes import Axes
 import os
-import logging
-from matplotlib.lines import Line2D
-from fabrication import generate_2d_obj
-from objective_function import shape_difference_rating
-import shape_factory
-from typing import Union
-
-step = 0
+from debug_util import MyDebugger
+from shape_processor import getUniformContourSampledShape
 
 
-def obj_func(center, drive_polygon, target_shape, k, objective_sample_count=32, subplots=None, figure=None, model=None):
-    drive_contour = np.array(list(drive_polygon.exterior.coords))
-
-    dual_shape = None
-    score = None
-    global step
-
-    if drive_polygon.contains(Point(center[0], center[1])):
-        polar_poly = toExteriorPolarCoord(Point(center[0], center[1]), drive_contour, model.sample_num)
-        # generate and draw the dual shape
-        driven_gear, center_distance, phi = compute_dual_gear(polar_poly, k=k)
-        dual_shape = toCartesianCoordAsNp(driven_gear, 0, 0)
-        score = shape_difference_rating(dual_shape, target_shape, objective_sample_count)
-    else:
-        score = 1e8
-
-    if subplots is not None:
-        subplots[0].set_title('Input shape')
-        subplots[0].fill(drive_contour[:, 0], drive_contour[:, 1], "g", facecolor='lightsalmon', edgecolor='orangered',
-                         linewidth=3, alpha=0.3)
-        subplots[0].axis('equal')
-        subplots[0].scatter(center[0], center[1], s=10, c='r')
-
-    plts = subplots  # not trying to separate drawing and calculating below
-    if dual_shape is not None:
-        plts[1].set_title('Dual shape(Math)')
-        plts[1].fill(dual_shape[:, 0], dual_shape[:, 1], "g", alpha=0.3)
-        for p in dual_shape[1:-1: int(len(dual_shape) / 32)]:
-            l = Line2D([0, p[0]], [0, p[1]], linewidth=1)
-            plts[1].add_line(l)
-        plts[1].scatter(0, 0, s=30, c='b')
-        plts[1].axis('equal')
-    plts[1].text(0, 0, str(score), ha='left', rotation=0, wrap=True)
-    # draw target shape
-    plts[2].set_title('Target shape')
-    plts[2].fill(target_shape[:, 0], target_shape[:, 1], "g", alpha=0.3)
-    plts[2].axis('equal')
-    fig.savefig(os.path.join(debugger.get_root_debug_dir_name(), f'shapes_{step}_{score}.png'))
-    plt.pause(0.0001)
-    plts[0].cla()
-    plts[1].cla()
-    plts[2].cla()
-
-    for subplot in subplots:
-        subplot.axis('equal')
-
-    step = step + 1
-
-    return score
+def counterclockwise_orientation(contour: np.ndarray) -> np.ndarray:
+    """
+    change a contour to counterclockwise direction
+    """
+    pass  # TODO
+    return contour
 
 
-def optimize_shapes(our_model: Model, target_model: Model, seed: int, visualization: Union[None, tuple] = None):
-    # read the contour shape
-    contour = shape_factory.get_shape_contour(our_model, True, None, smooth=our_model.smooth)
-    target_contour = shape_factory.get_shape_contour(target_model, True, None, smooth=our_model.smooth)
+def draw_contour(subplot: Axes, contour: np.ndarray, color: str = 'black', title: str = None):
+    if title is not None:
+        subplot.set_title(title)
+    subplot.plot(list(contour.transpose()), color=color)
+    subplot.axis('equal')
 
+
+def sample_drive_gear(drive_contour: np.ndarray, target_driven_contour: np.ndarray, sampling_count: (int, int),
+                      keep_count: int, comparing_accuracy: int, max_sample_depth: int, debugging_path: str) \
+        -> List[(float, float, float, np.ndarray)]:
+    """
+    run sampling with respect to the sample drive gear
+    :param drive_contour: uniformly sampled drive contour
+    :param target_driven_contour: target driven contour, not necessarily uniformly sampled
+    :param sampling_count: count of samples in each dimension
+    :param keep_count: the number of drive gears to be returned
+    :param comparing_accuracy: resample rate in compare function
+    :param max_sample_depth: maximum depth for resampling
+    :return:[score, center_x, center_y, driven_contour]
+    """
+    # TODO: sample in a window and always keep the top keep_count
+    pass
+
+
+def update_polygon_subplots(drive_contour: np.ndarray, driven_contour: np.ndarray, subplots: List[Axes]):
+    draw_contour(subplots[0], drive_contour, 'orange', 'Drive Contour')
+    draw_contour(subplots[1], driven_contour, 'blue', 'Driven Contour')
+
+
+def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray, sampling_count: (int, int),
+                          keep_count: int, resampling_accuracy: int, comparing_accuracy: int, debugger: MyDebugger,
+                          max_sample_depth: int = 5, max_iteration: int = 1, smoothing: Tuple[int, int] = (0, 0),
+                          visualization: Union[Dict, None] = None, draw_tar_functions: bool = False) \
+        -> List[(float, np.ndarray, np.ndarray)]:
+    """
+    perform sampling optimization for drive contour and driven contour
+    :param drive_contour: the driving gear's contour
+    :param driven_contour: the driven gear's contour
+    :param sampling_count: the number of samples in each dimension
+    :param keep_count: the count of samples kept
+    :param resampling_accuracy: count of points in the sampling procedure
+    :param comparing_accuracy: count of samples during comparison
+    :param debugger: the debugger for storing data
+    :param max_sample_depth: maximum depth for the sampling optimization to use
+    :param max_iteration: maximum time for drive/driven to swap and iterate
+    :param smoothing: smoothing level to be taken by uniform re-sampling
+    :param visualization: None for no figure, otherwise for visualization configuration
+    :return: final score, drive contour and driven contour
+    """
+    drive_contour = counterclockwise_orientation(drive_contour)
+    driven_contour = counterclockwise_orientation(driven_contour)
+    drive_smoothing, driven_smoothing = smoothing
+    drive_contour = getUniformContourSampledShape(drive_contour, resampling_accuracy, drive_smoothing > 0)
+    driven_contour = getUniformContourSampledShape(driven_contour, resampling_accuracy, driven_smoothing > 0)
+    visualize_config = {
+        'fig_size': (16, 9),
+    }
+    subplots = None
     if visualization is not None:
-        figure, subplots = visualization
-    else:
-        figure, subplots = None, None
-    polygon = Polygon(contour)
-    poly_bound = polygon.bounds
+        visualize_config.update(visualization)
+        plt.ion()
+        fig, subplots = plt.subplots(3, 2)
+        fig.set_size_inches(*visualize_config['fig_size'])
+        update_polygon_subplots(drive_contour, driven_contour, subplots[0])
 
-    lb = [poly_bound[0], poly_bound[1]]
-    ub = [poly_bound[2], poly_bound[3]]
-
-    return dual_annealing(obj_func, args=(polygon, target_contour, 1, 32, subplots, figure, our_model),
-                          bounds=list(zip(lb, ub)), seed=seed, maxiter=100)
-
-
-if __name__ == '__main__':
-    debug_mode = False
-    debugger = MyDebugger(['circle', 'square'])
-
-    # set up the plotting window
-    fig, plts = plt.subplots(1, 3)
-    fig.set_size_inches(16, 9)
-    plt.ion()
-    plt.show()
-
-    ret = optimize_shapes(our_models[0], our_models[-1], 3, (fig, plts))
-
-    print(f"global minimum: xmin = {ret.x}, f(xmin) = {ret.fun}")
+    debugging_root_directory = debugger.get_root_debug_dir_name()
+    for iteration_count in range(max_iteration):
+        debug_directory = os.path.join(debugging_root_directory, f'iteration_{iteration_count}')
+        results = sample_drive_gear(drive_contour, driven_contour, sampling_count, keep_count, comparing_accuracy,
+                                    max_sample_depth, debug_directory)
+        for index, result in enumerate(results):
+            score, *center, driven = result
+            update_polygon_subplots(drive_contour, driven, subplots[1])
+            subplots[1][0].scatter(center[0], center[1], 3)
+            if draw_tar_functions:
+                # TODO: draw tar functions in subplots[1]
+                pass
+            plt.savefig(os.path.join(debug_directory, f'final_result_{index}.png'))
+        driven_contour = results[0][3]
+        os.makedirs(debug_directory, exist_ok=True)
+        drive_contour, driven_contour = driven_contour, drive_contour
+        drive_smoothing, driven_smoothing = driven_smoothing, drive_smoothing
+        drive_contour = getUniformContourSampledShape(drive_contour, resampling_accuracy, drive_smoothing > 0)
