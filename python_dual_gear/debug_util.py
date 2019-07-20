@@ -2,15 +2,21 @@ import time
 import datetime
 import os
 import logging
+from typing import Union, List, Callable
+from multiprocessing import Process
+import sys
 
 
 class MyDebugger:
     pre_fix = 'debug'
 
-    def __init__(self, model_name: str):
-        self.model_name = model_name
+    def __init__(self, model_name: Union[str, List[str]]):
+        if isinstance(model_name, str):
+            self.model_name = model_name
+        else:
+            self.model_name = '_'.join(model_name)
         self._debug_dir_name = os.path.join(MyDebugger.pre_fix, datetime.datetime.fromtimestamp(time.time()).strftime(
-            f'%Y-%m-%d_%H-%M-%S_{model_name}'))
+            f'%Y-%m-%d_%H-%M-%S_{self.model_name}'))
         logging.info("=================== Program Start ====================")
         logging.info(f"Output directory: {self._debug_dir_name}")
         self._init_debug_dir()
@@ -39,10 +45,46 @@ class MyDebugger:
         logging.info("Directory %s established" % os.path.join(self._debug_dir_name, "cut_rotate"))
 
 
+class SubprocessDebugger:
+    """
+    the debugger that starts a subprocess for a given function
+    """
+
+    def __init__(self, debugger: MyDebugger, function: Callable, args: tuple = ()):
+        self.debugger = debugger
+        self.function = function
+        self.args = args
+        self.process = None
+
+    def _func(self):
+        sys.stdout = open(self.debugger.file_path('stdout.txt'), 'w')
+        sys.stderr = open(self.debugger.file_path('stderr.txt'), 'w')
+        self.function(*self.args)
+
+    def start(self):
+        if self.process is not None:
+            raise RuntimeError("SubprocessDebugger Not Restartable")
+        self.process = Process(target=self._func)
+        self.process.start()
+
+    def join(self):
+        """
+        wait the debugging process to finish
+        """
+        if self.process is None:
+            raise RuntimeError("Subprocess Not Started")
+        self.process.join()
+
+
+def __main__test__function(args):
+    """
+    function merely meant to test the debugger used by '__name__==__main__' part, do not import
+    """
+    print('this shall be stdout' + repr(args))
+    error = 1 / 0
+
+
 if __name__ == '__main__':
-    import logging
-
-    LOG_FILENAME = 'debug\\2019-07-03_17-43-27_circular\\info.log'
-    logging.basicConfig(filename=LOG_FILENAME, level=logging.DEBUG)
-
-    logging.debug('This message should go to the log file')
+    p_debugger = SubprocessDebugger(MyDebugger('hello'), __main__test__function, ('233',))
+    p_debugger.start()
+    p_debugger.join()
