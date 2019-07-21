@@ -5,6 +5,7 @@ from matplotlib.axes import Axes
 import os
 from debug_util import MyDebugger
 from shape_processor import getUniformContourSampledShape
+from objective_function import triangle_area_representation
 
 
 def counterclockwise_orientation(contour: np.ndarray) -> np.ndarray:
@@ -24,7 +25,7 @@ def draw_contour(subplot: Axes, contour: np.ndarray, color: str = 'black', title
 
 def sample_drive_gear(drive_contour: np.ndarray, target_driven_contour: np.ndarray, sampling_count: (int, int),
                       keep_count: int, comparing_accuracy: int, max_sample_depth: int, debugging_path: str) \
-        -> List[(float, float, float, np.ndarray)]:
+        -> List[(float, float, float, float, np.ndarray)]:
     """
     run sampling with respect to the sample drive gear
     :param drive_contour: uniformly sampled drive contour
@@ -33,7 +34,7 @@ def sample_drive_gear(drive_contour: np.ndarray, target_driven_contour: np.ndarr
     :param keep_count: the number of drive gears to be returned
     :param comparing_accuracy: resample rate in compare function
     :param max_sample_depth: maximum depth for resampling
-    :return:[score, center_x, center_y, driven_contour]
+    :return:[score, center_x, center_y, center_distance, driven_contour]
     """
     # TODO: sample in a window and always keep the top keep_count
     pass
@@ -86,12 +87,16 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
         results = sample_drive_gear(drive_contour, driven_contour, sampling_count, keep_count, comparing_accuracy,
                                     max_sample_depth, debug_directory)
         for index, result in enumerate(results):
-            score, *center, driven = result
+            score, *center, center_distance, driven = result
             update_polygon_subplots(drive_contour, driven, subplots[1])
             subplots[1][0].scatter(center[0], center[1], 3)
+            # TODO: try to find where the center of driven gear is
             if draw_tar_functions:
-                # TODO: draw tar functions in subplots[1]
-                pass
+                tars = [triangle_area_representation(contour, comparing_accuracy)
+                        for contour in (drive_contour, driven)]
+                for subplot, tar in subplots[2], tars:
+                    tar = tar[:, 0]
+                    subplot.plot(range(len(tar)), tar, color='blue')
             plt.savefig(os.path.join(debug_directory, f'final_result_{index}.png'))
         driven_contour = results[0][3]
         os.makedirs(debug_directory, exist_ok=True)
