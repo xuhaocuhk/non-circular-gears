@@ -6,6 +6,7 @@ import os
 from debug_util import MyDebugger
 from shape_processor import getUniformContourSampledShape
 from objective_function import triangle_area_representation
+from shapely.geometry import Polygon
 
 
 def counterclockwise_orientation(contour: np.ndarray) -> np.ndarray:
@@ -29,9 +30,22 @@ def draw_contour(subplot: Axes, contour: np.ndarray, color: str = 'black', title
     subplot.axis('equal')
 
 
+def sample_result(drive_contour: np.ndarray, drive_polygon: np.ndarray,
+                  sample_window: Tuple[float, float, float, float]) -> np.ndarray:
+    """
+    sample the center of the sample window and get the driven gear
+    :param drive_contour: the drive gear contour
+    :param drive_polygon: the driving polygon
+    :param sample_window: the window in which to take sample
+    :return: the driven gear
+    """
+    # TODO
+    pass
+
+
 def sample_drive_gear(drive_contour: np.ndarray, target_driven_contour: np.ndarray, sampling_count: (int, int),
-                      keep_count: int, comparing_accuracy: int, max_sample_depth: int, debugging_path: str) \
-        -> List[Tuple[float, float, float, float, np.ndarray]]:
+                      keep_count: int, comparing_accuracy: int, max_sample_depth: int, debugging_path: str,
+                      subplots: List[Axes]) -> List[Tuple[float, float, float, float, np.ndarray]]:
     """
     run sampling with respect to the sample drive gear
     :param drive_contour: uniformly sampled drive contour
@@ -40,9 +54,12 @@ def sample_drive_gear(drive_contour: np.ndarray, target_driven_contour: np.ndarr
     :param keep_count: the number of drive gears to be returned
     :param comparing_accuracy: resample rate in compare function
     :param max_sample_depth: maximum depth for resampling
+    :param subplots: subplots to draw the results
     :return:[score, center_x, center_y, center_distance, driven_contour]
     """
     # TODO: sample in a window and always keep the top keep_count
+    drive_polygon = Polygon(drive_contour)
+
     pass
 
 
@@ -69,6 +86,7 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
     :param max_iteration: maximum time for drive/driven to swap and iterate
     :param smoothing: smoothing level to be taken by uniform re-sampling
     :param visualization: None for no figure, otherwise for visualization configuration
+    :param draw_tar_functions: True for drawing tar functions in debug windows (affect performance)
     :return: final score, drive contour and driven contour
     """
     drive_contour = counterclockwise_orientation(drive_contour)
@@ -91,12 +109,13 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
     for iteration_count in range(max_iteration):
         debug_directory = os.path.join(debugging_root_directory, f'iteration_{iteration_count}')
         results = sample_drive_gear(drive_contour, driven_contour, sampling_count, keep_count, comparing_accuracy,
-                                    max_sample_depth, debug_directory)
+                                    max_sample_depth, debug_directory, subplots[1])
         for index, result in enumerate(results):
             score, *center, center_distance, driven = result
             update_polygon_subplots(drive_contour, driven, subplots[1])
             subplots[1][0].scatter(center[0], center[1], 3)
             # TODO: try to find where the center of driven gear is
+            subplots[1][1].text(0, 0, str(score))
             if draw_tar_functions:
                 tars = [triangle_area_representation(contour, comparing_accuracy)
                         for contour in (drive_contour, driven)]
