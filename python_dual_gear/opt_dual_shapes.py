@@ -12,8 +12,14 @@ def counterclockwise_orientation(contour: np.ndarray) -> np.ndarray:
     """
     change a contour to counterclockwise direction
     """
-    pass  # TODO
-    return contour
+    # using the shoelace formula and code adopted from https://stackoverflow.com/questions/14505565/
+    # Wikipedia: det[x_i,x_i+!;y_i,y_i+1]
+    shoelace = sum(
+        [contour[i - 1, 0] * contour[i, 1] - contour[i, 0] * contour[i - 1, 1] for i in range(contour.shape[0])])
+    if shoelace < 0:
+        return contour[::-1]
+    else:
+        return contour
 
 
 def draw_contour(subplot: Axes, contour: np.ndarray, color: str = 'black', title: str = None):
@@ -25,7 +31,7 @@ def draw_contour(subplot: Axes, contour: np.ndarray, color: str = 'black', title
 
 def sample_drive_gear(drive_contour: np.ndarray, target_driven_contour: np.ndarray, sampling_count: (int, int),
                       keep_count: int, comparing_accuracy: int, max_sample_depth: int, debugging_path: str) \
-        -> List[(float, float, float, float, np.ndarray)]:
+        -> List[Tuple[float, float, float, float, np.ndarray]]:
     """
     run sampling with respect to the sample drive gear
     :param drive_contour: uniformly sampled drive contour
@@ -49,7 +55,7 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
                           keep_count: int, resampling_accuracy: int, comparing_accuracy: int, debugger: MyDebugger,
                           max_sample_depth: int = 5, max_iteration: int = 1, smoothing: Tuple[int, int] = (0, 0),
                           visualization: Union[Dict, None] = None, draw_tar_functions: bool = False) \
-        -> List[(float, np.ndarray, np.ndarray)]:
+        -> List[Tuple[float, np.ndarray, np.ndarray]]:
     """
     perform sampling optimization for drive contour and driven contour
     :param drive_contour: the driving gear's contour
