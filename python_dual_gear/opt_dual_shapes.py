@@ -30,7 +30,7 @@ def counterclockwise_orientation(contour: np.ndarray) -> np.ndarray:
 def draw_contour(subplot: Axes, contour: np.ndarray, color: str = 'black', title: str = None):
     if title is not None:
         subplot.set_title(title)
-    subplot.plot(list(contour.transpose()), color=color)
+    subplot.plot(*contour.transpose(), color=color)
     subplot.axis('equal')
 
 
@@ -194,3 +194,9 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
     result = results[0]
     score, *center, center_distance, driven = result
     return score, drive_contour, driven
+
+
+if __name__ == '__main__':
+    square_contour = np.array([(0, 0), (10, 0), (10, 10), (0, 10)])
+    sampling_optimization(square_contour, square_contour, 1, (5, 5), 5, 1024, 64, MyDebugger(['square', 'square']),
+                          visualization={}, draw_tar_functions=True)
