@@ -105,7 +105,7 @@ def sample_drive_gear(drive_contour: np.ndarray, target_driven_contour: np.ndarr
                 if subplots is not None:
                     update_polygon_subplots(drive_contour, result, subplots)
                     min_x, max_x, min_y, max_y = window
-                    sample_region = Rectangle((min_x, min_y), max_x - min_x, max_y - min_y)
+                    sample_region = Rectangle((min_x, min_y), max_x - min_x, max_y - min_y, color='red', fill=False)
                     subplots[0].add_patch(sample_region)
                     subplots[0].scatter(center[0], center[1], 5)
                     subplots[1].text(0, 0, str(score))
