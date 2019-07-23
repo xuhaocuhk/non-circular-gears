@@ -88,29 +88,28 @@ def shape_difference_rating(contour_a: np.ndarray, contour_b: np.ndarray,
 if __name__ == '__main__':
     import os
     import time
+    import math
+    from core.compute_dual_gear import compute_dual_gear
+    from shape_processor import toExteriorPolarCoord, toCartesianCoordAsNp
+    from shapely.geometry import Point
+    from opt_dual_shapes import counterclockwise_orientation
 
     plt.ion()
-    fig, subplots = plt.subplots(1, 2)
-    square_contour = np.array([(0, 0), (10, 0), (10, 10), (0, 10)])
-    debug_dir = os.path.join(os.path.dirname(__file__), 'debug/objective_function_test/')
-    os.makedirs(debug_dir)
+    fig, subplots = plt.subplots(2, 2)
+    circle_contour = np.array(
+        [(5 * math.cos(theta), 5 * math.sin(theta)) for theta in np.linspace(0, 2 * math.pi, 1024, False)])
+    debug_dir = os.path.join(os.path.dirname(__file__), 'debug/objective_function_test_3/')
+    os.makedirs(debug_dir, exist_ok=True)
 
-
-    def rect_contour(height):
-        return np.array(
-            [(0, 0), (10, 0), (10, height), (0, height)]
-        )
-
-
-    for i in np.linspace(1, 21, 100):
-        square = getUniformContourSampledShape(square_contour, 1024, False)
-        rect = getUniformContourSampledShape(rect_contour(i), 1024, False)
-        for subplot in subplots:
-            subplot.clear()
-        subplots[0].plot(*square.transpose())
-        subplots[1].plot(*rect.transpose())
-        subplots[1].text(0, 0, shape_difference_rating(square, rect, 64))
-        for subplot in subplots:
-            subplot.axis('equal')
-        plt.savefig(os.path.join(debug_dir, f'test_{i}.png'))
-        time.sleep(0.1)
+    polar_coordinates = toExteriorPolarCoord(Point(0, 0), circle_contour, 1024)
+    dual_gear, *_ = compute_dual_gear(polar_coordinates, 1)
+    dual = toCartesianCoordAsNp(dual_gear, 0, 0)
+    dual = counterclockwise_orientation(dual)
+    subplots[0][0].plot(*circle_contour.transpose())
+    subplots[0][1].plot(*dual.transpose())
+    subplots[0][1].text(0, 0, '%.7f' % shape_difference_rating(circle_contour, dual, 64))
+    subplots[0][0].axis('equal')
+    subplots[0][1].axis('equal')
+    tars = [triangle_area_representation(contour, 64)[:, 0] for contour in (circle_contour, dual)]
+    for tar, subplot in zip(tars, subplots[1]):
+        subplot.plot(tar)
