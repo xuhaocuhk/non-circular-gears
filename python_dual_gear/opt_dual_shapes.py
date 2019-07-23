@@ -97,12 +97,12 @@ def sample_drive_gear(drive_contour: np.ndarray, target_driven_contour: np.ndarr
             result = sample_result(drive_contour, drive_polygon, window, k)
             if result is None:
                 score = 1e8
-                result_pool.append((score, None, None, window))
+                result_pool.append((score, None, None, window, result))
             else:
                 *center, center_distance, result = result
                 result = counterclockwise_orientation(result)
                 score = shape_difference_rating(target_driven_contour, result, comparing_accuracy)
-                result_pool.append((score, center, center_distance, window))
+                result_pool.append((score, center, center_distance, window, result))
                 if subplots is not None:
                     update_polygon_subplots(drive_contour, result, subplots)
                     min_x, max_x, min_y, max_y = window
@@ -115,7 +115,7 @@ def sample_drive_gear(drive_contour: np.ndarray, target_driven_contour: np.ndarr
         result_pool = result_pool[:keep_count]
         windows = [result[3] for result in result_pool]
     result_pool = [(score, center_x, center_y, center_distance, driven_contour) for
-                   score, (center_x, center_y), center_distance, driven_contour in result_pool]
+                   score, (center_x, center_y), center_distance, window, driven_contour in result_pool]
     return result_pool
 
 
@@ -202,5 +202,5 @@ if __name__ == '__main__':
 
     contour = np.array(
         [(5 * math.cos(theta), 5 * math.sin(theta)) for theta in np.linspace(0, 2 * math.pi, 1024, endpoint=False)])
-    sampling_optimization(contour, contour, 1, (1, 1), 5, 1024, 64, MyDebugger(['circle', 'circle']),
+    sampling_optimization(contour, contour, 1, (5, 5), 5, 1024, 64, MyDebugger(['circle', 'circle']),
                           visualization={}, draw_tar_functions=True)
