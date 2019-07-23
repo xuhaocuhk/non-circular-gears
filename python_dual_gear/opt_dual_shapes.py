@@ -197,6 +197,9 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
 
 
 if __name__ == '__main__':
-    square_contour = np.array([(0, 0), (10, 0), (10, 10), (0, 10)])
-    sampling_optimization(square_contour, square_contour, 1, (5, 5), 5, 1024, 64, MyDebugger(['square', 'square']),
+    import math
+
+    contour = np.array(
+        [(5 * math.cos(theta), 5 * math.sin(theta)) for theta in np.linspace(0, 2 * math.pi, 1024, endpoint=False)])
+    sampling_optimization(contour, contour, 1, (5, 5), 5, 1024, 64, MyDebugger(['square', 'square']),
                           visualization={}, draw_tar_functions=True)

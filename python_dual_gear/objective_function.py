@@ -86,29 +86,31 @@ def shape_difference_rating(contour_a: np.ndarray, contour_b: np.ndarray,
 
 
 if __name__ == '__main__':
-    contours = [
-        np.array([(0, 0), (10, 0), (10, 10), (0, 10)]),
-        np.array([(0, 0), (5, 5 * math.sqrt(3)), (5 - 5 * math.sqrt(3), 5 + 5 * math.sqrt(3)), (-5 * math.sqrt(3), 5)]),
-        np.array([(-5, -5), (5, -5), (5, 5), (-5, 5)]),
-        np.array([(0, 0), (1, 0), (1, 1), (0, 1)]),
-        np.array([(5 * math.cos(theta), 5 * math.sin(theta))
-                  for theta in np.linspace(0, 2 * math.pi, 1024, endpoint=False)]),
-    ]
-    count_contours = len(contours)
-    fig, subplots = plt.subplots(3, count_contours)
-    for contour, subplot_above, subplot_below in zip(contours, subplots[0], subplots[1]):
-        x, y = zip(*list(contour), contour[0])
-        subplot_above.plot(x, y, color='orange')
-        subplot_above.axis('equal')
-        sampled = getUniformContourSampledShape(contour, 24, False)
-        x, y = zip(*list(sampled), sampled[0])
-        subplot_below.plot(x, y, color='red')
-        subplot_below.axis('equal')
-    tars = [triangle_area_representation(contour, 24) for contour in contours]
-    for tar, subplot in zip(tars, subplots[2]):
-        tar = tar[:, 0]
-        subplot.plot(range(len(tar)), tar, color='blue')
-    plt.axis('equal')
-    distances = np.array(
-        [[shape_difference_rating(contour_a, contour_b, 48) for contour_b in contours] for contour_a in contours])
-    print(distances)
+    import os
+    import time
+
+    plt.ion()
+    fig, subplots = plt.subplots(1, 2)
+    square_contour = np.array([(0, 0), (10, 0), (10, 10), (0, 10)])
+    debug_dir = os.path.join(os.path.dirname(__file__), 'debug/objective_function_test/')
+    os.makedirs(debug_dir)
+
+
+    def rect_contour(height):
+        return np.array(
+            [(0, 0), (10, 0), (10, height), (0, height)]
+        )
+
+
+    for i in np.linspace(1, 21, 100):
+        square = getUniformContourSampledShape(square_contour, 1024, False)
+        rect = getUniformContourSampledShape(rect_contour(i), 1024, False)
+        for subplot in subplots:
+            subplot.clear()
+        subplots[0].plot(*square.transpose())
+        subplots[1].plot(*rect.transpose())
+        subplots[1].text(0, 0, shape_difference_rating(square, rect, 64))
+        for subplot in subplots:
+            subplot.axis('equal')
+        plt.savefig(os.path.join(debug_dir, f'test_{i}.png'))
+        time.sleep(0.1)
