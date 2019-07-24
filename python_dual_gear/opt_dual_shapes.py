@@ -11,6 +11,7 @@ import itertools
 from objective_function import shape_difference_rating
 from matplotlib.patches import Rectangle
 from core.compute_dual_gear import compute_dual_gear
+import math
 
 
 def counterclockwise_orientation(contour: np.ndarray) -> np.ndarray:
@@ -60,17 +61,20 @@ def uniform_interval(start, end, count):
     return [(separators[i - 1], separators[i]) for i in range(1, count + 1)]
 
 
-def shape_average(polygon_a: Iterable[float], polygon_b: Iterable[float]) -> np.ndarray:
+def shape_average(polygon_a: Iterable[float], polygon_b: Iterable[float], area_a: float, area_b: float) -> np.ndarray:
     """
     get the averages of two shapes with respect to polar coordinates from the centroid
     :param polygon_a: polygon a in polar coordinates
     :param polygon_b: polygon b in polar coordinates, same length as polygon a
+    :param area_a: area of polygon a, used for normalization
+    :param area_b: area of polygon b, used for normalization
     :return: the average contour, not necessarily uniformly sampled
     """
     if hasattr(polygon_a, '__len__') and hasattr(polygon_b, '__len__'):
         # noinspection PyTypeChecker
         assert len(polygon_a) == len(polygon_b)
-    return toCartesianCoordAsNp([(ra + rb) / 2 for ra, rb in zip(polygon_a, polygon_b)], 0, 0)
+    sqrt_a, sqrt_b = [math.sqrt(area_a) for area in (area_a, area_b)]
+    return toCartesianCoordAsNp([(ra / sqrt_a + rb / sqrt_b) / 2 for ra, rb in zip(polygon_a, polygon_b)], 0, 0)
 
 
 def sample_drive_gear(drive_contour: np.ndarray, target_driven_contour: np.ndarray, k: int,
@@ -147,7 +151,7 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
                           keep_count: int, resampling_accuracy: int, comparing_accuracy: int, debugger: MyDebugger,
                           max_sample_depth: int = 5, max_iteration: int = 1, smoothing: Tuple[int, int] = (0, 0),
                           visualization: Union[Dict, None] = None, draw_tar_functions: bool = False) \
-        -> Tuple[float, np.ndarray, np.ndarray]:
+        -> List[Tuple[float, np.ndarray, np.ndarray]]:
     """
     perform sampling optimization for drive contour and driven contour
     :param drive_contour: the driving gear's contour
@@ -163,7 +167,7 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
     :param smoothing: smoothing level to be taken by uniform re-sampling
     :param visualization: None for no figure, otherwise for visualization configuration
     :param draw_tar_functions: True for drawing tar functions in debug windows (affect performance)
-    :return: final score, drive contour and driven contour
+    :return: final score, center_x, center_y, center_distance drive contour and driven contour
     """
     drive_contour = counterclockwise_orientation(drive_contour)
     driven_contour = counterclockwise_orientation(driven_contour)
@@ -214,17 +218,16 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
                         subplot.clear()
                         subplot.plot(range(len(tar)), tar, color='blue')
                 plt.savefig(os.path.join(debug_directory, f'final_result_{index}.png'))
-        results.sort(key=lambda data: data[0])
-        *_, drive, driven = results[0]
+        *_, drive, driven = results[-1]  # get the last result
         drive_contour, driven_contour = driven_contour, drive_contour
         drive_polygon, driven_polygon = driven_polygon, drive_polygon
         drive_polar, driven_polar = driven_polar, drive_polar
         drive, driven = driven, drive
         drive_smoothing, driven_smoothing = driven_smoothing, drive_smoothing
-        drive = shape_average(drive_polar, toExteriorPolarCoord(Polygon(drive).centroid, drive, resampling_accuracy))
+        drive_poly = Polygon(drive)
+        drive = shape_average(drive_polar, toExteriorPolarCoord(Polygon(drive).centroid, drive, resampling_accuracy),
+                              drive_polygon.area, drive_poly.area)
         drive = getUniformContourSampledShape(drive, resampling_accuracy, drive_smoothing > 0)
         for subplot in subplots[2]:
             subplot.clear()
-    result = results[0]
-    score, *center, center_distance, drive, driven = result
-    return score, drive, driven
+    return results
