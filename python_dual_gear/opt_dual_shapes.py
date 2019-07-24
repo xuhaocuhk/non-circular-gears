@@ -109,6 +109,7 @@ def sample_drive_gear(drive_contour: np.ndarray, target_driven_contour: np.ndarr
                     sample_region = Rectangle((min_x, min_y), max_x - min_x, max_y - min_y, color='red', fill=False)
                     subplots[0].add_patch(sample_region)
                     subplots[0].scatter(center[0], center[1], 5)
+                    subplots[0].text(0, 0, str(center))
                     subplots[1].text(0, 0, str(score))
                     plt.savefig(os.path.join(debugging_path, f'{iter_time}_{index}.png'))
         result_pool.sort(key=lambda tup: tup[0])
@@ -178,12 +179,13 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
             if subplots is not None:
                 update_polygon_subplots(drive_contour, driven, subplots[1])
                 subplots[1][0].scatter(center[0], center[1], 3)
+                subplots[1][0].text(0, 0, str(center))
                 # TODO: try to find where the center of driven gear is
                 subplots[1][1].text(0, 0, str(score))
                 if draw_tar_functions:
                     tars = [triangle_area_representation(contour, comparing_accuracy)
                             for contour in (drive_contour, driven)]
-                    for subplot, tar in subplots[2], tars:
+                    for subplot, tar in zip(subplots[2], tars):
                         tar = tar[:, 0]
                         subplot.plot(range(len(tar)), tar, color='blue')
                 plt.savefig(os.path.join(debug_directory, f'final_result_{index}.png'))
@@ -195,12 +197,3 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
     result = results[0]
     score, *center, center_distance, driven = result
     return score, drive_contour, driven
-
-
-if __name__ == '__main__':
-    import math
-
-    contour = np.array(
-        [(5 * math.cos(theta), 5 * math.sin(theta)) for theta in np.linspace(0, 2 * math.pi, 1024, endpoint=False)])
-    sampling_optimization(contour, contour, 1, (5, 5), 5, 1024, 64, MyDebugger(['circle', 'circle']),
-                          visualization={}, draw_tar_functions=True)
