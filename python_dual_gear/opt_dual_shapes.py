@@ -122,6 +122,7 @@ def sample_drive_gear(drive_contour: np.ndarray, target_driven_contour: np.ndarr
                     sample_region = Rectangle((min_x, min_y), max_x - min_x, max_y - min_y, color='red', fill=False)
                     subplots[0].add_patch(sample_region)
                     subplots[0].scatter(center[0], center[1], 5)
+                    subplots[1].scatter(0, 0, 3)
                     subplots[0].text(0, 0, str(center))
                     subplots[1].text(0, 0, str(score))
                     plt.savefig(os.path.join(debugging_path, f'{iter_time}_{index}.png'))
@@ -193,24 +194,28 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
         debug_directory = os.path.join(debugging_root_directory, f'iteration_{iteration_count}')
         os.makedirs(debug_directory, exist_ok=True)
         drive = counterclockwise_orientation(drive)
-        results += sample_drive_gear(drive, driven_contour, k, sampling_count, keep_count, comparing_accuracy,
-                                     max_sample_depth, debug_directory, subplots[1] if subplots is not None else None)
+        new_res = sample_drive_gear(drive, driven_contour, k, sampling_count, keep_count, comparing_accuracy,
+                                    max_sample_depth, debug_directory, subplots[1] if subplots is not None else None)
+        results += [(score, *center, center_distance, drive, driven)
+                    for score, *center, center_distance, driven in new_res]
         for index, result in enumerate(results):
-            score, *center, center_distance, driven = result
+            score, *center, center_distance, this_drive, driven = result
             if subplots is not None:
-                update_polygon_subplots(drive, driven, subplots[1])
+                update_polygon_subplots(this_drive, driven, subplots[1])
                 subplots[1][0].scatter(center[0], center[1], 3)
                 subplots[1][0].text(0, 0, str(center))
                 subplots[1][1].text(0, 0, str(score))
+                subplots[1][1].scatter(0, 0, 3)
                 if draw_tar_functions:
                     tars = [triangle_area_representation(contour, comparing_accuracy)
-                            for contour in (drive, driven)]
+                            for contour in (this_drive, driven)]
                     for subplot, tar in zip(subplots[2], tars):
                         tar = tar[:, 0]
                         subplot.clear()
                         subplot.plot(range(len(tar)), tar, color='blue')
                 plt.savefig(os.path.join(debug_directory, f'final_result_{index}.png'))
-        *_, driven = results[0]
+        results.sort(key=lambda data: data[0])
+        *_, drive, driven = results[0]
         drive_contour, driven_contour = driven_contour, drive_contour
         drive_polygon, driven_polygon = driven_polygon, drive_polygon
         drive_polar, driven_polar = driven_polar, drive_polar
@@ -221,5 +226,5 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
         for subplot in subplots[2]:
             subplot.clear()
     result = results[0]
-    score, *center, center_distance, driven = result
+    score, *center, center_distance, drive, driven = result
     return score, drive, driven
