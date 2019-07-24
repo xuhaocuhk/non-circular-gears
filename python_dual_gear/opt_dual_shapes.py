@@ -74,7 +74,8 @@ def shape_average(polygon_a: Iterable[float], polygon_b: Iterable[float], area_a
         # noinspection PyTypeChecker
         assert len(polygon_a) == len(polygon_b)
     sqrt_a, sqrt_b = [math.sqrt(area_a) for area in (area_a, area_b)]
-    return toCartesianCoordAsNp([(ra / sqrt_a + rb / sqrt_b) / 2 for ra, rb in zip(polygon_a, polygon_b)], 0, 0)
+    # return toCartesianCoordAsNp([(ra / sqrt_a + rb / sqrt_b) / 2 for ra, rb in zip(polygon_a, polygon_b)], 0, 0)
+    return toCartesianCoordAsNp([(ra + rb) / 2 for ra, rb in zip(polygon_a, polygon_b)], 0, 0)
 
 
 def sample_drive_gear(drive_contour: np.ndarray, target_driven_contour: np.ndarray, k: int,

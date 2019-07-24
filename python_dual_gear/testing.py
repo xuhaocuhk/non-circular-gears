@@ -8,8 +8,8 @@ from opt_dual_shapes import sampling_optimization
 
 
 def _optimize_pair(drive_contour, driven_contour, debugger):
-    sampling_optimization(drive_contour, driven_contour, 1, (4, 4), 1, 1024, 64, debugger,
-                          max_iteration=5, max_sample_depth=3,
+    sampling_optimization(drive_contour, driven_contour, 1, (5, 5), 1, 1024, 64, debugger,
+                          max_iteration=5, max_sample_depth=4,
                           visualization={}, draw_tar_functions=True)
 
 
