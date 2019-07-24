@@ -1,5 +1,5 @@
 import numpy as np
-from typing import Union, Dict, List, Tuple
+from typing import Union, Dict, List, Tuple, Iterable
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 import os
@@ -58,6 +58,19 @@ def sample_result(drive_contour: np.ndarray, drive_polygon: Polygon,
 def uniform_interval(start, end, count):
     separators = np.linspace(start, end, count + 1, endpoint=True)
     return [(separators[i - 1], separators[i]) for i in range(1, count + 1)]
+
+
+def shape_average(polygon_a: Iterable[float], polygon_b: Iterable[float]) -> np.ndarray:
+    """
+    get the averages of two shapes with respect to polar coordinates from the centroid
+    :param polygon_a: polygon a in polar coordinates
+    :param polygon_b: polygon b in polar coordinates, same length as polygon a
+    :return: the average contour, not necessarily uniformly sampled
+    """
+    if hasattr(polygon_a, '__len__') and hasattr(polygon_b, '__len__'):
+        # noinspection PyTypeChecker
+        assert len(polygon_a) == len(polygon_b)
+    return toCartesianCoordAsNp([(ra + rb) / 2 for ra, rb in zip(polygon_a, polygon_b)], 0, 0)
 
 
 def sample_drive_gear(drive_contour: np.ndarray, target_driven_contour: np.ndarray, k: int,
@@ -153,6 +166,10 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
     """
     drive_contour = counterclockwise_orientation(drive_contour)
     driven_contour = counterclockwise_orientation(driven_contour)
+    drive_polygon = Polygon(drive_contour)
+    driven_polygon = Polygon(driven_contour)
+    drive_polar = toExteriorPolarCoord(drive_polygon.centroid, drive_contour, resampling_accuracy)
+    driven_polar = toExteriorPolarCoord(driven_polygon.centroid, driven_contour, resampling_accuracy)
     drive_smoothing, driven_smoothing = smoothing
     drive_contour = getUniformContourSampledShape(drive_contour, resampling_accuracy, drive_smoothing > 0)
     driven_contour = getUniformContourSampledShape(driven_contour, resampling_accuracy, driven_smoothing > 0)
@@ -175,6 +192,7 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
     for iteration_count in range(max_iteration):
         debug_directory = os.path.join(debugging_root_directory, f'iteration_{iteration_count}')
         os.makedirs(debug_directory, exist_ok=True)
+        drive = counterclockwise_orientation(drive)
         results += sample_drive_gear(drive, driven_contour, k, sampling_count, keep_count, comparing_accuracy,
                                      max_sample_depth, debug_directory, subplots[1] if subplots is not None else None)
         for index, result in enumerate(results):
@@ -194,9 +212,12 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
                 plt.savefig(os.path.join(debug_directory, f'final_result_{index}.png'))
         *_, driven = results[0]
         drive_contour, driven_contour = driven_contour, drive_contour
+        drive_polygon, driven_polygon = driven_polygon, drive_polygon
+        drive_polar, driven_polar = driven_polar, drive_polar
         drive, driven = driven, drive
         drive_smoothing, driven_smoothing = driven_smoothing, drive_smoothing
-        drive_contour = getUniformContourSampledShape(drive_contour, resampling_accuracy, drive_smoothing > 0)
+        drive = shape_average(drive_polar, toExteriorPolarCoord(Polygon(drive).centroid, drive, resampling_accuracy))
+        drive = getUniformContourSampledShape(drive, resampling_accuracy, drive_smoothing > 0)
         for subplot in subplots[2]:
             subplot.clear()
     result = results[0]
