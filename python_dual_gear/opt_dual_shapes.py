@@ -169,31 +169,36 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
 
     debugging_root_directory = debugger.get_root_debug_dir_name()
     results = []
+    # following two variables change during iteration
+    drive = drive_contour
+    driven = driven_contour
     for iteration_count in range(max_iteration):
         debug_directory = os.path.join(debugging_root_directory, f'iteration_{iteration_count}')
         os.makedirs(debug_directory, exist_ok=True)
-        results = sample_drive_gear(drive_contour, driven_contour, k, sampling_count, keep_count, comparing_accuracy,
-                                    max_sample_depth, debug_directory, subplots[1] if subplots is not None else None)
+        results += sample_drive_gear(drive, driven_contour, k, sampling_count, keep_count, comparing_accuracy,
+                                     max_sample_depth, debug_directory, subplots[1] if subplots is not None else None)
         for index, result in enumerate(results):
             score, *center, center_distance, driven = result
             if subplots is not None:
-                update_polygon_subplots(drive_contour, driven, subplots[1])
+                update_polygon_subplots(drive, driven, subplots[1])
                 subplots[1][0].scatter(center[0], center[1], 3)
                 subplots[1][0].text(0, 0, str(center))
-                # TODO: try to find where the center of driven gear is
                 subplots[1][1].text(0, 0, str(score))
                 if draw_tar_functions:
                     tars = [triangle_area_representation(contour, comparing_accuracy)
-                            for contour in (drive_contour, driven)]
+                            for contour in (drive, driven)]
                     for subplot, tar in zip(subplots[2], tars):
                         tar = tar[:, 0]
+                        subplot.clear()
                         subplot.plot(range(len(tar)), tar, color='blue')
                 plt.savefig(os.path.join(debug_directory, f'final_result_{index}.png'))
-        driven_contour = results[0][3]
-        os.makedirs(debug_directory, exist_ok=True)
+        *_, driven = results[0]
         drive_contour, driven_contour = driven_contour, drive_contour
+        drive, driven = driven, drive
         drive_smoothing, driven_smoothing = driven_smoothing, drive_smoothing
         drive_contour = getUniformContourSampledShape(drive_contour, resampling_accuracy, drive_smoothing > 0)
+        for subplot in subplots[2]:
+            subplot.clear()
     result = results[0]
     score, *center, center_distance, driven = result
-    return score, drive_contour, driven
+    return score, drive, driven

@@ -9,6 +9,7 @@ from opt_dual_shapes import sampling_optimization
 
 def _optimize_pair(drive_contour, driven_contour, debugger):
     sampling_optimization(drive_contour, driven_contour, 1, (1, 1), 1, 1024, 64, debugger,
+                          max_iteration=5, max_sample_depth=1,
                           visualization={}, draw_tar_functions=True)
 
 
@@ -42,6 +43,7 @@ if __name__ == '__main__':
     )
     circle_contour = np.array(
         [(5 * math.cos(theta), 5 * math.sin(theta)) for theta in np.linspace(0, 2 * math.pi, 1024, endpoint=False)])
-    optimization_test([['circle', 'circle'], ['circle', 'square'], ['square', 'square']],
-                      [(circle_contour, circle_contour), (circle_contour, square_contour),
-                       (square_contour, square_contour)], False)
+    # optimization_test([['circle', 'circle'], ['circle', 'square'], ['square', 'square']],
+    #                   [(circle_contour, circle_contour), (circle_contour, square_contour),
+    #                    (square_contour, square_contour)], False)
+    _optimize_pair(square_contour, square_contour, MyDebugger(['square', 'square']))
