@@ -222,7 +222,8 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
                         subplot.clear()
                         subplot.plot(range(len(tar)), tar, color='blue')
                 score += shape_difference_rating(this_drive, drive_contour)
-                plt.savefig(os.path.join(debug_directory, f'final_result_{index}_{score}.png'))
+                score_str = "%.8f" % score
+                plt.savefig(os.path.join(debug_directory, f'final_result_{index}_{score_str}.png'))
         *_, drive, driven = results[-1]  # get the last result
         drive_contour, driven_contour = driven_contour, drive_contour
         drive_polygon, driven_polygon = driven_polygon, drive_polygon
