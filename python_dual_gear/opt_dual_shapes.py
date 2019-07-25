@@ -5,10 +5,9 @@ from matplotlib.axes import Axes
 import os
 from debug_util import MyDebugger
 from shape_processor import getUniformContourSampledShape, toExteriorPolarCoord, toCartesianCoordAsNp
-from objective_function import triangle_area_representation
+from objective_function import triangle_area_representation, shape_difference_rating, trivial_distance
 from shapely.geometry import Polygon, Point
 import itertools
-from objective_function import shape_difference_rating
 from matplotlib.patches import Rectangle
 from core.compute_dual_gear import compute_dual_gear
 import math
@@ -119,7 +118,8 @@ def sample_drive_gear(drive_contour: np.ndarray, target_driven_contour: np.ndarr
             else:
                 *center, center_distance, result = result
                 result = counterclockwise_orientation(result)
-                score = shape_difference_rating(target_driven_contour, result, comparing_accuracy)
+                score = shape_difference_rating(target_driven_contour, result, comparing_accuracy,
+                                                distance_function=trivial_distance)
                 result_pool.append((score, center, center_distance, window, result))
                 if subplots is not None:
                     update_polygon_subplots(drive_contour, result, subplots)

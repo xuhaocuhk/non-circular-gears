@@ -63,26 +63,33 @@ def dtw_distance(distance_matrix: np.ndarray, offset: int) -> float:
     return dtw(distance_matrix.shape, distance)[0]
 
 
-def tar_distance(tar_a: np.ndarray, tar_b: np.ndarray) -> float:
+def trivial_distance(distance_matrix: np.ndarray, offset: int) -> float:
+    assert distance_matrix.shape[0] == distance_matrix.shape[1]
+    n = distance_matrix.shape[0]
+    return distance_matrix.trace(offset=offset) + distance_matrix.trace(offset=offset - n)
+
+
+def tar_distance(tar_a: np.ndarray, tar_b: np.ndarray, distance_function=dtw_distance) -> float:
     assert tar_a.shape == tar_b.shape
     distance_matrix = tar_to_distance_matrix(tar_a, tar_b)
-    return min([dtw_distance(distance_matrix, offset) for offset in range(tar_a.shape[0])])
+    return min([distance_function(distance_matrix, offset) for offset in range(tar_a.shape[0])])
 
 
 def shape_difference_rating(contour_a: np.ndarray, contour_b: np.ndarray,
-                            sample_rate: Union[int, None] = None) -> float:
+                            sample_rate: Union[int, None] = None, distance_function=dtw_distance) -> float:
     """
     calculate the shape difference level according to TAR function and DSW
     :param contour_a: the contour A array([(x,y)]) in counterclockwise direction
     :param contour_b: the contour B array([(x,y)]) in counterclockwise direction
     :param sample_rate: the re-sampled rate used in the calculation, None for choosing the maximum of input
+    :param distance_function: the distance warping function used (dtw or trivial)
     :return: TAR DSW-difference
     """
     if sample_rate is None:
         sample_rate = max(contour_a.shape[0], contour_b.shape[0])
     tar_a = triangle_area_representation(contour_a, sample_rate)
     tar_b = triangle_area_representation(contour_b, sample_rate)
-    return tar_distance(tar_a, tar_b)
+    return tar_distance(tar_a, tar_b, distance_function)
 
 
 if __name__ == '__main__':
