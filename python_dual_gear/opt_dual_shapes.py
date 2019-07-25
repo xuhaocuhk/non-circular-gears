@@ -11,6 +11,7 @@ import itertools
 from matplotlib.patches import Rectangle
 from core.compute_dual_gear import compute_dual_gear
 import math
+from util_functions import align
 
 
 def counterclockwise_orientation(contour: np.ndarray) -> np.ndarray:
@@ -72,9 +73,11 @@ def shape_average(polygon_a: Iterable[float], polygon_b: Iterable[float], area_a
     if hasattr(polygon_a, '__len__') and hasattr(polygon_b, '__len__'):
         # noinspection PyTypeChecker
         assert len(polygon_a) == len(polygon_b)
-    sqrt_a, sqrt_b = [math.sqrt(area_a) for area in (area_a, area_b)]
+    # sqrt_a, sqrt_b = [math.sqrt(area_a) for area in (area_a, area_b)]
+    offset = align(polygon_a, polygon_b)
     # return toCartesianCoordAsNp([(ra / sqrt_a + rb / sqrt_b) / 2 for ra, rb in zip(polygon_a, polygon_b)], 0, 0)
-    return toCartesianCoordAsNp([(ra + rb) / 2 for ra, rb in zip(polygon_a, polygon_b)], 0, 0)
+    return toCartesianCoordAsNp([(ra + rb) / 2 for ra, rb in zip(polygon_a, polygon_b[offset:] + polygon_b[:offset])],
+                                0, 0)
 
 
 def sample_drive_gear(drive_contour: np.ndarray, target_driven_contour: np.ndarray, k: int,
@@ -218,7 +221,8 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
                         tar = tar[:, 0]
                         subplot.clear()
                         subplot.plot(range(len(tar)), tar, color='blue')
-                plt.savefig(os.path.join(debug_directory, f'final_result_{index}.png'))
+                score += shape_difference_rating(this_drive, drive_contour)
+                plt.savefig(os.path.join(debug_directory, f'final_result_{index}_{score}.png'))
         *_, drive, driven = results[-1]  # get the last result
         drive_contour, driven_contour = driven_contour, drive_contour
         drive_polygon, driven_polygon = driven_polygon, drive_polygon
