@@ -33,17 +33,24 @@ def generate_3d_mesh(debugger: MyDebugger, filename: str, contour: np.ndarray, t
     """
     destination = debugger.file_path(filename)
     mesh = openmesh.TriMesh()
-    lower_plane = [mesh.add_vertex((np.array(*point, 0) for point in contour))]  # TODO: make this more graceful
-    upper_plane = [mesh.add_vertex((np.array(*point, thickness) for point in contour))]
+    contour = np.append(contour, contour[:1], axis=0)  # duplicate first point to complete a cycle
+    lower_plane = [mesh.add_vertex((np.append(point, 0))) for point in contour]
+    upper_plane = [mesh.add_vertex((np.append(point, thickness))) for point in contour]
     contour_poly = Polygon(contour)
     point_to_vertex = {
         tuple(point): (lower_vertex, upper_vertex)
         for point, lower_vertex, upper_vertex in zip(contour, lower_plane, upper_plane)
     }
     triangles = triangulate(contour_poly)
+    lower_face = []
+    upper_face = []
     for triangle in triangles:
-        *points, _ = triangle
-        mesh.add_face(zip(*[point_to_vertex[point] for point in points]))  # TODO: is this correct?
+        *points, _ = triangle.exterior.coords
+        face_1, face_2 = zip(*[point_to_vertex[point] for point in points])
+        lower_face.append(mesh.add_face(face_1))
+        upper_face.append(mesh.add_face(face_2))
+
+    openmesh.write_mesh(destination, mesh)
 
 
 def generate_printable_spline(debugger, contour1, contour2, center_dist, target_dist=100):
@@ -55,7 +62,5 @@ def generate_printable_spline(debugger, contour1, contour2, center_dist, target_
 
 
 if __name__ == '__main__':
-    from plot.plot_sampled_function import polar_to_rectangular
-    from drive_gears.ellipse_gear import generate_gear
-
-    generate_2d_obj('test.obj', polar_to_rectangular(generate_gear(1024), None))
+    square_contour = np.array([(-5, -5), (5, -5), (5, 5), (-5, 5)])
+    generate_3d_mesh(MyDebugger('test'), 'output.obj', square_contour, 0.5)
