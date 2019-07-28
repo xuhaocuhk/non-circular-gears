@@ -48,8 +48,14 @@ def generate_3d_mesh(debugger: MyDebugger, filename: str, contour: np.ndarray, t
         *points, _ = triangle.exterior.coords
         face_1, face_2 = zip(*[point_to_vertex[point] for point in points])
         lower_face.append(mesh.add_face(face_1))
+        face_2 = face_2[::-1]
         upper_face.append(mesh.add_face(face_2))
-
+    side_face = []
+    for index, point in enumerate(contour):
+        lower_point, upper_point = point_to_vertex[tuple(point)]
+        lower_prev, upper_prev = point_to_vertex[tuple(contour[index - 1])]
+        side_face.append(mesh.add_face([upper_prev, lower_point, upper_point]))
+        side_face.append(mesh.add_face([upper_prev, lower_prev, lower_point]))
     openmesh.write_mesh(destination, mesh)
 
 
