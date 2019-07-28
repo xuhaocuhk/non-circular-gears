@@ -79,7 +79,7 @@ def getUniformCoordinateFunction(contour: np.array):
     distance = [np.linalg.norm(coord[i] - coord[i - 1]) for i in range(len(coord))]
     cumsum_dist = np.cumsum(distance)
     cumsum_dist = cumsum_dist / cumsum_dist[-1]
-    f = interp1d(cumsum_dist, coord, axis=0, kind='cubic')
+    f = interp1d(cumsum_dist, coord, axis=0)
     return f
 
 

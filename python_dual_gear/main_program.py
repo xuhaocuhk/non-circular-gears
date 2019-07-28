@@ -94,7 +94,7 @@ def generate_all_models():
 if __name__ == '__main__':
     # generate_all_models()
 
-    model = our_models[2]
+    model = our_models[1]
     drive_tooth_contour, final_gear_contour, debugger = generate_gear(model, show_cut_anim=True, save_cut_anim=True,
                                                                       show_math_anim=False)
 
