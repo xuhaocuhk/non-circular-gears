@@ -21,7 +21,7 @@ def generate_gear(model, show_math_anim=False, save_math_anim=False, show_cut_an
     debugger = MyDebugger(model.name)
 
     fig, plts = init_plot()
-    contour = shape_factory.get_shape_contour(model, True, plts, smooth=model.smooth)
+    contour = shape_factory.get_shape_contour(model, True, plts[0], smooth=model.smooth)
 
     # convert to polar coordinate shape
     center = model.center_point
