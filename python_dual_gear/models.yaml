@@ -1,0 +1,77 @@
+- center_point: [0, 0]
+  k: 1
+  name: circular
+  sample_num: 512
+  smooth: 0
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.25, 0]
+  k: 1
+  name: ellipse
+  sample_num: 1024
+  smooth: 0
+  tooth_height: 0.04
+  tooth_num: 32
+- center_point: [0, 0]
+  k: 1
+  name: focal_ellipse
+  sample_num: 512
+  smooth: 0
+  tooth_height: 0.05
+  tooth_num: 32
+- center_point: [1.0, 0.5]
+  k: 1
+  name: irregular_circle
+  sample_num: 512
+  smooth: 0
+  tooth_height: 0.04
+  tooth_num: 32
+- center_point: [1.5, 0.5]
+  k: 1
+  name: irregular_ellipse
+  sample_num: 1024
+  smooth: 0
+  tooth_height: 0.08
+  tooth_num: 32
+- center_point: [2.3, 0.5]
+  k: 1
+  name: spiral_circle
+  sample_num: 512
+  smooth: 0
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.5, 0.5]
+  k: 1
+  name: mahou
+  sample_num: 1024
+  smooth: 0
+  tooth_height: 0.02
+  tooth_num: 32
+- center_point: [0.5, 0.3]
+  k: 1
+  name: wolf
+  sample_num: 4096
+  smooth: 0
+  tooth_height: 0.01
+  tooth_num: 128
+- center_point: [0.8, 0.6]
+  k: 1
+  name: trump
+  sample_num: 1024
+  smooth: 0
+  tooth_height: 0.02
+  tooth_num: 32
+- center_point: [0.5, 0.6]
+  k: 1
+  name: man
+  sample_num: 4096
+  smooth: 0
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0, 0]
+  k: 1
+  name: square
+  sample_num: 256
+  smooth: 0
+  tooth_height: 0.02
+  tooth_num: 32

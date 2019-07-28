@@ -73,13 +73,16 @@ def getMaxIntersDist(p: Point, theta, poly: Polygon, MAX_R):
 
 
 # get uniform sampled points along boundary
-def getUniformCoordinateFunction(contour: np.array):
+def getUniformCoordinateFunction(contour: np.array, smoothing=True):
     polygon = Polygon(contour)
     coord = np.array(list(polygon.exterior.coords))
     distance = [np.linalg.norm(coord[i] - coord[i - 1]) for i in range(len(coord))]
     cumsum_dist = np.cumsum(distance)
     cumsum_dist = cumsum_dist / cumsum_dist[-1]
-    f = interp1d(cumsum_dist, coord, axis=0, kind='cubic')
+    if smoothing:
+        f = interp1d(cumsum_dist, coord, axis=0, kind='cubic')
+    else:
+        f = interp1d(cumsum_dist, coord, axis=0)
     return f
 
 
@@ -125,8 +128,8 @@ def getVisiblePoint(contour):
     return None
 
 
-def getUniformContourSampledShape(contour: np.array, n: int):
-    func = getUniformCoordinateFunction(contour)
+def getUniformContourSampledShape(contour: np.array, n: int, smoothing=True):
+    func = getUniformCoordinateFunction(contour, smoothing)
     return np.array([[func(i / n)[0], func(i / n)[1]] for i in range(n)])
 
 
