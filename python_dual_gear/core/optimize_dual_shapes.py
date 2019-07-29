@@ -5,12 +5,11 @@ from matplotlib.axes import Axes
 import os
 from debug_util import MyDebugger
 from shape_processor import getUniformContourSampledShape, toExteriorPolarCoord, toCartesianCoordAsNp
-from objective_function import triangle_area_representation, shape_difference_rating, trivial_distance
+from core.objective_function import triangle_area_representation, shape_difference_rating, trivial_distance
 from shapely.geometry import Polygon, Point
 import itertools
 from matplotlib.patches import Rectangle
 from core.compute_dual_gear import compute_dual_gear
-import math
 from util_functions import align
 
 

@@ -1,7 +1,6 @@
 from shape_processor import getUniformContourSampledShape
 import numpy as np
 from dtw import dtw
-import math
 import matplotlib.pyplot as plt
 from typing import Union
 
@@ -94,12 +93,11 @@ def shape_difference_rating(contour_a: np.ndarray, contour_b: np.ndarray,
 
 if __name__ == '__main__':
     import os
-    import time
     import math
     from core.compute_dual_gear import compute_dual_gear
     from shape_processor import toExteriorPolarCoord, toCartesianCoordAsNp
     from shapely.geometry import Point
-    from opt_dual_shapes import counterclockwise_orientation
+    from core.optimize_dual_shapes import counterclockwise_orientation
 
     plt.ion()
     fig, subplots = plt.subplots(2, 2)
