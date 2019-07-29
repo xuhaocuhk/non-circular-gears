@@ -32,31 +32,25 @@ def generate_3d_mesh(debugger: MyDebugger, filename: str, contour: np.ndarray, t
     :return:
     """
     destination = debugger.file_path(filename)
-    mesh = openmesh.TriMesh()
-    contour = np.append(contour, contour[:1], axis=0)  # duplicate first point to complete a cycle
-    lower_plane = [mesh.add_vertex((np.append(point, 0))) for point in contour]
-    upper_plane = [mesh.add_vertex((np.append(point, thickness))) for point in contour]
-    contour_poly = Polygon(contour)
-    point_to_vertex = {
-        tuple(point): (lower_vertex, upper_vertex)
-        for point, lower_vertex, upper_vertex in zip(contour, lower_plane, upper_plane)
-    }
-    triangles = triangulate(contour_poly)
-    lower_face = []
-    upper_face = []
-    for triangle in triangles:
-        *points, _ = triangle.exterior.coords
-        face_1, face_2 = zip(*[point_to_vertex[point] for point in points])
-        lower_face.append(mesh.add_face(face_1))
-        face_2 = face_2[::-1]
-        upper_face.append(mesh.add_face(face_2))
-    side_face = []
-    for index, point in enumerate(contour):
-        lower_point, upper_point = point_to_vertex[tuple(point)]
-        lower_prev, upper_prev = point_to_vertex[tuple(contour[index - 1])]
-        side_face.append(mesh.add_face([upper_prev, lower_point, upper_point]))
-        side_face.append(mesh.add_face([upper_prev, lower_prev, lower_point]))
-    openmesh.write_mesh(destination, mesh)
+    with open(destination, 'w') as obj_file:
+        point_to_vertex = {}
+        for index, point in enumerate(contour):
+            point_to_vertex[tuple(point)] = (index * 2 + 1, index * 2 + 2)
+            print(f'v {point[0]} {point[1]} 0', file=obj_file)
+            print(f'v {point[0]} {point[1]} {thickness}', file=obj_file)
+
+        contour_poly = Polygon(contour)
+        triangles = triangulate(contour_poly)
+        for triangle in triangles:
+            *points, _ = triangle.exterior.coords
+            face_1, face_2 = zip(*[point_to_vertex[point] for point in points])
+            for face in (face_1[::-1], face_2):
+                print('f ' + ' '.join([str(i) for i in face]), file=obj_file)
+        for index, point in enumerate(contour):
+            lower_point, upper_point = point_to_vertex[tuple(point)]
+            lower_prev, upper_prev = point_to_vertex[tuple(contour[index - 1])]
+            print('f ' + ' '.join([str(point) for point in (upper_prev, lower_point, upper_point)]), file=obj_file)
+            print('f ' + ' '.join([str(point) for point in (upper_prev, lower_prev, lower_point)]), file=obj_file)
 
 
 def generate_printable_spline(debugger, contour1, contour2, center_dist, target_dist=100):
@@ -68,5 +62,8 @@ def generate_printable_spline(debugger, contour1, contour2, center_dist, target_
 
 
 if __name__ == '__main__':
-    square_contour = np.array([(-5, -5), (5, -5), (5, 5), (-5, 5)])
+    import math
+
+    square_contour = np.array(
+        [(3 * math.cos(theta), 2 * math.sin(theta)) for theta in np.linspace(0, 2 * math.pi, 1024, endpoint=False)])
     generate_3d_mesh(MyDebugger('test'), 'output.obj', square_contour, 0.5)
