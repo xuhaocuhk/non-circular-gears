@@ -4,3 +4,4 @@ venv
 .idea
 __pycache__
 /python_dual_gear/.idea
+/python_dual_gear/debug
