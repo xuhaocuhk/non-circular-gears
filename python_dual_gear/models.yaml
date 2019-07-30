@@ -26,13 +26,13 @@
   smooth: 0
   tooth_height: 0.04
   tooth_num: 32
-- center_point: [1.5, 0.5]
-  k: 1
-  name: irregular_ellipse
-  sample_num: 1024
-  smooth: 0
-  tooth_height: 0.08
-  tooth_num: 32
+#- center_point: [1.5, 0.5]
+#  k: 1
+#  name: irregular_ellipse
+#  sample_num: 1024
+#  smooth: 0
+#  tooth_height: 0.08
+#  tooth_num: 32
 - center_point: [2.3, 0.5]
   k: 1
   name: spiral_circle
@@ -74,4 +74,11 @@
   sample_num: 256
   smooth: 0
   tooth_height: 0.02
+  tooth_num: 32
+- center_point: [158, 119]
+  k: 1
+  name: horse
+  sample_num: 1024
+  smooth: 0
+  tooth_height: 0.03
   tooth_num: 32

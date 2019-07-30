@@ -49,4 +49,10 @@ def optimization_test(names: List[List[str]], optimize_pairs: List[Tuple[np.ndar
 
 
 if __name__ == '__main__':
-    pass
+    from shape_factory import get_shape_contour
+    from models import our_models
+
+    models = {
+        model.name: get_shape_contour(model, True, None, model.smooth) for model in our_models
+    }
+    print(models)
