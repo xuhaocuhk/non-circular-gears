@@ -82,3 +82,24 @@
   smooth: 0
   tooth_height: 0.03
   tooth_num: 32
+- center_point: [468, 350]
+  k: 1
+  name: united_states
+  sample_num: 1024
+  smooth: 0
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [565, 446]
+  k: 1
+  name: australia
+  sample_num: 1024
+  smooth: 0
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [582, 500]
+  k: 1
+  name: france
+  sample_num: 1024
+  smooth: 0
+  tooth_height: 0.03
+  tooth_num: 32
