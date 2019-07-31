@@ -10,7 +10,7 @@ from shapely.geometry import Polygon, Point
 import itertools
 from matplotlib.patches import Rectangle
 from core.compute_dual_gear import compute_dual_gear
-from util_functions import align
+from util_functions import align, save_contour
 
 
 def counterclockwise_orientation(contour: np.ndarray) -> np.ndarray:
@@ -133,6 +133,7 @@ def sample_drive_gear(drive_contour: np.ndarray, target_driven_contour: np.ndarr
                     subplots[0].text(0, 0, str(center))
                     subplots[1].text(0, 0, str(score))
                     plt.savefig(os.path.join(debugging_path, f'{iter_time}_{index}.png'))
+                    save_contour(os.path.join(debugging_path, f'{iter_time}_{index}_driven.dat'), result)
         result_pool.sort(key=lambda tup: tup[0])
         result_pool = result_pool[:keep_count]
         windows = [result[3] for result in result_pool]
@@ -224,6 +225,8 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
                                                  distance_function=trivial_distance)
                 score_str = "%.8f" % score
                 plt.savefig(os.path.join(debug_directory, f'final_result_{index}_{score_str}.png'))
+                save_contour(os.path.join(debug_directory, f'final_result_{index}_drive.dat'), this_drive)
+                save_contour(os.path.join(debug_directory, f'final_result_{index}_driven.dat'), driven)
         *_, drive, driven = results[-1]  # get the last result
         drive_contour, driven_contour = driven_contour, drive_contour
         drive_polygon, driven_polygon = driven_polygon, drive_polygon

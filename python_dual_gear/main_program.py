@@ -76,6 +76,8 @@ def generate_gear(model, show_math_anim=False, save_math_anim=False, show_cut_an
     # TODO: consider tolarence when fabricate
     fabrication.generate_2d_obj(debugger, 'drive.obj', toCartesianCoordAsNp(polar_contour, 0, 0))
     fabrication.generate_2d_obj(debugger, 'driven_math.obj', toCartesianCoordAsNp(driven_gear, 0, 0 + center_distance))
+    fabrication.generate_3d_mesh(debugger, 'drive_3d.obj', toCartesianCoordAsNp(polar_contour, 0, 0), 1)
+    fabrication.generate_3d_mesh(debugger, 'driven.obj', toCartesianCoordAsNp(driven_gear, 0, 0 + center_distance), 1)
 
     plt.close('all')
 

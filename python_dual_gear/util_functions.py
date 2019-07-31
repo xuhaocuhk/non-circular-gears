@@ -1,5 +1,7 @@
 from typing import Iterable, Collection, SupportsFloat, Sized, Callable
 import math
+import numpy as np
+import struct
 
 
 def standard_deviation_distance(x: Iterable[SupportsFloat], y: Iterable[SupportsFloat]) -> float:
@@ -27,6 +29,20 @@ def align(array_a: Collection, array_b: Collection, stride: int = 1,
     assert len(array_a) == len(array_b)
     return min([(offset, distance_function(array_a, array_b[offset:] + array_b[:offset])) for offset in
                 range(0, len(array_a), stride)], key=lambda tup: tup[1])[0]
+
+
+def pack_contour(contour: np.ndarray) -> bytes:
+    assert contour.shape[1] == 2
+    result = struct.pack('i', contour.shape[0])
+    for point in contour:
+        x, y = point
+        result += struct.pack('dd', x, y)
+    return result
+
+
+def save_contour(filename: str, contour: np.ndarray):
+    with open(filename, 'wb') as file:
+        file.write(pack_contour(contour))
 
 
 if __name__ == '__main__':
