@@ -103,3 +103,10 @@
   smooth: 0
   tooth_height: 0.03
   tooth_num: 32
+- center_point: [171, 241]
+  k: 1
+  name: pikachu
+  sample_num: 1024
+  smooth: 0
+  tooth_height: 0.03
+  tooth_num: 32
