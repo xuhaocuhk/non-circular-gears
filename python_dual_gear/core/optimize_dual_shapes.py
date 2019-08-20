@@ -204,11 +204,13 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
         drive = counterclockwise_orientation(drive)
         new_res = sample_drive_gear(drive, driven_contour, k, sampling_count, keep_count, comparing_accuracy,
                                     max_sample_depth, debug_directory, subplots[1] if subplots is not None else None)
-        results += [(score, *center, center_distance, drive, driven)
+        results += [(None, score, *center, center_distance, drive, driven)
                     for score, *center, center_distance, driven in new_res]
         for index, result in enumerate(results):
-            score, *center, center_distance, this_drive, driven = result
+            total_score, score, *center, center_distance, this_drive, driven = result
             if subplots is not None:
+                update_polygon_subplots(drive_contour, driven_contour,
+                                        subplots[0])  # so that the two subplots can iterate
                 update_polygon_subplots(this_drive, driven, subplots[1])
                 subplots[1][0].scatter(center[0], center[1], 3)
                 subplots[1][0].text(0, 0, str(center))
@@ -221,9 +223,11 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
                         tar = tar[:, 0]
                         subplot.clear()
                         subplot.plot(range(len(tar)), tar, color='blue')
-                score += shape_difference_rating(this_drive, drive_contour, comparing_accuracy,
-                                                 distance_function=trivial_distance)
-                score_str = "%.8f" % score
+                if total_score is None:
+                    total_score = score + shape_difference_rating(this_drive, drive_contour, comparing_accuracy,
+                                                                  distance_function=trivial_distance)
+                    results[index] = (total_score, *result[1:])
+                score_str = "%.8f" % total_score
                 plt.savefig(os.path.join(debug_directory, f'final_result_{index}_{score_str}.png'))
                 save_contour(os.path.join(debug_directory, f'final_result_{index}_drive.dat'), this_drive)
                 save_contour(os.path.join(debug_directory, f'final_result_{index}_driven.dat'), driven)

@@ -61,8 +61,10 @@ if __name__ == '__main__':
         ('united_states', 'square'),
         ('france', 'square'),
     ]
-
-    optimization_test(test_case_names,
-                      [(models[drive_name], models[dual_name]) for drive_name, dual_name in test_case_names],
-                      'optimization_config.yaml',
-                      False)
+    #
+    # optimization_test(test_case_names,
+    #                   [(models[drive_name], models[dual_name]) for drive_name, dual_name in test_case_names],
+    #                   'optimization_config.yaml',
+    #                   False)
+    optimize_pair_from_config(models['australia'], models['france'], MyDebugger(['australia', 'france']),
+                              'optimization_config.yaml')
