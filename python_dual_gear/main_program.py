@@ -1,5 +1,5 @@
 from debug_util import MyDebugger
-from models import our_models
+from models import our_models, Model
 from shape_processor import *
 from core.compute_dual_gear import compute_dual_gear, rotate_and_cut, _plot_polygon
 from shapely.affinity import translate
@@ -17,26 +17,27 @@ logging.basicConfig(filename='debug\\info.log', level=logging.INFO)
 logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
 
-def generate_gear(model, show_math_anim=False, save_math_anim=False, show_cut_anim=False, save_cut_anim=False):
-    debugger = MyDebugger(model.name)
+def generate_gear(drive_model: Model, driven_model: Model, show_math_anim=False, save_math_anim=False,
+                  show_cut_anim=False, save_cut_anim=False):
+    debugger = MyDebugger(drive_model.name)
 
     fig, plts = init_plot()
-    contour = shape_factory.get_shape_contour(model, True, plts[0], smooth=model.smooth)
+    contour = shape_factory.get_shape_contour(drive_model, True, plts[0], smooth=drive_model.smooth)
 
     # convert to polar coordinate shape
-    center = model.center_point
+    center = drive_model.center_point
     if center is None:
         center = getVisiblePoint(contour)
         if center is None:
             logging.error("No visible point found, need manually assign one!")
             exit(1)
 
-    polar_contour = toExteriorPolarCoord(Point(center[0], center[1]), contour, model.sample_num)
-    plot_polar_shape(plts[1][0], 'Polar shape', polar_contour, model.center_point, model.sample_num)
+    polar_contour = toExteriorPolarCoord(Point(center[0], center[1]), contour, drive_model.sample_num)
+    plot_polar_shape(plts[1][0], 'Polar shape', polar_contour, drive_model.center_point, drive_model.sample_num)
 
     # generate and draw the dual shape
-    driven_gear, center_distance, phi = compute_dual_gear(polar_contour, k=model.k)
-    plot_polar_shape(plts[0][2], 'Dual shape(Math)', driven_gear, (0, 0), model.sample_num)
+    driven_gear, center_distance, phi = compute_dual_gear(polar_contour, k=drive_model.k)
+    plot_polar_shape(plts[0][2], 'Dual shape(Math)', driven_gear, (0, 0), drive_model.sample_num)
     logging.info(f'Center Distance = {center_distance}\n')
 
     if show_math_anim:
@@ -46,11 +47,11 @@ def generate_gear(model, show_math_anim=False, save_math_anim=False, show_cut_an
 
     # calculate normals
     plot_cartesian_shape(plts[1][1], "Normals", contour)
-    normals = getNormals(contour, plts[1][1], model.center_point)
+    normals = getNormals(contour, plts[1][1], drive_model.center_point)
 
     # generate teeth
-    contour = addToothToContour(contour, center, center_distance, normals, height=model.tooth_height,
-                                tooth_num=model.tooth_num,
+    contour = addToothToContour(contour, center, center_distance, normals, height=drive_model.tooth_height,
+                                tooth_num=drive_model.tooth_num,
                                 plt_axis=plts[1][1], consider_driving_torque=False, consider_driving_continue=False)
     plot_cartesian_shape(plts[1][2], 'Add Tooth', contour)
 
@@ -60,7 +61,7 @@ def generate_gear(model, show_math_anim=False, save_math_anim=False, show_cut_an
         drive_tooth_contour.append((x - center[0], y - center[1]))
     drive_gear = Polygon(drive_tooth_contour)
     drive_gear = drive_gear.buffer(0)  # resolve invalid polygon issues
-    driven_gear_cut, cut_fig, subplot = rotate_and_cut(drive_gear, center_distance, phi, k=model.k,
+    driven_gear_cut, cut_fig, subplot = rotate_and_cut(drive_gear, center_distance, phi, k=drive_model.k,
                                                        debugger=debugger if save_cut_anim else None,
                                                        replay_animation=show_cut_anim)
     final_polygon = translate(driven_gear_cut, center_distance)

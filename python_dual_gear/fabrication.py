@@ -3,7 +3,6 @@ functions related to 3D modelling and fabrication
 """
 from debug_util import MyDebugger
 import numpy as np
-import openmesh
 from shapely.geometry import Polygon
 from shapely.ops import triangulate
 
