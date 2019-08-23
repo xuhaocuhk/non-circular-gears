@@ -137,26 +137,26 @@ def draw_cross(axis):
     """
     x = axis.x
     y = axis.y
-    cross_contour = [(x+1.21, y+1.21),
-                     (x+0.91, y+1.21),
-                     (x+0.91, y+2.41),
-                     (x-0.91, y+2.41),
-                     (x-0.91, y+1.21),
-                     (x-1.21, y+1.21),
-                     (x-1.21, y+0.91),
-                     (x-2.41, y+0.91),
-                     (x-2.41, y-0.91),
-                     (x-1.21, y-0.91),
-                     (x-1.21, y-1.21),
-                     (x-0.91, y-1.21),
-                     (x-0.91, y-2.41),
-                     (x+0.91, y-2.41),
-                     (x+0.91, y-1.21),
-                     (x+1.21, y-1.21),
-                     (x+1.21, y-0.91),
-                     (x+2.41, y-0.91),
-                     (x+2.41, y+0.91),
-                     (x+1.21, y+0.91)]
+    cross_contour = [(x+1.22, y+1.22),
+                     (x+0.92, y+1.22),
+                     (x+0.92, y+2.42),
+                     (x-0.92, y+2.42),
+                     (x-0.92, y+1.22),
+                     (x-1.22, y+1.22),
+                     (x-1.22, y+0.92),
+                     (x-2.42, y+0.92),
+                     (x-2.42, y-0.92),
+                     (x-1.22, y-0.92),
+                     (x-1.22, y-1.22),
+                     (x-0.92, y-1.22),
+                     (x-0.92, y-2.42),
+                     (x+0.92, y-2.42),
+                     (x+0.92, y-1.22),
+                     (x+1.22, y-1.22),
+                     (x+1.22, y-0.92),
+                     (x+2.42, y-0.92),
+                     (x+2.42, y+0.92),
+                     (x+1.22, y+0.92)]
     return cross_contour
 
 
@@ -177,8 +177,8 @@ def generate_gear_pair(distance:int, filename_drive:str, filename_driven:str, dr
     interior_drive = draw_cross(drive_axis_scale)
     interior_driven = draw_cross(driven_axis_scale)
     debugger = MyDebugger('test')
-    generate_3d_mesh_hole(debugger, 'drive.obj', np.array(exterior_drive_scale), np.array(interior_drive), 3)
-    generate_3d_mesh_hole(debugger, 'driven.obj', np.array(exterior_driven_scale), np.array(interior_driven), 3)
+    generate_3d_mesh_hole(debugger, 'drive.obj', np.array(exterior_drive_scale), np.array(interior_drive), 6)
+    generate_3d_mesh_hole(debugger, 'driven.obj', np.array(exterior_driven_scale), np.array(interior_driven), 6)
 
 
 if __name__ == '__main__':
@@ -196,7 +196,7 @@ if __name__ == '__main__':
     filename_driven = 'C:/Users/admin/Documents/GitHub/gears/python_dual_gear/debug/printtest/driven_cut.obj'
     drive_axis = Point(0, 0)
     driven_axis = Point(0.6311470734139077, 0)
-    generate_gear_pair(3, filename_drive, filename_driven, drive_axis, driven_axis)
+    generate_gear_pair(14, filename_drive, filename_driven, drive_axis, driven_axis)
 
 
 
