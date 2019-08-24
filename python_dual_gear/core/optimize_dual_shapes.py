@@ -5,13 +5,12 @@ from matplotlib.axes import Axes
 import os
 from debug_util import MyDebugger
 from shape_processor import getUniformContourSampledShape, toExteriorPolarCoord, toCartesianCoordAsNp
-from objective_function import triangle_area_representation, shape_difference_rating, trivial_distance
+from core.objective_function import triangle_area_representation, shape_difference_rating, trivial_distance
 from shapely.geometry import Polygon, Point
 import itertools
 from matplotlib.patches import Rectangle
 from core.compute_dual_gear import compute_dual_gear
-import math
-from util_functions import align
+from util_functions import align, save_contour
 
 
 def counterclockwise_orientation(contour: np.ndarray) -> np.ndarray:
@@ -134,6 +133,7 @@ def sample_drive_gear(drive_contour: np.ndarray, target_driven_contour: np.ndarr
                     subplots[0].text(0, 0, str(center))
                     subplots[1].text(0, 0, str(score))
                     plt.savefig(os.path.join(debugging_path, f'{iter_time}_{index}.png'))
+                    save_contour(os.path.join(debugging_path, f'{iter_time}_{index}_driven.dat'), result)
         result_pool.sort(key=lambda tup: tup[0])
         result_pool = result_pool[:keep_count]
         windows = [result[3] for result in result_pool]
@@ -155,7 +155,7 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
                           keep_count: int, resampling_accuracy: int, comparing_accuracy: int, debugger: MyDebugger,
                           max_sample_depth: int = 5, max_iteration: int = 1, smoothing: Tuple[int, int] = (0, 0),
                           visualization: Union[Dict, None] = None, draw_tar_functions: bool = False) \
-        -> List[Tuple[float, np.ndarray, np.ndarray]]:
+        -> List[Tuple[float, float, float, float, float, np.ndarray, np.ndarray]]:
     """
     perform sampling optimization for drive contour and driven contour
     :param drive_contour: the driving gear's contour
@@ -171,7 +171,7 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
     :param smoothing: smoothing level to be taken by uniform re-sampling
     :param visualization: None for no figure, otherwise for visualization configuration
     :param draw_tar_functions: True for drawing tar functions in debug windows (affect performance)
-    :return: final score, center_x, center_y, center_distance drive contour and driven contour
+    :return: final total score, score, center_x, center_y, center_distance, drive contour and driven contour
     """
     drive_contour = counterclockwise_orientation(drive_contour)
     driven_contour = counterclockwise_orientation(driven_contour)
@@ -204,11 +204,13 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
         drive = counterclockwise_orientation(drive)
         new_res = sample_drive_gear(drive, driven_contour, k, sampling_count, keep_count, comparing_accuracy,
                                     max_sample_depth, debug_directory, subplots[1] if subplots is not None else None)
-        results += [(score, *center, center_distance, drive, driven)
+        results += [(None, score, *center, center_distance, drive, driven)
                     for score, *center, center_distance, driven in new_res]
         for index, result in enumerate(results):
-            score, *center, center_distance, this_drive, driven = result
+            total_score, score, *center, center_distance, this_drive, driven = result
             if subplots is not None:
+                update_polygon_subplots(drive_contour, driven_contour,
+                                        subplots[0])  # so that the two subplots can iterate
                 update_polygon_subplots(this_drive, driven, subplots[1])
                 subplots[1][0].scatter(center[0], center[1], 3)
                 subplots[1][0].text(0, 0, str(center))
@@ -221,10 +223,14 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
                         tar = tar[:, 0]
                         subplot.clear()
                         subplot.plot(range(len(tar)), tar, color='blue')
-                score += shape_difference_rating(this_drive, drive_contour, comparing_accuracy,
-                                                 distance_function=trivial_distance)
-                score_str = "%.8f" % score
+                if total_score is None:
+                    total_score = score + shape_difference_rating(this_drive, drive_contour, comparing_accuracy,
+                                                                  distance_function=trivial_distance)
+                    results[index] = (total_score, *result[1:])
+                score_str = "%.8f" % total_score
                 plt.savefig(os.path.join(debug_directory, f'final_result_{index}_{score_str}.png'))
+                save_contour(os.path.join(debug_directory, f'final_result_{index}_drive.dat'), this_drive)
+                save_contour(os.path.join(debug_directory, f'final_result_{index}_driven.dat'), driven)
         *_, drive, driven = results[-1]  # get the last result
         drive_contour, driven_contour = driven_contour, drive_contour
         drive_polygon, driven_polygon = driven_polygon, drive_polygon

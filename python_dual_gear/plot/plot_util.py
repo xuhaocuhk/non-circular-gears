@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 # set up the plotting window
 def init_plot():
-    fig, plts = plt.subplots(2, 3)
+    fig, plts = plt.subplots(3, 3)
     fig.set_size_inches(16, 9)
     plt.ion()
     plt.show()
