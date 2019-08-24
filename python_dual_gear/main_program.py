@@ -1,5 +1,5 @@
 from debug_util import MyDebugger
-from models import our_models, Model
+from models import our_models, Model, find_model_by_name
 from shape_processor import *
 from core.compute_dual_gear import compute_dual_gear, rotate_and_cut
 from shapely.affinity import translate
@@ -18,9 +18,13 @@ logging.basicConfig(filename='debug\\info.log', level=logging.INFO)
 logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
 
-def math_rotate(drive_model: Model, k: int, debugger: MyDebugger):
-    # TODO: Extract math rotate related code
-    pass
+def math_rotate(drive_model: Model, drive_contour: np.ndarray, debugger: MyDebugger):
+    # TODO: save necessary figures
+    center = drive_model.center_point
+    polar_contour = toExteriorPolarCoord(Point(center[0], center[1]), drive_contour, drive_model.sample_num)
+    driven_gear, center_distance, phi = compute_dual_gear(polar_contour, k=drive_model.k)
+    logging.info(f'Center Distance = {center_distance}')
+    return center_distance, phi
 
 
 def optimize_dual(drive_model: Model, driven_model: Model, do_math_rotate=False, do_cut_rotate=False,
@@ -38,14 +42,15 @@ def optimize_dual(drive_model: Model, driven_model: Model, do_math_rotate=False,
             opt_config = yaml.safe_load(config_file)
             opt_config['sampling_count'] = tuple(opt_config['sampling_count'])
 
-    if do_math_rotate:
-        math_rotate(drive_model, opt_config['k'], debugger)
-
     # get the original contours
     drive_contour = shape_factory.get_shape_contour(drive_model, True, None, drive_model.smooth)
     driven_contour = shape_factory.get_shape_contour(driven_model, True, None, driven_model.smooth)
     fabrication.generate_3d_mesh(debugger, 'drive_original.obj', drive_contour, 1)
     fabrication.generate_3d_mesh(debugger, 'driven_original.obj', drive_contour, 1)
+
+    # do math rotate
+    if do_math_rotate:
+        math_rotate(drive_model, drive_contour, debugger)
 
     # optimization
     results = optimize_pair_from_config(drive_contour, driven_contour, debugger, opt_config)
@@ -66,13 +71,26 @@ def optimize_dual(drive_model: Model, driven_model: Model, do_math_rotate=False,
 
     # rotate and cut
     if do_cut_rotate:
-        # TODO: cut-and-rotate functions here
-        pass
+        # get the phi function
+        drive_polar = toExteriorPolarCoord(Point(center), drive, opt_config['resampling_accuracy'])
+        *_, phi = compute_dual_gear(drive_polar, opt_config['k'])
+
+        # initiate cutting
+        centered_drive = drive_contour - center
+        drive_gear = Polygon(centered_drive)
+        drive_gear = drive_gear.buffer(0)  # resolve invalid polygon issues
+        driven_gear_cut, cut_fig, subplot = rotate_and_cut(drive_gear, center_distance, phi, k=drive_model.k,
+                                                           debugger=debugger, replay_animation=True)
+        final_polygon = translate(driven_gear_cut, center_distance).buffer(1).simplify(0.2)  # as in generate_gear
+        if final_polygon.geom_type == 'MultiPolygon':
+            final_polygon = max(final_polygon, key=lambda a: a.area)
+        driven_cut = np.array(final_polygon.exterior.coords)
+        fabrication.generate_3d_mesh(debugger, 'drive_cut.obj', centered_drive, 1)
+        fabrication.generate_3d_mesh(debugger, 'driven_cut.obj', driven_cut, 1)
 
 
 def generate_gear(drive_model: Model, driven_model: Model, show_math_anim=False, save_math_anim=False,
                   show_cut_anim=False, save_cut_anim=False):
-    # TODO: create debugged generate gear if necessary
     debugger = MyDebugger(drive_model.name)
     # create a log file in the debug folder
     logging_fh = logging.FileHandler(debugger.file_path('logs.log'), 'w')
@@ -158,10 +176,4 @@ def generate_all_models():
 if __name__ == '__main__':
     # generate_all_models()
 
-    model = our_models[1]
-    drive_tooth_contour, final_gear_contour, debugger = generate_gear(model, show_cut_anim=True, save_cut_anim=True,
-                                                                      show_math_anim=False)
-
-    # generate fabrication files
-    fabrication.generate_2d_obj(debugger, 'drive_tooth.obj', drive_tooth_contour)
-    fabrication.generate_2d_obj(debugger, 'driven_cut.obj', final_gear_contour)
+    optimize_dual(find_model_by_name('man'), find_model_by_name('trump'), True, True)
