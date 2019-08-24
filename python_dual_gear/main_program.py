@@ -5,7 +5,7 @@ from core.compute_dual_gear import compute_dual_gear, rotate_and_cut
 from shapely.affinity import translate
 import fabrication
 import shape_factory
-from plot.plot_util import plot_cartesian_shape, plot_polar_shape, init_plot
+from plot.plot_util import plot_cartesian_shape, plot_polar_shape, init_plot, plot_contour_and_save
 import logging
 import sys
 from plot.plot_sampled_function import plot_sampled_function
@@ -21,10 +21,17 @@ logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
 
 def math_rotate(drive_model: Model, drive_contour: np.ndarray, debugger: MyDebugger):
-    # TODO: save necessary figures
     center = drive_model.center_point
     polar_contour = toExteriorPolarCoord(Point(center[0], center[1]), drive_contour, drive_model.sample_num)
     driven_gear, center_distance, phi = compute_dual_gear(polar_contour, k=drive_model.k)
+
+    # save figures
+    plot_contour_and_save(toCartesianCoordAsNp(polar_contour, 0, 0), debugger.file_path('math_rotate/drive.png'),
+                          figure_config.math_shapes['drive_face'], figure_config.math_shapes['drive_edge'])
+    plot_contour_and_save(toCartesianCoordAsNp(driven_gear, 0, 0), debugger.file_path('math_rotate/driven.png'),
+                          figure_config.math_shapes['driven_face'], figure_config.math_shapes['driven_edge'])
+
+    logging.info('math rotate complete')
     logging.info(f'Center Distance = {center_distance}')
     return center_distance, phi
 
@@ -43,12 +50,18 @@ def optimize_dual(drive_model: Model, driven_model: Model, do_math_rotate=False,
         with open(opt_config) as config_file:
             opt_config = yaml.safe_load(config_file)
             opt_config['sampling_count'] = tuple(opt_config['sampling_count'])
+    logging.debug('optimization config parse complete, config:' + repr(opt_config))
 
     # get the original contours
     drive_contour = shape_factory.get_shape_contour(drive_model, True, None, drive_model.smooth)
     driven_contour = shape_factory.get_shape_contour(driven_model, True, None, driven_model.smooth)
     fabrication.generate_3d_mesh(debugger, 'drive_original.obj', drive_contour, 1)
     fabrication.generate_3d_mesh(debugger, 'driven_original.obj', drive_contour, 1)
+    plot_contour_and_save(drive_contour, debugger.file_path('input_drive.png'),
+                          figure_config.input_shapes['drive_face'], figure_config.input_shapes['drive_edge'])
+    plot_contour_and_save(driven_contour, debugger.file_path('input_driven.png'),
+                          figure_config.input_shapes['driven_face'], figure_config.input_shapes['driven_edge'])
+    logging.debug('original 3D meshes generated')
 
     # do math rotate
     if do_math_rotate:
@@ -58,6 +71,7 @@ def optimize_dual(drive_model: Model, driven_model: Model, do_math_rotate=False,
     results = optimize_pair_from_config(drive_contour, driven_contour, debugger, opt_config)
     results.sort(key=lambda total_score, *_: total_score)
     best_result = results[0]
+    logging.info(f'Best result with score {best_result[0]}')
 
     total_score, score, *center, center_distance, drive, driven = best_result
     fabrication.generate_3d_mesh(debugger, 'drive_not_cut.obj', drive, 1)
