@@ -1,7 +1,8 @@
-from shapely.geometry import Point
 from matplotlib.lines import Line2D
 from shape_processor import toExteriorPolarCoord, toCartesianCoordAsNp
 import matplotlib.pyplot as plt
+import numpy as np
+import figure_config
 
 
 # set up the plotting window
@@ -29,3 +30,25 @@ def plot_polar_shape(ax, title, polar_contour, center, sample_num):
         ax.add_line(l)
     ax.scatter(center[0], center[1], s=10, c='b')
     ax.axis('equal')
+
+
+def plot_contour_and_save(contour: np.ndarray, file_path: str, face_color=None, edge_color=None):
+    fig = plt.figure(figsize=figure_config.figure_size)
+    plt.fill(contour[:, 0], contour[:, 1], "g", facecolor='lightsalmon' if face_color is None else face_color,
+             edgecolor='orangered' if edge_color is None else edge_color, linewidth=3, alpha=0.3)
+    plt.axis(figure_config.axis_range['x_lim'] + figure_config.axis_range['y_lim'])
+    plt.axis('off')
+    plt.savefig(file_path)
+    plt.close(fig)
+
+
+if __name__ == '__main__':
+    from debug_util import MyDebugger
+
+    debugger = MyDebugger('test')
+    contour = np.array([
+        (0, 0),
+        (2, 3),
+        (3, -2)
+    ])
+    plot_contour_and_save(contour, debugger.file_path('test.png'), (1.0, 0.0, 0.0), (0.0, 0.0, 1.0))
