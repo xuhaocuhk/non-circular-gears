@@ -13,10 +13,10 @@ def init_plot():
     return fig, plts
 
 
-def plot_cartesian_shape(ax, title, contour):
+def plot_cartesian_shape(ax, title, contour, face_color=None, edge_color=None):
     ax.set_title(title)
-    ax.fill(contour[:, 0], contour[:, 1], "g", facecolor='lightsalmon', edgecolor='orangered', linewidth=3,
-            alpha=0.3)
+    ax.fill(contour[:, 0], contour[:, 1], "g", facecolor='lightsalmon' if face_color is None else face_color,
+            edgecolor='orangered' if edge_color is None else edge_color, linewidth=3, alpha=0.3)
     ax.axis('equal')
 
 

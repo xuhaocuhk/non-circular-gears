@@ -3,14 +3,13 @@ from models import our_models
 from shape_processor import *
 from core.compute_dual_gear import compute_dual_gear, rotate_and_cut, _plot_polygon
 from shapely.affinity import translate
-import os
 import fabrication
 import shape_factory
 from plot.plot_util import plot_cartesian_shape, plot_polar_shape, init_plot
 import logging
 import sys
 from plot.plot_sampled_function import plot_sampled_function
-from shapely.validation import explain_validity
+import figure_config
 
 # writing log to file
 logging.basicConfig(filename='debug\\info.log', level=logging.INFO)
@@ -21,7 +20,9 @@ def generate_gear(model, show_math_anim=False, save_math_anim=False, show_cut_an
     debugger = MyDebugger(model.name)
 
     fig, plts = init_plot()
-    contour = shape_factory.get_shape_contour(model, True, plts[0], smooth=model.smooth)
+    contour = shape_factory.get_shape_contour(model, True, plts[0], smooth=model.smooth,
+                                              face_color=figure_config.input_shapes['drive_face'],
+                                              edge_color=figure_config.input_shapes['drive_edge'])
 
     # convert to polar coordinate shape
     center = model.center_point
