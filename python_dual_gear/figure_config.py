@@ -5,8 +5,13 @@ all colors shall be in matplotlib style
 
 figure_size = (20, 20)
 axis_range = {
-    'x_lim': (-3, 7),
-    'y_lim': (-5, 5)
+    'x_lim': (-1.5, 2.5),
+    'y_lim': (-2, 2)
+}
+scatter_point = {
+    'size': 0.05,
+    'color': (1.0, 1.0, 1.0),
+    'edge': (0.498, 0.498, 0.498)
 }
 input_shapes = {
     'drive_face': (0.8, 0.8, 0.8),

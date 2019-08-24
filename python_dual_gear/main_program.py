@@ -27,9 +27,9 @@ def math_rotate(drive_model: Model, drive_contour: np.ndarray, debugger: MyDebug
 
     # save figures
     plot_contour_and_save(toCartesianCoordAsNp(polar_contour, 0, 0), debugger.file_path('math_rotate/drive.png'),
-                          figure_config.math_shapes['drive_face'], figure_config.math_shapes['drive_edge'])
+                          figure_config.math_shapes['drive_face'], figure_config.math_shapes['drive_edge'], (0, 0))
     plot_contour_and_save(toCartesianCoordAsNp(driven_gear, 0, 0), debugger.file_path('math_rotate/driven.png'),
-                          figure_config.math_shapes['driven_face'], figure_config.math_shapes['driven_edge'])
+                          figure_config.math_shapes['driven_face'], figure_config.math_shapes['driven_edge'], (0, 0))
 
     logging.info('math rotate complete')
     logging.info(f'Center Distance = {center_distance}')
