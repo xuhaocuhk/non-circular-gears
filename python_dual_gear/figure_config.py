@@ -1,9 +1,9 @@
 """
 config of colors
-all colors shall be in matplotlib style
+all colors shall be in Qt style
 """
 
-figure_size = (20, 20)
+figure_size = (2000, 2000)
 axis_range = {
     'x_lim': (-1.5, 2.5),
     'y_lim': (-2, 2)
