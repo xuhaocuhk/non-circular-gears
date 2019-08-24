@@ -64,6 +64,7 @@ def optimize_dual(drive_model: Model, driven_model: Model, do_math_rotate=False,
 
     # add teeth
     normals = getNormals(drive, None, drive_model.center_point)
+    # TODO: teeth not added onto the contour
     drive_contour = addToothToContour(drive, center, center_distance, normals, height=drive_model.tooth_height,
                                       tooth_num=drive_model.tooth_num,
                                       plt_axis=None, consider_driving_torque=False,
