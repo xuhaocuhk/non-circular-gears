@@ -12,6 +12,7 @@ from plot.plot_sampled_function import plot_sampled_function
 import yaml
 import os
 from optimization import optimize_pair_from_config
+import itertools
 
 # writing log to file
 logging.basicConfig(filename='debug\\info.log', level=logging.INFO)
@@ -165,8 +166,9 @@ def generate_gear(drive_model: Model, driven_model: Model, show_math_anim=False,
 
 
 def generate_all_models():
-    for model in our_models:
-        drive_tooth_contour, final_gear_contour, debugger = generate_gear(model, True, True, True, True)
+    for model_drive, model_driven in itertools.product(our_models, our_models):
+        drive_tooth_contour, final_gear_contour, debugger = generate_gear(model_drive, model_driven, True, True, True,
+                                                                          True)
 
         # generate fabrication files
         fabrication.generate_2d_obj(debugger, 'drive_tooth.obj', drive_tooth_contour)
@@ -176,4 +178,4 @@ def generate_all_models():
 if __name__ == '__main__':
     # generate_all_models()
 
-    optimize_dual(find_model_by_name('man'), find_model_by_name('trump'), True, True)
+    optimize_dual(find_model_by_name('ellipse'), find_model_by_name('ellipse'), True, True)
