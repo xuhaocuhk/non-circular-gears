@@ -103,11 +103,11 @@ def generate_gear(drive_model: Model, driven_model: Model, show_math_anim=False,
 
     fig, plts = init_plot()
     drive_contour = shape_factory.get_shape_contour(drive_model, True, plts[0], smooth=drive_model.smooth,
-                                              face_color=figure_config.input_shapes['drive_face'],
-                                              edge_color=figure_config.input_shapes['drive_edge'])
+                                                    face_color=figure_config.input_shapes['drive_face'],
+                                                    edge_color=figure_config.input_shapes['drive_edge'])
     driven_contour = shape_factory.get_shape_contour(driven_model, True, plts[2], smooth=driven_model.smooth,
-                                              face_color=figure_config.input_shapes['drive_face'],
-                                              edge_color=figure_config.input_shapes['drive_edge'])
+                                                     face_color=figure_config.input_shapes['driven_face'],
+                                                     edge_color=figure_config.input_shapes['driven_edge'])
 
     # convert to polar coordinate shape
     center = drive_model.center_point
