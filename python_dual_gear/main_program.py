@@ -1,38 +1,98 @@
 from debug_util import MyDebugger
 from models import our_models, Model
 from shape_processor import *
-from core.compute_dual_gear import compute_dual_gear, rotate_and_cut, _plot_polygon
+from core.compute_dual_gear import compute_dual_gear, rotate_and_cut
 from shapely.affinity import translate
-import os
 import fabrication
 import shape_factory
 from plot.plot_util import plot_cartesian_shape, plot_polar_shape, init_plot
 import logging
 import sys
 from plot.plot_sampled_function import plot_sampled_function
-from shapely.validation import explain_validity
+import yaml
+import os
+from optimization import optimize_pair_from_config
 
 # writing log to file
 logging.basicConfig(filename='debug\\info.log', level=logging.INFO)
 logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
 
+def math_rotate(drive_model: Model, k: int, debugger: MyDebugger):
+    # TODO: Extract math rotate related code
+    pass
+
+
+def optimize_dual(drive_model: Model, driven_model: Model, do_math_rotate=False, do_cut_rotate=False,
+                  opt_config='optimization_config.yaml'):
+    # debugger and logging
+    debugger = MyDebugger([model.name for model in (drive_model, driven_model)])
+    logging_fh = logging.FileHandler(debugger.file_path('logs.log'), 'w')
+    logging_fh.setLevel(logging.DEBUG)
+    logging_fh.setFormatter(logging.Formatter('[%(asctime)s][%(name)s][%(levelname)s] %(message)s'))
+    logging.getLogger('').addHandler(logging_fh)
+
+    # parse config
+    if isinstance(opt_config, str) and os.path.isfile(opt_config):
+        with open(opt_config) as config_file:
+            opt_config = yaml.safe_load(config_file)
+            opt_config['sampling_count'] = tuple(opt_config['sampling_count'])
+
+    if do_math_rotate:
+        math_rotate(drive_model, opt_config['k'], debugger)
+
+    # get the original contours
+    drive_contour = shape_factory.get_shape_contour(drive_model, True, None, drive_model.smooth)
+    driven_contour = shape_factory.get_shape_contour(driven_model, True, None, driven_model.smooth)
+    fabrication.generate_3d_mesh(debugger, 'drive_original.obj', drive_contour, 1)
+    fabrication.generate_3d_mesh(debugger, 'driven_original.obj', drive_contour, 1)
+
+    # optimization
+    results = optimize_pair_from_config(drive_contour, driven_contour, debugger, opt_config)
+    results.sort(key=lambda total_score, *_: total_score)
+    best_result = results[0]
+
+    total_score, score, *center, center_distance, drive, driven = best_result
+    fabrication.generate_3d_mesh(debugger, 'drive_not_cut.obj', drive, 1)
+    fabrication.generate_3d_mesh(debugger, 'driven_not_cut.obj', driven, 1)
+
+    # add teeth
+    normals = getNormals(drive, None, drive_model.center_point)
+    drive_contour = addToothToContour(drive, center, center_distance, normals, height=drive_model.tooth_height,
+                                      tooth_num=drive_model.tooth_num,
+                                      plt_axis=None, consider_driving_torque=False,
+                                      consider_driving_continue=False)
+    fabrication.generate_3d_mesh(debugger, 'drive_with_teeth.obj', drive_contour, 1)
+
+    # rotate and cut
+    if do_cut_rotate:
+        # TODO: cut-and-rotate functions here
+        pass
+
+
 def generate_gear(drive_model: Model, driven_model: Model, show_math_anim=False, save_math_anim=False,
                   show_cut_anim=False, save_cut_anim=False):
+    # TODO: create debugged generate gear if necessary
     debugger = MyDebugger(drive_model.name)
+    # create a log file in the debug folder
+    logging_fh = logging.FileHandler(debugger.file_path('logs.log'), 'w')
+    logging_fh.setLevel(logging.DEBUG)
+    logging_fh.setFormatter(logging.Formatter('[%(asctime)s][%(name)s][%(levelname)s] %(message)s'))
+    logging.getLogger('').addHandler(logging_fh)
 
     fig, plts = init_plot()
-    contour = shape_factory.get_shape_contour(drive_model, True, plts[0], smooth=drive_model.smooth)
+    drive_contour = shape_factory.get_shape_contour(drive_model, True, plts[0], smooth=drive_model.smooth)
+    driven_contour = shape_factory.get_shape_contour(driven_model, True, plts[2], smooth=driven_model.smooth)
 
     # convert to polar coordinate shape
     center = drive_model.center_point
     if center is None:
-        center = getVisiblePoint(contour)
+        center = getVisiblePoint(drive_contour)
         if center is None:
-            logging.error("No visible point found, need manually assign one!")
+            logging.error("No visible points found, need manually assign one!")
             exit(1)
 
-    polar_contour = toExteriorPolarCoord(Point(center[0], center[1]), contour, drive_model.sample_num)
+    polar_contour = toExteriorPolarCoord(Point(center[0], center[1]), drive_contour, drive_model.sample_num)
     plot_polar_shape(plts[1][0], 'Polar shape', polar_contour, drive_model.center_point, drive_model.sample_num)
 
     # generate and draw the dual shape
@@ -46,18 +106,19 @@ def generate_gear(drive_model: Model, driven_model: Model, show_math_anim=False,
                               100, 0.001, [(0, 0), (center_distance, 0)], (8, 8), ((-0.5, 1.5), (-1.1, 1.1)))
 
     # calculate normals
-    plot_cartesian_shape(plts[1][1], "Normals", contour)
-    normals = getNormals(contour, plts[1][1], drive_model.center_point)
+    plot_cartesian_shape(plts[1][1], "Normals", drive_contour)
+    normals = getNormals(drive_contour, plts[1][1], drive_model.center_point)
 
     # generate teeth
-    contour = addToothToContour(contour, center, center_distance, normals, height=drive_model.tooth_height,
-                                tooth_num=drive_model.tooth_num,
-                                plt_axis=plts[1][1], consider_driving_torque=False, consider_driving_continue=False)
-    plot_cartesian_shape(plts[1][2], 'Add Tooth', contour)
+    drive_contour = addToothToContour(drive_contour, center, center_distance, normals, height=drive_model.tooth_height,
+                                      tooth_num=drive_model.tooth_num,
+                                      plt_axis=plts[1][1], consider_driving_torque=False,
+                                      consider_driving_continue=False)
+    plot_cartesian_shape(plts[1][2], 'Add Tooth', drive_contour)
 
     # cut and generate the cutting dual shape
     drive_tooth_contour = []
-    for x, y in contour:
+    for x, y in drive_contour:
         drive_tooth_contour.append((x - center[0], y - center[1]))
     drive_gear = Polygon(drive_tooth_contour)
     drive_gear = drive_gear.buffer(0)  # resolve invalid polygon issues
@@ -74,7 +135,7 @@ def generate_gear(drive_model: Model, driven_model: Model, show_math_anim=False,
     cut_fig.savefig(debugger.file_path('cut_final.pdf'))
     fig.savefig(debugger.file_path('shapes.pdf'))
 
-    # TODO: consider tolarence when fabricate
+    # TODO: consider tolerance when fabricate
     fabrication.generate_2d_obj(debugger, 'drive.obj', toCartesianCoordAsNp(polar_contour, 0, 0))
     fabrication.generate_2d_obj(debugger, 'driven_math.obj', toCartesianCoordAsNp(driven_gear, 0, 0 + center_distance))
     fabrication.generate_3d_mesh(debugger, 'drive_3d.obj', toCartesianCoordAsNp(polar_contour, 0, 0), 1)

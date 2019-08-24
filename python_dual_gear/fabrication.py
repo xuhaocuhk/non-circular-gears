@@ -28,8 +28,10 @@ def generate_3d_mesh(debugger: MyDebugger, filename: str, contour: np.ndarray, t
     :param filename: filename (excluding the extension)
     :param contour: the contour to create 3d object with
     :param thickness: the thickness of 3d object mesh
-    :return:
+    :return: None
     """
+    if filename[-4:] != '.obj':
+        filename = filename + '.obj'
     destination = debugger.file_path(filename)
     with open(destination, 'w') as obj_file:
         point_to_vertex = {}

@@ -155,7 +155,7 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
                           keep_count: int, resampling_accuracy: int, comparing_accuracy: int, debugger: MyDebugger,
                           max_sample_depth: int = 5, max_iteration: int = 1, smoothing: Tuple[int, int] = (0, 0),
                           visualization: Union[Dict, None] = None, draw_tar_functions: bool = False) \
-        -> List[Tuple[float, np.ndarray, np.ndarray]]:
+        -> List[Tuple[float, float, float, float, float, np.ndarray, np.ndarray]]:
     """
     perform sampling optimization for drive contour and driven contour
     :param drive_contour: the driving gear's contour
@@ -171,7 +171,7 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
     :param smoothing: smoothing level to be taken by uniform re-sampling
     :param visualization: None for no figure, otherwise for visualization configuration
     :param draw_tar_functions: True for drawing tar functions in debug windows (affect performance)
-    :return: final score, center_x, center_y, center_distance drive contour and driven contour
+    :return: final total score, score, center_x, center_y, center_distance, drive contour and driven contour
     """
     drive_contour = counterclockwise_orientation(drive_contour)
     driven_contour = counterclockwise_orientation(driven_contour)
