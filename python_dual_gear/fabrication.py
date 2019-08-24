@@ -7,6 +7,8 @@ from shapely.geometry import Polygon
 from shapely.geometry import Point
 from shapely.geometry import LineString
 from shapely.ops import triangulate
+from typing import Tuple
+import os
 
 
 def read_2d_obj(filename):
@@ -91,13 +93,13 @@ def generate_3d_mesh_hole(debugger: MyDebugger, filename: str, contour: np.ndarr
         point_to_vertex = {}
         for index, point in enumerate(contour):
             point_to_vertex[tuple(point)] = (index * 2 + 1, index * 2 + 2)
-            print(f'v {point[0]}, {point[1]} 0', file = obj_file)
-            print(f'v {point[0]}, {point[1]} {thickness}', file = obj_file)
+            print(f'v {point[0]}, {point[1]} 0', file=obj_file)
+            print(f'v {point[0]}, {point[1]} {thickness}', file=obj_file)
         for index, point in enumerate(interiors):
             index += len(contour)
             point_to_vertex[tuple(point)] = (index * 2 + 1, index * 2 + 2)
-            print(f'v {point[0]}, {point[1]} 0', file = obj_file)
-            print(f'v {point[0]}, {point[1]} {thickness}', file = obj_file)
+            print(f'v {point[0]}, {point[1]} 0', file=obj_file)
+            print(f'v {point[0]}, {point[1]} {thickness}', file=obj_file)
 
         poly = Polygon(contour, [interiors])
         triangles = triangulate(poly)
@@ -108,7 +110,7 @@ def generate_3d_mesh_hole(debugger: MyDebugger, filename: str, contour: np.ndarr
             *points, _ = triangle.exterior.coords
             face_1, face_2 = zip(*[point_to_vertex[point] for point in points])
             for face in (face_1[::-1], face_2):
-                print('f '+ ' '.join([str(i) for i in face]), file=obj_file)
+                print('f ' + ' '.join([str(i) for i in face]), file=obj_file)
         for index, point in enumerate(contour):
             lower_point, upper_point = point_to_vertex[tuple(point)]
             lower_prev, upper_prev = point_to_vertex[tuple(contour[index - 1])]
@@ -137,48 +139,52 @@ def draw_cross(axis):
     """
     x = axis.x
     y = axis.y
-    cross_contour = [(x+1.22, y+1.22),
-                     (x+0.92, y+1.22),
-                     (x+0.92, y+2.42),
-                     (x-0.92, y+2.42),
-                     (x-0.92, y+1.22),
-                     (x-1.22, y+1.22),
-                     (x-1.22, y+0.92),
-                     (x-2.42, y+0.92),
-                     (x-2.42, y-0.92),
-                     (x-1.22, y-0.92),
-                     (x-1.22, y-1.22),
-                     (x-0.92, y-1.22),
-                     (x-0.92, y-2.42),
-                     (x+0.92, y-2.42),
-                     (x+0.92, y-1.22),
-                     (x+1.22, y-1.22),
-                     (x+1.22, y-0.92),
-                     (x+2.42, y-0.92),
-                     (x+2.42, y+0.92),
-                     (x+1.22, y+0.92)]
+    cross_contour = [(x + 1.22, y + 1.22),
+                     (x + 0.92, y + 1.22),
+                     (x + 0.92, y + 2.42),
+                     (x - 0.92, y + 2.42),
+                     (x - 0.92, y + 1.22),
+                     (x - 1.22, y + 1.22),
+                     (x - 1.22, y + 0.92),
+                     (x - 2.42, y + 0.92),
+                     (x - 2.42, y - 0.92),
+                     (x - 1.22, y - 0.92),
+                     (x - 1.22, y - 1.22),
+                     (x - 0.92, y - 1.22),
+                     (x - 0.92, y - 2.42),
+                     (x + 0.92, y - 2.42),
+                     (x + 0.92, y - 1.22),
+                     (x + 1.22, y - 1.22),
+                     (x + 1.22, y - 0.92),
+                     (x + 2.42, y - 0.92),
+                     (x + 2.42, y + 0.92),
+                     (x + 1.22, y + 0.92)]
     return cross_contour
 
 
-def generate_gear_pair(distance:int, filename_drive:str, filename_driven:str, drive_axis:Point, driven_axis:Point):
+def generate_gear_pair(distance: float, filename_drive: str, filename_driven: str, drive_axis: Tuple[float, float],
+                       driven_axis: Tuple[float, float], debugger: MyDebugger, thickness: float):
     """
     :param distance: distance between axes of two gears
     :param filename_drive: file name of the drive gear
     :param filename_driven: file name of the driven gear
     :return:
     """
+    assert os.path.isfile(filename_drive)
+    assert os.path.isfile(filename_driven)
     exterior_drive = read_2d_obj(filename_drive)
     exterior_driven = read_2d_obj(filename_driven)
-    scaling_ratio = distance*7.97/(math.fabs(drive_axis.x - driven_axis.x))
-    exterior_drive_scale = [(scaling_ratio*drive_point[0], scaling_ratio*drive_point[1]) for drive_point in exterior_drive]
-    exterior_driven_scale = [(scaling_ratio*driven_point[0], scaling_ratio*driven_point[1]) for driven_point in exterior_driven]
-    drive_axis_scale = Point(drive_axis.x*scaling_ratio, drive_axis.y*scaling_ratio)
-    driven_axis_scale = Point(driven_axis.x*scaling_ratio, driven_axis.y*scaling_ratio)
+    scaling_ratio = distance * 7.97 / (math.fabs(drive_axis[0] - driven_axis[0]))
+    exterior_drive_scale = [(scaling_ratio * drive_point[0], scaling_ratio * drive_point[1]) for drive_point in
+                            exterior_drive]
+    exterior_driven_scale = [(scaling_ratio * driven_point[0], scaling_ratio * driven_point[1]) for driven_point in
+                             exterior_driven]
+    drive_axis_scale = Point(drive_axis[0] * scaling_ratio, drive_axis[1] * scaling_ratio)
+    driven_axis_scale = Point(driven_axis[0] * scaling_ratio, driven_axis[1] * scaling_ratio)
     interior_drive = draw_cross(drive_axis_scale)
     interior_driven = draw_cross(driven_axis_scale)
-    debugger = MyDebugger('test')
-    generate_3d_mesh_hole(debugger, 'drive.obj', np.array(exterior_drive_scale), np.array(interior_drive), 6)
-    generate_3d_mesh_hole(debugger, 'driven.obj', np.array(exterior_driven_scale), np.array(interior_driven), 6)
+    generate_3d_mesh_hole(debugger, 'drive.obj', np.array(exterior_drive_scale), np.array(interior_drive), thickness)
+    generate_3d_mesh_hole(debugger, 'driven.obj', np.array(exterior_driven_scale), np.array(interior_driven), thickness)
 
 
 if __name__ == '__main__':
@@ -194,9 +200,6 @@ if __name__ == '__main__':
     # generate_3d_mesh_hole(MyDebugger('test'), 'output.obj', square_contour, cross_contour, 2)
     filename_drive = 'C:/Users/admin/Documents/GitHub/gears/python_dual_gear/debug/printtest/drive_tooth.obj'
     filename_driven = 'C:/Users/admin/Documents/GitHub/gears/python_dual_gear/debug/printtest/driven_cut.obj'
-    drive_axis = Point(0, 0)
-    driven_axis = Point(0.6311470734139077, 0)
-    generate_gear_pair(14, filename_drive, filename_driven, drive_axis, driven_axis)
-
-
-
+    drive_axis = (0, 0)
+    driven_axis = (0.6311470734139077, 0)
+    generate_gear_pair(14, filename_drive, filename_driven, drive_axis, driven_axis, MyDebugger('test'), 6)
