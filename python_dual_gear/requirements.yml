@@ -1,0 +1,64 @@
+name: gears
+channels:
+  - defaults
+dependencies:
+  - blas=1.0=mkl
+  - ca-certificates=2019.5.15=0
+  - certifi=2019.6.16=py37_0
+  - cloudpickle=1.2.1=py_0
+  - cycler=0.10.0=py37_0
+  - cytoolz=0.9.0.1=py37hfa6e2cd_1
+  - dask-core=2.1.0=py_0
+  - decorator=4.4.0=py37_1
+  - freetype=2.9.1=ha9979f8_1
+  - geos=3.7.1=h33f27b4_0
+  - icc_rt=2019.0.0=h0cc432a_1
+  - icu=58.2=ha66f8fd_1
+  - imageio=2.5.0=py37_0
+  - intel-openmp=2019.4=245
+  - jpeg=9b=hb83a4c4_2
+  - kiwisolver=1.1.0=py37ha925a31_0
+  - libpng=1.6.37=h2a8f88b_0
+  - libtiff=4.0.10=hb898794_2
+  - matplotlib=3.1.0=py37hc8f65d3_0
+  - mkl=2019.4=245
+  - mkl_fft=1.0.12=py37h14836fe_0
+  - mkl_random=1.0.2=py37h343c172_0
+  - networkx=2.3=py_0
+  - numpy=1.16.4=py37h19fb1c0_0
+  - numpy-base=1.16.4=py37hc3f5095_0
+  - olefile=0.46=py37_0
+  - openssl=1.1.1c=he774522_1
+  - pillow=6.0.0=py37hdc69c19_0
+  - pip=19.1.1=py37_0
+  - pyparsing=2.4.0=py_0
+  - pyqt=5.9.2=py37h6538335_2
+  - python=3.7.3=h8c8aaf0_1
+  - python-dateutil=2.8.0=py37_0
+  - pytz=2019.1=py_0
+  - pywavelets=1.0.3=py37h8c2d366_1
+  - pyyaml=5.1.1=py37he774522_0
+  - qt=5.9.7=vc14h73c81de_0
+  - scikit-image=0.15.0=py37ha925a31_0
+  - scipy=1.2.1=py37h29ff71c_0
+  - setuptools=41.0.1=py37_0
+  - shapely=1.6.4=py37h222a598_0
+  - sip=4.19.8=py37h6538335_0
+  - six=1.12.0=py37_0
+  - sqlite=3.28.0=he774522_0
+  - tk=8.6.8=hfa6e2cd_0
+  - toolz=0.9.0=py37_0
+  - tornado=6.0.3=py37he774522_0
+  - vc=14.1=h0510ff6_4
+  - vs2015_runtime=14.15.26706=h3a45250_4
+  - wheel=0.33.4=py37_0
+  - wincertstore=0.2=py37_0
+  - xz=5.2.4=h2fa13f4_4
+  - yaml=0.1.7=hc54c509_2
+  - zlib=1.2.11=h62dcd97_3
+  - zstd=1.3.7=h508b16e_0
+  - pip:
+      - dtw==1.3.3
+      - openmesh==1.1.3
+prefix: C:\ProgramData\Anaconda3\envs\gears
+

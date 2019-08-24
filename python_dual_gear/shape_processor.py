@@ -166,7 +166,8 @@ def getNormals(contour: np.array, plt_axis, center, normal_filter=True):
         normal_l = [normal[0] * 0.05, normal[1] * 0.05]
         end = start + normal_l
         l = Line2D([start[0], end[0]], [start[1], end[1]], linewidth=1)
-        plt_axis.add_line(l)
+        if plt_axis is not None:
+            plt_axis.add_line(l)
 
     return normals
 

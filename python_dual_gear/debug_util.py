@@ -2,7 +2,7 @@ import time
 import datetime
 import os
 import logging
-from typing import Union, List, Callable
+from typing import Union, Iterable, Callable
 from multiprocessing import Process
 import sys
 
@@ -10,7 +10,7 @@ import sys
 class MyDebugger:
     pre_fix = 'debug'
 
-    def __init__(self, model_name: Union[str, List[str]]):
+    def __init__(self, model_name: Union[str, Iterable[str]]):
         if isinstance(model_name, str):
             self.model_name = model_name
         else:

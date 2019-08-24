@@ -1,5 +1,6 @@
 from typing import Tuple, List, Union
 import yaml
+import os
 
 
 class Model:
@@ -23,7 +24,7 @@ def load_models(filename: str) -> List[Model]:
         return [load_model_from_file(data) for data in yaml.safe_load(file)]
 
 
-our_models = load_models('models.yaml')
+our_models = load_models(os.path.join(os.path.dirname(__file__), 'models.yaml'))
 
 
 def find_model_by_name(model_name: str) -> Union[Model, None]:
