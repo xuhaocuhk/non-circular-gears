@@ -8,6 +8,7 @@ import numpy as np
 import figure_config as conf
 import logging
 import itertools
+from typing import Iterable, Tuple, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -31,15 +32,10 @@ class Plotter:
         self.scaling = scaling
         self.window = PlotterWindow()
         self.window.resize(*figure_config.figure_size)
-        self.window.polygons = [self.scaled_polygon(np.array([(0.5, -0.5), (0.5, 0.5), (-0.5, 0.5), (-0.5, -0.5)]))]
-        self.window.pens = [self.pens['input_drive']]
-        self.window.brushes = [self.brushes['input_drive']]
-        self.window.repaint()
-        self.window.grab().save('test.png')
         # self.app.exec_()
 
     @staticmethod
-    def create_polygon(contour: np.ndarray):
+    def create_polygon(contour: np.ndarray) -> QtGui.QPolygonF:
         """
         Create a QPolygonF object from the given contour
         :param contour: numpy contour
@@ -50,9 +46,27 @@ class Plotter:
         print(points)
         return QtGui.QPolygonF(points)
 
-    def scaled_polygon(self, contour: np.ndarray):
+    def scaled_polygon(self, contour: np.ndarray) -> QtGui.QPolygonF:
         logger.debug(f'Scaling polygon {contour}')
         return self.create_polygon((contour + self.translation) * self.scaling)
+
+    def draw_contours(self, file_path: str, contours: Iterable[Tuple[str, np.ndarray]],
+                      centers: Optional[Iterable[Tuple[float, float]]]):
+        """
+        draw the given contours and save to an image file
+        :param file_path: the path to the image file to save
+        :param contours: (color option, contour) of the contours to draw
+        :param centers: additional centers to be drawn
+        :return: None
+        """
+        self.window.polygons = [self.scaled_polygon(contour) for _, contour in contours]
+        self.window.pens = [self.pens[config] for config, _ in contours]
+        self.window.brushes = [self.brushes[config] for config, _ in contours]
+        self._save_canvas(file_path)
+
+    def _save_canvas(self, file_path: str):
+        self.window.repaint()
+        self.window.grab().save(file_path)
 
     def __del__(self):
         self.window.close()
