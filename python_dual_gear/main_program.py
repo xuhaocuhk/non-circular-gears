@@ -10,22 +10,31 @@ import logging
 import sys
 from plot.plot_sampled_function import plot_sampled_function
 import yaml
+from plot.qt_plot import Plotter
 import os
 from optimization import optimize_pair_from_config
 import itertools
 import figure_config
+from typing import Optional
 
 # writing log to file
 logging.basicConfig(filename='debug\\info.log', level=logging.INFO)
 logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
 
-def math_rotate(drive_model: Model, drive_contour: np.ndarray, debugger: MyDebugger):
+def math_rotate(drive_model: Model, drive_contour: np.ndarray, debugger: MyDebugger, plotter: Optional[Plotter],
+                animation=False):
     center = drive_model.center_point
     polar_contour = toExteriorPolarCoord(Point(center[0], center[1]), drive_contour, drive_model.sample_num)
     driven_gear, center_distance, phi = compute_dual_gear(polar_contour, k=drive_model.k)
 
+    if animation:
+        plot_sampled_function((polar_contour, driven_gear), (phi,), debugger.get_math_debug_dir_name(),
+                              100, 0.001, [(0, 0), (center_distance, 0)], (8, 8), ((-0.5, 1.5), (-1.1, 1.1)),
+                              plotter=plotter)
+
     # save figures
+    # TODO: change this saving function
     plot_contour_and_save(toCartesianCoordAsNp(polar_contour, 0, 0), debugger.file_path('math_rotate/drive.png'),
                           figure_config.math_shapes['drive_face'], figure_config.math_shapes['drive_edge'], (0, 0))
     plot_contour_and_save(toCartesianCoordAsNp(driven_gear, 0, 0), debugger.file_path('math_rotate/driven.png'),
@@ -37,13 +46,16 @@ def math_rotate(drive_model: Model, drive_contour: np.ndarray, debugger: MyDebug
 
 
 def optimize_dual(drive_model: Model, driven_model: Model, do_math_rotate=False, do_cut_rotate=False,
-                  opt_config='optimization_config.yaml'):
+                  opt_config='optimization_config.yaml', math_animation=False):
     # debugger and logging
     debugger = MyDebugger([model.name for model in (drive_model, driven_model)])
     logging_fh = logging.FileHandler(debugger.file_path('logs.log'), 'w')
     logging_fh.setLevel(logging.DEBUG)
     logging_fh.setFormatter(logging.Formatter('[%(asctime)s][%(name)s][%(levelname)s] %(message)s'))
     logging.getLogger('').addHandler(logging_fh)
+
+    # initialize plotter
+    plotter = Plotter()
 
     # parse config
     if isinstance(opt_config, str) and os.path.isfile(opt_config):
@@ -65,7 +77,7 @@ def optimize_dual(drive_model: Model, driven_model: Model, do_math_rotate=False,
 
     # do math rotate
     if do_math_rotate:
-        math_rotate(drive_model, drive_contour, debugger)
+        math_rotate(drive_model, drive_contour, debugger, plotter, math_animation)
 
     # optimization
     results = optimize_pair_from_config(drive_contour, driven_contour, debugger, opt_config)
@@ -198,4 +210,4 @@ def generate_all_models():
 if __name__ == '__main__':
     # generate_all_models()
 
-    optimize_dual(find_model_by_name('ellipse'), find_model_by_name('ellipse'), True, True)
+    optimize_dual(find_model_by_name('square'), find_model_by_name('ellipse'), True, True, math_animation=True)

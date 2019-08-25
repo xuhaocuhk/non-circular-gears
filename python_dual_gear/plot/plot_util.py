@@ -33,6 +33,7 @@ def plot_polar_shape(ax, title, polar_contour, center, sample_num):
 
 
 def plot_contour_and_save(contour: np.ndarray, file_path: str, face_color=None, edge_color=None, center=None):
+    return  # TODO: this is a temp workaround
     fig = plt.figure(figsize=figure_config.figure_size)
     plt.fill(contour[:, 0], contour[:, 1], "g", facecolor='lightsalmon' if face_color is None else face_color,
              edgecolor='orangered' if edge_color is None else edge_color, linewidth=3, alpha=0.3)

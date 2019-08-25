@@ -46,7 +46,6 @@ class Plotter:
         """
         points = [QtCore.QPointF(x, y) for x, y in contour]
         logger.debug(f'Creating polygon with points {points}')
-        print(points)
         return QtGui.QPolygonF(points)
 
     def scaled_polygon(self, contour: np.ndarray) -> QtGui.QPolygonF:
