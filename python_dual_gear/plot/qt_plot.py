@@ -7,11 +7,22 @@ import sys
 import numpy as np
 import figure_config as conf
 import logging
+import itertools
 
 logger = logging.getLogger(__name__)
 
 
 class Plotter:
+    types = ('input', 'math', 'carve')
+    pens = {
+        type + '_' + driving: getattr(conf, type + '_shapes')[driving + '_edge']
+        for type, driving in itertools.product(types, ('drive', 'driven'))
+    }
+    brushes = {
+        type + '_' + driving: getattr(conf, type + '_shapes')[driving + '_face']
+        for type, driving in itertools.product(types, ('drive', 'driven'))
+    }
+
     def __init__(self, translation=conf.figure_translation, scaling=conf.figure_scale):
         self.app = QtWidgets.QApplication(sys.argv)
         self.translation = translation
@@ -62,4 +73,5 @@ class PlotterWindow(QtWidgets.QWidget):
 
 
 if __name__ == '__main__':
+    print(Plotter.pens, Plotter.brushes)
     plotter = Plotter()
