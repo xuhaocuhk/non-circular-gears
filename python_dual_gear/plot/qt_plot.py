@@ -64,6 +64,8 @@ class Plotter:
         self.window.polygons = [self.scaled_polygon(contour) for _, contour in contours]
         self.window.pens = [self.pens[config] for config, _ in contours]
         self.window.brushes = [self.brushes[config] for config, _ in contours]
+        if centers is not None:
+            self.window.centers = centers
         self._save_canvas(file_path)
 
     def _save_canvas(self, file_path: str):
