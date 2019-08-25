@@ -14,6 +14,7 @@ axis_range = {
 scatter_point = {
     'size': 0.05,  # legacy part in some files
     'radius': 10,
+    'edge_width': 1,
     'color': (255, 255, 255),
     'edge': (127, 127, 127)
 }

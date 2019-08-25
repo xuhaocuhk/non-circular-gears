@@ -32,6 +32,9 @@ class Plotter:
         self.scaling = scaling
         self.window = PlotterWindow()
         self.window.resize(*figure_config.figure_size)
+        self.window.center_pen = QtGui.QPen(QtGui.QColor(*conf.scatter_point['edge']))
+        self.window.center_pen.setWidth(conf.scatter_point['edge_width'])
+        self.window.center_brush = QtGui.QBrush(QtGui.QColor(*conf.scatter_point['color']))
         # self.app.exec_()
 
     @staticmethod
@@ -80,6 +83,9 @@ class PlotterWindow(QtWidgets.QWidget):
         self.polygons = []
         self.pens = []
         self.brushes = []
+        self.centers = []
+        self.center_pen = None
+        self.center_brush = None
         super().__init__()
 
     def paintEvent(self, event: QtGui.QPaintEvent):
@@ -89,6 +95,11 @@ class PlotterWindow(QtWidgets.QWidget):
             painter.setPen(pen)
             painter.setBrush(brush)
             painter.drawPolygon(polygon)
+        if self.center_brush is not None and self.center_pen is not None:
+            painter.setPen(self.center_pen)
+            painter.setBrush(self.center_brush)
+            for center in self.centers:
+                painter.drawEllipse(QtCore.QPointF(*center), conf.scatter_point['radius'], conf.scatter_point['radius'])
 
 
 if __name__ == '__main__':
