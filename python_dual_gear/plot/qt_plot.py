@@ -65,7 +65,7 @@ class Plotter:
         self.window.pens = [self.pens[config] for config, _ in contours]
         self.window.brushes = [self.brushes[config] for config, _ in contours]
         if centers is not None:
-            self.window.centers = centers
+            self.window.centers = [tuple(self.scaling * (np.array(center) + self.translation)) for center in centers]
         self._save_canvas(file_path)
 
     def _save_canvas(self, file_path: str):
@@ -104,5 +104,8 @@ class PlotterWindow(QtWidgets.QWidget):
 
 
 if __name__ == '__main__':
-    print(Plotter.pens, Plotter.brushes)
+    test_gear = np.array(
+        [(-0.5, -0.5), (0.5, -0.5), (0.5, 0.5), (-0.5, 0.5)]
+    )
     plotter = Plotter()
+    plotter.draw_contours('test.png', [('math_drive', test_gear)], [(0, 0)])
