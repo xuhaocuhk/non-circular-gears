@@ -5,8 +5,8 @@ all colors shall be in Qt style
 
 figure_size = (2000, 2000)
 figure_translation = (1.5, 2)
-figure_scale = 100  # translation done before scaling
-edge_width = 3  # in pixels
+figure_scale = 500  # translation done before scaling
+edge_width = 5  # in pixels
 axis_range = {
     'x_lim': (-1.5, 2.5),
     'y_lim': (-2, 2)
@@ -14,7 +14,7 @@ axis_range = {
 scatter_point = {
     'size': 0.05,  # legacy part in some files
     'radius': 10,
-    'edge_width': 1,
+    'edge_width': 3,
     'color': (255, 255, 255),
     'edge': (127, 127, 127)
 }

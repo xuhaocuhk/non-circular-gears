@@ -210,4 +210,4 @@ def generate_all_models():
 if __name__ == '__main__':
     # generate_all_models()
 
-    optimize_dual(find_model_by_name('square'), find_model_by_name('ellipse'), True, True, math_animation=True)
+    optimize_dual(find_model_by_name('ellipse'), find_model_by_name('ellipse'), True, True, math_animation=True)
