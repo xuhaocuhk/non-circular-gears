@@ -9,6 +9,7 @@ import figure_config as conf
 import logging
 import itertools
 from typing import Iterable, Tuple, Optional
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +62,6 @@ class Plotter:
         :param centers: additional centers to be drawn
         :return: None
         """
-        print([contour for _, contour in contours])
         self.window.polygons = [self.scaled_polygon(contour) for _, contour in contours]
         self.window.pens = [self.pens[config] for config, _ in contours]
         self.window.brushes = [self.brushes[config] for config, _ in contours]
@@ -105,8 +105,10 @@ class PlotterWindow(QtWidgets.QWidget):
 
 
 if __name__ == '__main__':
+    from math import sin, cos, pi
+
     test_gear = np.array(
-        [(-0.5, -0.5), (0.5, -0.5), (0.5, 0.5), (-0.5, 0.5)]
+        [(.3 * cos(theta), .4 * sin(theta)) for theta in np.linspace(0, 2 * pi, 1024, endpoint=True)]
     )
     plotter = Plotter()
     plotter.draw_contours('test.png', [('math_drive', test_gear)], [(0, 0)])
