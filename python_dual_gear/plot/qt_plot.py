@@ -61,6 +61,7 @@ class Plotter:
         :param centers: additional centers to be drawn
         :return: None
         """
+        print([contour for _, contour in contours])
         self.window.polygons = [self.scaled_polygon(contour) for _, contour in contours]
         self.window.pens = [self.pens[config] for config, _ in contours]
         self.window.brushes = [self.brushes[config] for config, _ in contours]
