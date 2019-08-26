@@ -120,11 +120,11 @@ def plot_sampled_function(sample_functions, phi_functions, filename_prefix, fram
 
 if __name__ == '__main__':
     from core.compute_dual_gear import compute_dual_gear
-    from drive_gears.ellipse_gear import generate_gear
+    from drive_gears.generate_standard_shapes import gen_ellipse_gear
 
-    drive_gear = generate_gear(8192)
+    drive_gear = gen_ellipse_gear(1024)
 
     k = 2
     driven_gear, center_distance, phi = compute_dual_gear(drive_gear, 2)
-    plot_sampled_function((drive_gear, driven_gear), (phi,), None, 100, 0.001, [(0, 0), (center_distance, 0)],
-                          (8, 8), ((-3, 7), (-5, 5)))
+    plot_sampled_function((drive_gear, driven_gear), (phi,), os.path.dirname(__file__) + '\\debug\\', 100, 0.001,
+                          [(0, 0), (center_distance, 0)], (8, 8), ((-3, 7), (-5, 5)), plotter=Plotter())
