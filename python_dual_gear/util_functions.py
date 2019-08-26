@@ -2,6 +2,7 @@ from typing import Iterable, Collection, SupportsFloat, Sized, Callable
 import math
 import numpy as np
 import struct
+from shapely.geometry import Polygon
 
 
 def standard_deviation_distance(x: Iterable[SupportsFloat], y: Iterable[SupportsFloat]) -> float:
@@ -43,6 +44,10 @@ def pack_contour(contour: np.ndarray) -> bytes:
 def save_contour(filename: str, contour: np.ndarray):
     with open(filename, 'wb') as file:
         file.write(pack_contour(contour))
+
+
+def shapely_polygon_to_numpy_contour(polygon: Polygon) -> np.ndarray:
+    return np.array(list(zip(*polygon.exterior.xy)))
 
 
 if __name__ == '__main__':

@@ -34,11 +34,10 @@ def math_rotate(drive_model: Model, drive_contour: np.ndarray, debugger: MyDebug
                               plotter=plotter)
 
     # save figures
-    # TODO: change this saving function
-    plot_contour_and_save(toCartesianCoordAsNp(polar_contour, 0, 0), debugger.file_path('math_rotate/drive.png'),
-                          figure_config.math_shapes['drive_face'], figure_config.math_shapes['drive_edge'], (0, 0))
-    plot_contour_and_save(toCartesianCoordAsNp(driven_gear, 0, 0), debugger.file_path('math_rotate/driven.png'),
-                          figure_config.math_shapes['driven_face'], figure_config.math_shapes['driven_edge'], (0, 0))
+    plotter.draw_contours(debugger.file_path('math_rotate/drive.png'),
+                          [('math_drive', toCartesianCoordAsNp(polar_contour, 0, 0))], None)
+    plotter.draw_contours(debugger.file_path('math_rotate/driven.png'),
+                          [('math_driven', toCartesianCoordAsNp(driven_gear, 0, 0))], None)
 
     logging.info('math rotate complete')
     logging.info(f'Center Distance = {center_distance}')
@@ -69,10 +68,8 @@ def optimize_dual(drive_model: Model, driven_model: Model, do_math_rotate=False,
     driven_contour = shape_factory.get_shape_contour(driven_model, True, None, driven_model.smooth)
     fabrication.generate_3d_mesh(debugger, 'drive_original.obj', drive_contour, 1)
     fabrication.generate_3d_mesh(debugger, 'driven_original.obj', drive_contour, 1)
-    plot_contour_and_save(drive_contour, debugger.file_path('input_drive.png'),
-                          figure_config.input_shapes['drive_face'], figure_config.input_shapes['drive_edge'])
-    plot_contour_and_save(driven_contour, debugger.file_path('input_driven.png'),
-                          figure_config.input_shapes['driven_face'], figure_config.input_shapes['driven_edge'])
+    plotter.draw_contours(debugger.file_path('input_drive.png'), [('input_drive', drive_contour)], None)
+    plotter.draw_contours(debugger.file_path('input_driven.png'), [('input_driven', driven_contour)], None)
     logging.debug('original 3D meshes generated')
 
     # do math rotate
@@ -109,7 +106,7 @@ def optimize_dual(drive_model: Model, driven_model: Model, do_math_rotate=False,
         drive_gear = Polygon(centered_drive)
         drive_gear = drive_gear.buffer(0)  # resolve invalid polygon issues
         driven_gear_cut, cut_fig, subplot = rotate_and_cut(drive_gear, center_distance, phi, k=drive_model.k,
-                                                           debugger=debugger, replay_animation=True)
+                                                           debugger=debugger, replay_animation=True, plotter=plotter)
         final_polygon = translate(driven_gear_cut, center_distance).buffer(1).simplify(0.2)  # as in generate_gear
         if final_polygon.geom_type == 'MultiPolygon':
             final_polygon = max(final_polygon, key=lambda a: a.area)

@@ -3,6 +3,7 @@ from shape_processor import toExteriorPolarCoord, toCartesianCoordAsNp
 import matplotlib.pyplot as plt
 import numpy as np
 import figure_config
+from plot.qt_plot import Plotter
 
 
 # set up the plotting window
@@ -32,21 +33,9 @@ def plot_polar_shape(ax, title, polar_contour, center, sample_num):
     ax.axis('equal')
 
 
-def plot_contour_and_save(contour: np.ndarray, file_path: str, face_color=None, edge_color=None, center=None):
-    return  # TODO: this is a temp workaround
-    fig = plt.figure(figsize=figure_config.figure_size)
-    plt.fill(contour[:, 0], contour[:, 1], "g", facecolor='lightsalmon' if face_color is None else face_color,
-             edgecolor='orangered' if edge_color is None else edge_color, linewidth=3, alpha=0.3)
-    plt.axis(figure_config.axis_range['x_lim'] + figure_config.axis_range['y_lim'])
-    # scatter center if given
-    if center is not None:
-        center_circle = plt.Circle(center, figure_config.scatter_point['size'],
-                                   facecolor=figure_config.scatter_point['color'],
-                                   edgecolor=figure_config.scatter_point['edge'])
-        fig.gca().add_artist(center_circle)
-    plt.axis('off')
-    plt.savefig(file_path)
-    plt.close(fig)
+def plot_contour_and_save(plotter: Plotter, contour: np.ndarray, file_path: str, face_color=None, edge_color=None,
+                          center=None):
+    raise
 
 
 if __name__ == '__main__':
