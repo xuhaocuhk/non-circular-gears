@@ -126,7 +126,7 @@ if __name__ == '__main__':
     from shape_processor import toExteriorPolarCoord
     from shapely.geometry import Point
 
-    drive_model = find_model_by_name('focal_ellipse')
+    drive_model = find_model_by_name('ellipse')
     drive_contour = shape_factory.get_shape_contour(drive_model, True, None, smooth=drive_model.smooth)
     drive_gear = toExteriorPolarCoord(Point(*drive_model.center_point), drive_contour, 1024)
 
@@ -137,5 +137,5 @@ if __name__ == '__main__':
         plot_sampled_function((drive_gear, driven_gear), (phi,), debugger.file_path(f'k={k}'), 100, 0.001,
                               [(0, 0), (center_distance, 0)], (8, 8), ((-3, 7), (-5, 5)), plotter=Plotter())
         # figure configuration for this:
-        # figure_translation = (1.0, 4.0)
-        # figure_scale = 230
+        # figure_translation = (1.0, 5.0)
+        # figure_scale = 200
