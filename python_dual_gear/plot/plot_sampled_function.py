@@ -137,5 +137,5 @@ if __name__ == '__main__':
         plot_sampled_function((drive_gear, driven_gear), (phi,), debugger.file_path(f'k={k}'), 100, 0.001,
                               [(0, 0), (center_distance, 0)], (8, 8), ((-3, 7), (-5, 5)), plotter=Plotter())
         # figure configuration for this:
-        # figure_translation = (1.5, 3.5)
-        # figure_scale = 250
+        # figure_translation = (1.0, 4.0)
+        # figure_scale = 230

@@ -3,10 +3,12 @@ from scipy.spatial import distance
 import numpy as np
 from shape_processor import toCartesianCoordAsNp
 
+ellipse_a, ellipse_b = 1.5, 1
+
 
 def gen_focal_ellipse(number_of_samples: int) -> [float]:
     sample_points = np.linspace(0, 2 * pi, number_of_samples, endpoint=False)
-    a, e = 1.5, sqrt(1 - 0.5 * 0.5 / 1.5 / 1.5)
+    a, e = ellipse_a, sqrt(1 - ellipse_b ** 2 / ellipse_a ** 2)
 
     def _radius(theta):
         return a * (1 - e * e) / (1 + e * cos(theta))
@@ -15,7 +17,7 @@ def gen_focal_ellipse(number_of_samples: int) -> [float]:
 
 
 def gen_ellipse_gear(number_of_samples: int) -> [float]:
-    a, b = 1.5, 0.5
+    a, b = ellipse_a, ellipse_b
     sample_points = np.linspace(0, 2 * pi, number_of_samples, endpoint=False)
 
     def _radius(theta):
