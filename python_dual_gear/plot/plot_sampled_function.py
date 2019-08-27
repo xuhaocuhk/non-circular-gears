@@ -120,10 +120,15 @@ def plot_sampled_function(sample_functions, phi_functions, filename_prefix, fram
 
 if __name__ == '__main__':
     from core.compute_dual_gear import compute_dual_gear
-    from drive_gears.generate_standard_shapes import gen_ellipse_gear
     from debug_util import MyDebugger
+    import shape_factory
+    from models import find_model_by_name
+    from shape_processor import toExteriorPolarCoord
+    from shapely.geometry import Point
 
-    drive_gear = gen_ellipse_gear(1024)
+    drive_model = find_model_by_name('ellipse')
+    drive_contour = shape_factory.get_shape_contour(drive_model, True, None, smooth=drive_model.smooth)
+    drive_gear = toExteriorPolarCoord(Point(*drive_model.center_point), drive_contour, 1024)
 
     debugger = MyDebugger('different_k')
     for k in (10, 2, 3, 4, 5, 1):
@@ -132,5 +137,5 @@ if __name__ == '__main__':
         plot_sampled_function((drive_gear, driven_gear), (phi,), debugger.file_path(f'k={k}'), 100, 0.001,
                               [(0, 0), (center_distance, 0)], (8, 8), ((-3, 7), (-5, 5)), plotter=Plotter())
         # figure configuration for this:
-        # figure_translation = (1.5, 9)
-        # figure_scale = 100
+        # figure_translation = (1.5, 3.5)
+        # figure_scale = 250
