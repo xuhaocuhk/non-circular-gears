@@ -1,7 +1,9 @@
-from shapely.geometry import Point
 from matplotlib.lines import Line2D
 from shape_processor import toExteriorPolarCoord, toCartesianCoordAsNp
 import matplotlib.pyplot as plt
+import numpy as np
+import figure_config
+from plot.qt_plot import Plotter
 
 
 # set up the plotting window
@@ -13,10 +15,10 @@ def init_plot():
     return fig, plts
 
 
-def plot_cartesian_shape(ax, title, contour):
+def plot_cartesian_shape(ax, title, contour, face_color=None, edge_color=None):
     ax.set_title(title)
-    ax.fill(contour[:, 0], contour[:, 1], "g", facecolor='lightsalmon', edgecolor='orangered', linewidth=3,
-            alpha=0.3)
+    ax.fill(contour[:, 0], contour[:, 1], "g", facecolor='lightsalmon' if face_color is None else face_color,
+            edgecolor='orangered' if edge_color is None else edge_color, linewidth=3, alpha=0.3)
     ax.axis('equal')
 
 
@@ -29,3 +31,20 @@ def plot_polar_shape(ax, title, polar_contour, center, sample_num):
         ax.add_line(l)
     ax.scatter(center[0], center[1], s=10, c='b')
     ax.axis('equal')
+
+
+def plot_contour_and_save(plotter: Plotter, contour: np.ndarray, file_path: str, face_color=None, edge_color=None,
+                          center=None):
+    raise
+
+
+if __name__ == '__main__':
+    from debug_util import MyDebugger
+
+    debugger = MyDebugger('test')
+    contour = np.array([
+        (0, 0),
+        (2, 3),
+        (3, -2)
+    ])
+    plot_contour_and_save(contour, debugger.file_path('test.png'), (1.0, 0.0, 0.0), (0.0, 0.0, 1.0))

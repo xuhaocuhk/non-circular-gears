@@ -3,7 +3,9 @@ import numpy as np
 from shapely.geometry import Polygon, MultiPolygon
 from debug_util import MyDebugger
 import os
-from typing import Tuple
+from typing import Tuple, Optional, Union, List
+from plot.qt_plot import Plotter
+import util_functions
 import matplotlib.pyplot as plt
 
 
@@ -89,7 +91,8 @@ def to_polygon(sample_function, theta_range=(0, 2 * pi)) -> Polygon:
 
 def rotate_and_cut(drive_polygon: Polygon, center_distance, phi, k=1, debugger: MyDebugger = None,
                    replay_animation: bool = False, plot_x_range: Tuple[float, float] = (-1.5, 3),
-                   plot_y_range: Tuple[float, float] = (-2.25, 2.25), save_rate: int = 4):
+                   plot_y_range: Tuple[float, float] = (-2.25, 2.25), save_rate: int = 4,
+                   plotter: Optional[Plotter] = None):
     # save_rate: save 1 frame per save_rate frames
     from shapely.affinity import translate, rotate
     driven_polygon = to_polygon([center_distance] * len(phi))
@@ -114,7 +117,12 @@ def rotate_and_cut(drive_polygon: Polygon, center_distance, phi, k=1, debugger: 
         _plot_polygon((_drive_polygon, driven_polygon), plot_x_range + plot_y_range)
         plt.scatter((0, center_distance), (0, 0), s=100, c='b')
         if debugger is not None and index % save_rate == 0:
-            fig.savefig(os.path.join(debugger.get_cutting_debug_dir_name(), f'before_cut_{index // save_rate}.png'))
+            file_path = os.path.join(debugger.get_cutting_debug_dir_name(), f'before_cut_{index // save_rate}.png')
+            if plotter is None:
+                fig.savefig(file_path)
+            else:
+                plotter.draw_contours(file_path, polygon_to_contour('carve_drive', _drive_polygon) + polygon_to_contour(
+                    'carve_driven', driven_polygon), [(center_distance, 0), (0, 0)])
         plt.pause(0.00001)
     assert isclose(angle_sum, 2 * pi * k, rel_tol=1e-5)
     plt.ioff()
@@ -132,7 +140,13 @@ def rotate_and_cut(drive_polygon: Polygon, center_distance, phi, k=1, debugger: 
             _plot_polygon((_drive_polygon, _driven_polygon), plot_x_range + plot_y_range)
             plt.scatter((0, center_distance), (0, 0), s=100, c='b')
             if debugger is not None and index % save_rate == 0:
-                fig.savefig(os.path.join(debugger.get_cutting_debug_dir_name(), f'after_cut_{index // save_rate}.png'))
+                file_path = os.path.join(debugger.get_cutting_debug_dir_name(), f'after_cut_{index // save_rate}.png')
+                if plotter is None:
+                    fig.savefig(file_path)
+                else:
+                    plotter.draw_contours(file_path,
+                                          polygon_to_contour('carve_drive', _drive_polygon) + polygon_to_contour(
+                                              'carve_driven', _driven_polygon), [(center_distance, 0), (0, 0)])
             plt.pause(0.001)
         plt.ioff()
 
@@ -157,6 +171,12 @@ def _draw_single_polygon(polygon):
     for poly in polygon:
         xs, ys = poly.exterior.xy
         plt.plot(xs, ys)
+
+
+def polygon_to_contour(draw_config: str, polygon: Union[Polygon, MultiPolygon]) -> List[Tuple[str, np.ndarray]]:
+    if not isinstance(polygon, MultiPolygon):
+        polygon = polygon,
+    return [(draw_config, util_functions.shapely_polygon_to_numpy_contour(poly)) for poly in polygon]
 
 
 if __name__ == '__main__':
