@@ -126,7 +126,7 @@ if __name__ == '__main__':
     from shape_processor import toExteriorPolarCoord
     from shapely.geometry import Point
 
-    drive_model = find_model_by_name('ellipse')
+    drive_model = find_model_by_name('focal_ellipse')
     drive_contour = shape_factory.get_shape_contour(drive_model, True, None, smooth=drive_model.smooth)
     drive_gear = toExteriorPolarCoord(Point(*drive_model.center_point), drive_contour, 1024)
 
