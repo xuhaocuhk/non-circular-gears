@@ -11,6 +11,7 @@ import itertools
 from matplotlib.patches import Rectangle
 from core.compute_dual_gear import compute_dual_gear
 from util_functions import align, save_contour
+import core.phi_shape_average as phi_average
 
 
 def counterclockwise_orientation(contour: np.ndarray) -> np.ndarray:
@@ -237,9 +238,12 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
         drive_polar, driven_polar = driven_polar, drive_polar
         drive, driven = driven, drive
         drive_smoothing, driven_smoothing = driven_smoothing, drive_smoothing
-        drive_poly = Polygon(drive)
-        drive = shape_average(drive_polar, toExteriorPolarCoord(Polygon(drive).centroid, drive, resampling_accuracy),
-                              drive_polygon.area, drive_poly.area)
+        # drive_poly = Polygon(drive)
+        # drive = shape_average(drive_polar, toExteriorPolarCoord(Polygon(drive).centroid, drive, resampling_accuracy),
+        #                       drive_polygon.area, drive_poly.area)
+        drive = phi_average.shape_average(drive_polar,
+                                          toExteriorPolarCoord(Polygon(drive).centroid, drive, resampling_accuracy))
+        drive = toCartesianCoordAsNp(drive, 0, 0)
         drive = getUniformContourSampledShape(drive, resampling_accuracy, drive_smoothing > 0)
         for subplot in subplots[2]:
             subplot.clear()
