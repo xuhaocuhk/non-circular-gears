@@ -3,10 +3,24 @@ Calculation for shape average by averaging out corresponding phi function and ce
 """
 
 import numpy as np
-from typing import Iterable
+from typing import Iterable, Collection
 from math import pi
 from util_functions import align
 from core.compute_dual_gear import compute_dual_gear
+
+
+def pre_process(function: Collection):
+    """
+    make sure the phi function is monotonically increasing
+    :param function: phi function
+    :return: pre-processed function
+    """
+    func = [-value for value in function]
+    func[0] += 2 * pi
+    for index in range(1, len(func)):
+        while func[index] < func[index - 1]:
+            func[index] = func[index] + 2 * pi
+    return func
 
 
 def derivative(function: np.ndarray, index: int, start=0, end=2 * pi) -> float:
@@ -16,12 +30,12 @@ def derivative(function: np.ndarray, index: int, start=0, end=2 * pi) -> float:
     :param index: the index of given function
     :param start: starting point of the function (inclusive)
     :param end: ending point of the function (not inclusive)
-    :return: the negative derivative at index
+    :return: the derivative at index
     """
     prev_index = (index - 1) % len(function)
     next_index = (index + 1) % len(function)
     interval_len = (end - start) / len(function) * 2
-    return -(function[next_index] - function[prev_index]) / interval_len  # notice the phi is negative
+    return (function[next_index] - function[prev_index]) % (2 * pi) / interval_len
 
 
 def differentiate_function(function: np.ndarray, start=0, end=2 * pi) -> np.ndarray:
@@ -55,6 +69,8 @@ def shape_average(polygon_a: Iterable[float], polygon_b: Iterable[float]) -> np.
     # retrieve the phi functions and center distances
     _, center_distance_a, phi_a = compute_dual_gear(list(polygon_a))
     _, center_distance_b, phi_b = compute_dual_gear(list(polygon_b))  # compute_dual_gear does not support ndarray yet
+    phi_a = pre_process(phi_a)
+    phi_b = pre_process(phi_b)
     dphi_a = differentiate_function(phi_a)
     dphi_b = differentiate_function(phi_b)
 
@@ -74,9 +90,9 @@ if __name__ == '__main__':
 
     debugger = MyDebugger('average_test')
     ellipse = toExteriorPolarCoord(Point(0, 0), np.array(
-        [(0.3 * cos(theta), 0.2 * sin(theta)) for theta in np.linspace(0, 2 * pi, 1024, endpoint=False)]), 8)
+        [(0.3 * cos(theta), 0.2 * sin(theta)) for theta in np.linspace(0, 2 * pi, 1024, endpoint=False)]), 1024)
     ellipse_copy = toExteriorPolarCoord(Point(0, 0), np.array(
-        [(0.2 * cos(theta), 0.3 * sin(theta)) for theta in np.linspace(0, 2 * pi, 1024, endpoint=False)]), 8)
+        [(0.2 * cos(theta), 0.3 * sin(theta)) for theta in np.linspace(0, 2 * pi, 1024, endpoint=False)]), 1024)
     plotter = Plotter()
 
     # save the figures
