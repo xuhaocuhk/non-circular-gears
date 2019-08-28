@@ -1,4 +1,4 @@
-from typing import Iterable, Collection, SupportsFloat, Sized, Callable
+from typing import Iterable, Collection, SupportsFloat, Sized, Callable, Tuple
 import math
 import numpy as np
 import struct
@@ -50,9 +50,33 @@ def shapely_polygon_to_numpy_contour(polygon: Polygon) -> np.ndarray:
     return np.array(list(zip(*polygon.exterior.xy)))
 
 
+def eval_function(function: np.ndarray, x_range: Tuple[float, float], x_value: float) -> float:
+    """
+    evaluate a function at given x-value
+    :param function: the values of functions with uniformly sampled x, endpoint not inclusive
+    :param x_range: the range of x value for the function
+    :param x_value: the x value to evaluate the function at
+    :return: the value at that point
+    """
+    return np.interp(x_value, function, np.linspace(*x_range, len(function), False))
+
+
+def inverse_function(function: np.ndarray, x_range: Tuple[float, float], y_range: Tuple[float, float],
+                     final_value: float) -> np.ndarray:
+    """
+    calculate the inverse function of a given function
+    :param function: the values of functions with uniformly sampled x, endpoint not inclusive
+    :param x_range: the range of x value for the function
+    :param y_range: the range of y value for the function
+    :param final_value: the final value of the function (i.e. y for x=endpoint)
+    :return: the inverse function, sampled in y_range and endpoint not inclusive
+    """
+    n = len(function)
+    y_samples = np.linspace(*y_range, n + 1, False)
+    return np.interp(y_samples, list(function) + [final_value], np.linspace(*x_range, n + 1, endpoint=True))[:-1]
+
+
 if __name__ == '__main__':
-    array_0 = [1, 2, 3, 4, 5, 6, 7]
-    array_1 = [2, 3, 4, 5, 6, 7, 1]
-    array_2 = [7, 1, 2, 3, 4, 5, 6]
-    print(align(array_0, array_1, 1))
-    print(align(array_0, array_2, 1))
+    x_values = list(range(10))
+    y_values = np.array([x * x for x in x_values])
+    print(inverse_function(y_values, (0, 10), (0, 100), 100))
