@@ -6,7 +6,7 @@ from matplotlib.axes import Axes
 from typing import Union, Iterable
 
 
-def get_shape_contour(model: Model, uniform_contour: bool, plots: Union[Iterable[Axes], None], smooth=0,
+def get_shape_contour(model: Model, uniform: bool, plots: Union[Iterable[Axes], None], smooth=0,
                       face_color=None, edge_color=None):
     contour = None
     if model.name in std_shapes:
@@ -26,7 +26,7 @@ def get_shape_contour(model: Model, uniform_contour: bool, plots: Union[Iterable
         plot_cartesian_shape(subplots[0], "Input Shape", contour, face_color, edge_color)
 
     # uniform vertex on contour
-    if uniform_contour:
+    if uniform:
         # convert to uniform coordinate
         contour = getUniformContourSampledShape(contour, model.sample_num, False)
         if not smooth == 0:

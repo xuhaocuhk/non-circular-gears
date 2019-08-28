@@ -16,16 +16,17 @@ from optimization import optimize_pair_from_config
 import itertools
 import figure_config
 from typing import Optional
+from core.optimize_dual_shapes import counterclockwise_orientation, clockwise_orientation
 
 # writing log to file
 logging.basicConfig(filename='debug\\info.log', level=logging.INFO)
 logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
 
-def math_rotate(drive_model: Model, drive_contour: np.ndarray, debugger: MyDebugger, plotter: Optional[Plotter],
+def math_rotate(drive_model: Model, cart_drive: np.ndarray, debugger: MyDebugger, plotter: Optional[Plotter],
                 animation=False):
     center = drive_model.center_point
-    polar_contour = toExteriorPolarCoord(Point(center[0], center[1]), drive_contour, drive_model.sample_num)
+    polar_contour = toExteriorPolarCoord(Point(center[0], center[1]), cart_drive, drive_model.sample_num)
     driven_gear, center_distance, phi = compute_dual_gear(polar_contour, k=drive_model.k)
 
     if animation:
@@ -63,21 +64,19 @@ def optimize_dual(drive_model: Model, driven_model: Model, do_math_rotate=False,
             opt_config['sampling_count'] = tuple(opt_config['sampling_count'])
     logging.debug('optimization config parse complete, config:' + repr(opt_config))
 
-    # get the original contours
-    drive_contour = shape_factory.get_shape_contour(drive_model, True, None, drive_model.smooth)
-    driven_contour = shape_factory.get_shape_contour(driven_model, True, None, driven_model.smooth)
-    fabrication.generate_3d_mesh(debugger, 'drive_original.obj', drive_contour, 1)
-    fabrication.generate_3d_mesh(debugger, 'driven_original.obj', drive_contour, 1)
-    plotter.draw_contours(debugger.file_path('input_drive.png'), [('input_drive', drive_contour)], None)
-    plotter.draw_contours(debugger.file_path('input_driven.png'), [('input_driven', driven_contour)], None)
+    # get the input polygon
+    cart_drive = shape_factory.get_shape_contour(drive_model, uniform=True, plots=None, smooth=drive_model.smooth)
+    cart_driven = shape_factory.get_shape_contour(driven_model, uniform=True, plots=None, smooth=driven_model.smooth)
+    plotter.draw_contours(debugger.file_path('input_drive.png'), [('input_drive', cart_drive)], None)
+    plotter.draw_contours(debugger.file_path('input_driven.png'), [('input_driven', cart_driven)], None)
     logging.debug('original 3D meshes generated')
 
     # do math rotate
     if do_math_rotate:
-        math_rotate(drive_model, drive_contour, debugger, plotter, math_animation)
+        center_distance, phi = math_rotate(drive_model=drive_model, cart_drive=cart_drive, debugger=debugger, plotter=plotter, animation=math_animation)
 
     # optimization
-    results = optimize_pair_from_config(drive_contour, driven_contour, debugger, opt_config)
+    results = optimize_pair_from_config(cart_drive, cart_driven, debugger, opt_config)
     results.sort(key=lambda total_score, *_: total_score)
     best_result = results[0]
     logging.info(f'Best result with score {best_result[0]}')
@@ -87,13 +86,14 @@ def optimize_dual(drive_model: Model, driven_model: Model, do_math_rotate=False,
     fabrication.generate_3d_mesh(debugger, 'driven_not_cut.obj', driven, 1)
 
     # add teeth
-    normals = getNormals(drive, None, drive_model.center_point)
-    # TODO: teeth not added onto the contour
-    drive_contour = addToothToContour(drive, center, center_distance, normals, height=drive_model.tooth_height,
+    drive = counterclockwise_orientation(drive)
+    normals = getNormals(drive, None, center)
+    cart_drive = addToothToContour(drive, center, center_distance, normals, height=drive_model.tooth_height,
                                       tooth_num=drive_model.tooth_num,
                                       plt_axis=None, consider_driving_torque=False,
                                       consider_driving_continue=False)
-    fabrication.generate_3d_mesh(debugger, 'drive_with_teeth.obj', drive_contour, 1)
+    plotter.draw_contours(debugger.file_path('drive_with_teeth.png'), [('input_driven', cart_drive)], None)
+    fabrication.generate_3d_mesh(debugger, 'drive_with_teeth.obj', cart_drive, 1)
 
     # rotate and cut
     if do_cut_rotate:
@@ -102,7 +102,7 @@ def optimize_dual(drive_model: Model, driven_model: Model, do_math_rotate=False,
         *_, phi = compute_dual_gear(drive_polar, opt_config['k'])
 
         # initiate cutting
-        centered_drive = drive_contour - center
+        centered_drive = cart_drive - center
         drive_gear = Polygon(centered_drive)
         drive_gear = drive_gear.buffer(0)  # resolve invalid polygon issues
         driven_gear_cut, cut_fig, subplot = rotate_and_cut(drive_gear, center_distance, phi, k=drive_model.k,
@@ -140,16 +140,16 @@ def generate_gear(drive_model: Model, driven_model: Model, show_math_anim=False,
             logging.error("No visible points found, need manually assign one!")
             exit(1)
 
-    polar_contour = toExteriorPolarCoord(Point(center[0], center[1]), drive_contour, drive_model.sample_num)
-    plot_polar_shape(plts[1][0], 'Polar shape', polar_contour, drive_model.center_point, drive_model.sample_num)
+    polar_drive = toExteriorPolarCoord(Point(center[0], center[1]), drive_contour, drive_model.sample_num)
+    plot_polar_shape(plts[1][0], 'Polar shape', polar_drive, drive_model.center_point, drive_model.sample_num)
 
     # generate and draw the dual shape
-    driven_gear, center_distance, phi = compute_dual_gear(polar_contour, k=drive_model.k)
+    driven_gear, center_distance, phi = compute_dual_gear(polar_drive, k=drive_model.k)
     plot_polar_shape(plts[0][2], 'Dual shape(Math)', driven_gear, (0, 0), drive_model.sample_num)
     logging.info(f'Center Distance = {center_distance}\n')
 
     if show_math_anim:
-        plot_sampled_function((polar_contour, driven_gear), (phi,),
+        plot_sampled_function((polar_drive, driven_gear), (phi,),
                               debugger.get_math_debug_dir_name() if save_math_anim else None,
                               100, 0.001, [(0, 0), (center_distance, 0)], (8, 8), ((-0.5, 1.5), (-1.1, 1.1)))
 
@@ -184,9 +184,9 @@ def generate_gear(drive_model: Model, driven_model: Model, show_math_anim=False,
     fig.savefig(debugger.file_path('shapes.pdf'))
 
     # TODO: consider tolerance when fabricate
-    fabrication.generate_2d_obj(debugger, 'drive.obj', toCartesianCoordAsNp(polar_contour, 0, 0))
+    fabrication.generate_2d_obj(debugger, 'drive.obj', toCartesianCoordAsNp(polar_drive, 0, 0))
     fabrication.generate_2d_obj(debugger, 'driven_math.obj', toCartesianCoordAsNp(driven_gear, 0, 0 + center_distance))
-    fabrication.generate_3d_mesh(debugger, 'drive_3d.obj', toCartesianCoordAsNp(polar_contour, 0, 0), 1)
+    fabrication.generate_3d_mesh(debugger, 'drive_3d.obj', toCartesianCoordAsNp(polar_drive, 0, 0), 1)
     fabrication.generate_3d_mesh(debugger, 'driven.obj', toCartesianCoordAsNp(driven_gear, 0, 0 + center_distance), 1)
 
     plt.close('all')
@@ -207,4 +207,5 @@ def generate_all_models():
 if __name__ == '__main__':
     # generate_all_models()
 
-    optimize_dual(find_model_by_name('ellipse'), find_model_by_name('ellipse'), True, True, math_animation=True)
+    optimize_dual(find_model_by_name('mahou'), find_model_by_name('circular'),
+                  do_math_rotate=True, do_cut_rotate=False, math_animation=False)
