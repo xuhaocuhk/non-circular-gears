@@ -88,7 +88,10 @@ class DebuggingSuite:
         self.path_prefix = path_prefix
 
     def sub_suite(self, additional_path_prefix):
-        return DebuggingSuite(self.debugger, self.plotter, self.figure, self.path_prefix + additional_path_prefix)
+        if self.path_prefix is None:
+            return DebuggingSuite(self.debugger, self.plotter, self.figure, additional_path_prefix)
+        else:
+            return DebuggingSuite(self.debugger, self.plotter, self.figure, self.path_prefix + additional_path_prefix)
 
 
 def __main__test__function(args):

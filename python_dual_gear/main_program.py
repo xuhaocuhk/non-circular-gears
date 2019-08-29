@@ -1,4 +1,4 @@
-from debug_util import MyDebugger
+from debug_util import MyDebugger, DebuggingSuite
 from models import our_models, Model, find_model_by_name
 from shape_processor import *
 from core.compute_dual_gear import compute_dual_gear, rotate_and_cut
@@ -17,6 +17,7 @@ import itertools
 import figure_config
 from typing import Optional
 from core.optimize_dual_shapes import counterclockwise_orientation, clockwise_orientation
+from core.dual_optimization import sampling_optimization
 
 # writing log to file
 logging.basicConfig(filename='debug\\info.log', level=logging.INFO)
@@ -55,10 +56,14 @@ def optimize_dual(drive_model: Model, driven_model: Model, do_math_cut=False, do
 
     # math cutting
     if do_math_cut:
-        center_distance, phi, polar_math_drive, polar_math_driven = math_cut(drive_model=drive_model, cart_drive=cart_input_drive, debugger=debugger, plotter=plotter, animation=math_animation)
+        center_distance, phi, polar_math_drive, polar_math_driven = math_cut(drive_model=drive_model,
+                                                                             cart_drive=cart_input_drive,
+                                                                             debugger=debugger, plotter=plotter,
+                                                                             animation=math_animation)
 
     # optimization
-    center, center_distance, cart_drive = optimize_center(cart_input_drive, cart_input_driven, center_distance, debugger, opt_config)
+    center, center_distance, cart_drive = optimize_center(cart_input_drive, cart_input_driven, debugger, opt_config,
+                                                          plotter)
 
     # add teeth
     cart_drive = add_teeth(center, center_distance, debugger, cart_drive, drive_model, plotter)
@@ -84,13 +89,17 @@ def rotate_and_carve(cart_drive, center, center_distance, debugger, drive_model,
     return cart_driven_gear
 
 
-def optimize_center(cart_input_drive, cart_input_driven, center_distance, debugger, opt_config):
-    results = optimize_pair_from_config(cart_input_drive, cart_input_driven, debugger, opt_config)
+def optimize_center(cart_input_drive, cart_input_driven, debugger, opt_config, plotter):
+    debug_suite = DebuggingSuite(debugger, plotter, plt.figure(figsize=(16, 9)))
+    results = sampling_optimization(cart_input_drive, cart_input_driven, opt_config['sampling_count'],
+                                    opt_config['keep_count'], opt_config['resampling_accuracy'],
+                                    opt_config['max_sample_depth'], debug_suite)
     results.sort(key=lambda total_score, *_: total_score)
     best_result = results[0]
     logging.info(f'Best result with score {best_result[0]}')
-    total_score, score, *center, center_distance, drive, driven = best_result
-    return center, center_distance, drive
+    score, polar_drive = best_result
+    polar_driven, center_distance, phi = compute_dual_gear(polar_drive)
+    return (0, 0), center_distance, polar_drive
 
 
 def add_teeth(center, center_distance, debugger, drive, drive_model, plotter):

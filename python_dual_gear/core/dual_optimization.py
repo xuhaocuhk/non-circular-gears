@@ -84,7 +84,7 @@ def align_and_average(array_a: List, array_b: List) -> List:
 def sample_in_windows(drive_contour: np.ndarray, driven_contour: np.ndarray,
                       drive_windows: List[Window_T], driven_windows: List[Window_T], keep_count: int,
                       debugging_suite: DebuggingSuite, center_determine_function=center_of_window,
-                      sampling_accuracy=1024) -> List[Tuple[float, Window_T, Window_T]]:
+                      sampling_accuracy=1024) -> List[Tuple[float, Window_T, Window_T, Polar_T]]:
     """
     find the best sample windows
     :param drive_contour: the drive contour
@@ -95,14 +95,14 @@ def sample_in_windows(drive_contour: np.ndarray, driven_contour: np.ndarray,
     :param debugging_suite: the debugging suite
     :param center_determine_function: function to determine from window to center
     :param sampling_accuracy: number of samples when converting to polar contour
-    :return: list of (score, drive_window, driven_window)
+    :return: list of (score, drive_window, driven_window, reconstructed_drive)
     """
     window_pairs = itertools.product(drive_windows, driven_windows)
     results = []
     path_prefix = debugging_suite.path_prefix  # store in a directory
     if debugging_suite.figure is not None:
         plt.figure(debugging_suite.figure.number)
-        subplots = plt.subplots(2, 2)
+        fig, subplots = plt.subplots(2, 2)
         update_polygon_subplots(drive_contour, driven_contour, subplots[0])
     else:
         subplots = None
@@ -115,10 +115,10 @@ def sample_in_windows(drive_contour: np.ndarray, driven_contour: np.ndarray,
             continue
         distance, d_drive, d_driven, dist_drive, dist_driven = \
             contour_distance(drive_contour, center_drive, driven_contour, center_driven, sampling_accuracy)
-        results.append((distance, drive_window, driven_window))
+        reconstructed_drive = rebuild_polar((dist_drive + dist_driven) / 2, align_and_average(d_drive, d_driven))
+        results.append((distance, drive_window, driven_window, list(reconstructed_drive)))
         if subplots is not None:
-            reconstructed_drive = rebuild_polar((dist_drive + dist_driven) / 2, align_and_average(d_drive, d_driven))
-            reconstructed_driven, *_ = compute_dual_gear(reconstructed_drive)
+            reconstructed_driven, *_ = compute_dual_gear(list(reconstructed_drive))
             reconstructed_drive_contour = toCartesianCoordAsNp(reconstructed_drive, 0, 0)
             reconstructed_driven_contour = toCartesianCoordAsNp(reconstructed_driven, 0, 0)
             update_polygon_subplots(reconstructed_drive_contour, reconstructed_driven_contour, subplots[1])
@@ -141,7 +141,7 @@ def sample_in_windows(drive_contour: np.ndarray, driven_contour: np.ndarray,
 
 def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray, sampling_count: int, keep_count: int,
                           sampling_accuracy: int, iteration_count: int, debugging_suite: DebuggingSuite) \
-        -> List[Tuple[float, Polar_T, Polar_T]]:
+        -> List[Tuple[float, Polar_T]]:
     drive_polygon = Polygon(drive_contour)
     driven_polygon = Polygon(driven_contour)
     min_x, min_y, max_x, max_y = drive_polygon.bounds
@@ -160,10 +160,13 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
             [split_window(driven_window, x_sample, y_sample) for driven_window in driven_windows]))
         results = sample_in_windows(drive_contour, driven_contour, drive_windows, driven_windows, keep_count,
                                     debugging_suite.sub_suite('result_'), sampling_accuracy=sampling_accuracy)
-        _, drive_windows, driven_windows = zip(*results)
+        _, drive_windows, driven_windows, __ = zip(*results)
     else:
         results = []
-
+    results = results[:keep_count]
+    results.sort(key=lambda dist, *_: dist)
+    results = [(score, reconstructed_drive)
+               for score, drive_window, driven_window, reconstructed_drive in results]
     return results
 
 
