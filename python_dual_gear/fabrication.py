@@ -9,6 +9,7 @@ from shapely.geometry import LineString
 from shapely.ops import triangulate
 from typing import Tuple
 import os
+from core.optimize_dual_shapes import clockwise_orientation
 import math
 
 
@@ -27,6 +28,8 @@ def read_2d_obj(filename):
                 point = Point(float(str_list[1]), float(str_list[2]))
                 points.append(point)
     result = [(point.x, point.y) for point in points]
+    result = np.array(result)
+    result = clockwise_orientation(result)
     return result
 
 
@@ -142,27 +145,40 @@ def draw_cross(axis):
     """
     x = axis.x
     y = axis.y
-    cross_contour = [(x + 1.22, y + 1.22),
-                     (x + 0.92, y + 1.22),
-                     (x + 0.92, y + 2.42),
-                     (x - 0.92, y + 2.42),
-                     (x - 0.92, y + 1.22),
-                     (x - 1.22, y + 1.22),
-                     (x - 1.22, y + 0.92),
-                     (x - 2.42, y + 0.92),
-                     (x - 2.42, y - 0.92),
-                     (x - 1.22, y - 0.92),
-                     (x - 1.22, y - 1.22),
-                     (x - 0.92, y - 1.22),
-                     (x - 0.92, y - 2.42),
-                     (x + 0.92, y - 2.42),
-                     (x + 0.92, y - 1.22),
-                     (x + 1.22, y - 1.22),
-                     (x + 1.22, y - 0.92),
-                     (x + 2.42, y - 0.92),
-                     (x + 2.42, y + 0.92),
-                     (x + 1.22, y + 0.92)]
-    return cross_contour
+    tolerance = 0.20
+    cross_contour = [(x + 1.20, y + 1.20),
+                     (x + 0.90, y + 1.20),
+                     (x + 0.90, y + 2.40),
+                     (x - 0.90, y + 2.40),
+                     (x - 0.90, y + 1.20),
+                     (x - 1.20, y + 1.20),
+                     (x - 1.20, y + 0.90),
+                     (x - 2.40, y + 0.90),
+                     (x - 2.40, y - 0.90),
+                     (x - 1.20, y - 0.90),
+                     (x - 1.20, y - 1.20),
+                     (x - 0.90, y - 1.20),
+                     (x - 0.90, y - 2.40),
+                     (x + 0.90, y - 2.40),
+                     (x + 0.90, y - 1.20),
+                     (x + 1.20, y - 1.20),
+                     (x + 1.20, y - 0.90),
+                     (x + 2.40, y - 0.90),
+                     (x + 2.40, y + 0.90),
+                     (x + 1.20, y + 0.90)]
+    result = []
+    for vertex_tuple in cross_contour:
+        vertex_list = list(vertex_tuple)
+        if vertex_list[0] > 0:
+            vertex_list[0] += tolerance
+        else:
+            vertex_list[0] -= tolerance
+        if vertex_list[1] > 0:
+            vertex_list[1] += tolerance
+        else:
+            vertex_list[1] -= tolerance
+        result.append(tuple(vertex_list))
+    return result
 
 
 def generate_3D_with_axles(distance: float, filename_drive: str, filename_driven: str, drive_axis: Tuple[float, float],
@@ -201,8 +217,8 @@ if __name__ == '__main__':
     # polygon_ext = [(-5, -5), (5, -5), (5, 5), (-5, 5)]
 
     # generate_3d_mesh_hole(MyDebugger('test'), 'output.obj', square_contour, cross_contour, 2)
-    filename_drive = r'F:\workspace\gears\python_dual_gear\debug\2019-08-29_14-42-06_ellipse_ellipse/drive_2d.obj'
-    filename_driven = r'F:\workspace\gears\python_dual_gear\debug\2019-08-29_14-42-06_ellipse_ellipse/driven_2d.obj'
+    filename_drive = './debug/printtest/test 2/drive_2d.obj'
+    filename_driven = './debug/printtest/test 2/driven_2d.obj'
     drive_axis = (0, 0)
     driven_axis = (0.8251464417682275, 0)
     generate_3D_with_axles(4, filename_drive, filename_driven, drive_axis, driven_axis, MyDebugger('test'), 6)
