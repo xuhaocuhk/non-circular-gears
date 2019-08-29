@@ -106,6 +106,11 @@ def optimize_center(cart_input_drive, cart_input_driven, debugger, opt_config, p
     logging.info(f'Best result with score {best_result[0]}')
     score, polar_drive = best_result
     polar_driven, center_distance, phi = compute_dual_gear(polar_drive)
+    drive_contour = toCartesianCoordAsNp(polar_drive, 0, 0)
+    driven_contour = toCartesianCoordAsNp(polar_driven, center_distance, 0)
+    plotter.draw_contours(debugger.file_path('optimize_result.png'),
+                          [('carve_drive', drive_contour), ('carve_driven', driven_contour)],
+                          [(0, 0), (center_distance, 0)])
     return (0, 0), center_distance, toCartesianCoordAsNp(polar_drive, 0, 0)
 
 
