@@ -101,6 +101,7 @@ def sample_in_windows(drive_contour: np.ndarray, driven_contour: np.ndarray,
     results = []
     path_prefix = debugging_suite.path_prefix  # store in a directory
     if debugging_suite.figure is not None:
+        debugging_suite.figure.clear()  # clear the figure
         plt.figure(debugging_suite.figure.number)
         subplots = debugging_suite.figure.subplots(2, 2)
         update_polygon_subplots(drive_contour, driven_contour, subplots[0])
@@ -155,6 +156,7 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
     x_sample, y_sample = sampling_count
 
     # start iteration
+    results = []  # dummy
     for iteration in range(iteration_count):
         path = debugging_suite.debugger.file_path('iteration_' + str(iteration))
         os.makedirs(path, exist_ok=True)
@@ -166,8 +168,6 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
                                     debugging_suite.sub_suite(os.path.join(path, 'result_')),
                                     sampling_accuracy=sampling_accuracy)
         _, drive_windows, driven_windows, __ = zip(*results)
-    else:
-        results = []
     results = results[:keep_count]
     results.sort(key=lambda dist, *_: dist)
     results = [(score, reconstructed_drive)

@@ -106,7 +106,7 @@ def optimize_center(cart_input_drive, cart_input_driven, debugger, opt_config, p
     logging.info(f'Best result with score {best_result[0]}')
     score, polar_drive = best_result
     polar_driven, center_distance, phi = compute_dual_gear(polar_drive)
-    return (0, 0), center_distance, polar_drive
+    return (0, 0), center_distance, toCartesianCoordAsNp(polar_drive, 0, 0)
 
 
 def add_teeth(center, center_distance, debugger, drive, drive_model, plotter):
