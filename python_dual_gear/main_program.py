@@ -65,19 +65,23 @@ def optimize_dual(drive_model: Model, driven_model: Model, do_math_cut=False, do
 
     # rotate and cut
     if do_rotate_cut:
-        # initiate cutting
-        centered_drive = cart_drive - center
-        poly_drive_gear = Polygon(centered_drive)
-        poly_drive_gear = poly_drive_gear.buffer(0)  # resolve invalid polygon issues
-        poly_driven_gear, cut_fig, subplot = rotate_and_cut(poly_drive_gear, center_distance, phi, k=drive_model.k,
-                                                           debugger=debugger, replay_animation=True, plotter=plotter)
-        poly_driven_gear = translate(poly_driven_gear, center_distance).buffer(1).simplify(0.2)  # as in generate_gear
-        if poly_driven_gear.geom_type == 'MultiPolygon':
-            poly_driven_gear = max(poly_driven_gear, key=lambda a: a.area)
-        cart_driven_gear = np.array(poly_driven_gear.exterior.coords)
+        cart_driven_gear = rotate_and_carve(cart_drive, center, center_distance, debugger, drive_model, phi, plotter)
 
         fabrication.generate_3d_mesh(debugger, 'drive_cut.obj', cart_drive, 1)
         fabrication.generate_3d_mesh(debugger, 'driven_cut.obj', cart_driven_gear, 1)
+
+
+def rotate_and_carve(cart_drive, center, center_distance, debugger, drive_model, phi, plotter):
+    centered_drive = cart_drive - center
+    poly_drive_gear = Polygon(centered_drive)
+    poly_drive_gear = poly_drive_gear.buffer(0)  # resolve invalid polygon issues
+    poly_driven_gear, cut_fig, subplot = rotate_and_cut(poly_drive_gear, center_distance, phi, k=drive_model.k,
+                                                        debugger=debugger, replay_animation=True, plotter=plotter)
+    poly_driven_gear = translate(poly_driven_gear, center_distance).buffer(1).simplify(0.2)  # as in generate_gear
+    if poly_driven_gear.geom_type == 'MultiPolygon':
+        poly_driven_gear = max(poly_driven_gear, key=lambda a: a.area)
+    cart_driven_gear = np.array(poly_driven_gear.exterior.coords)
+    return cart_driven_gear
 
 
 def optimize_center(cart_input_drive, cart_input_driven, center_distance, debugger, opt_config):
