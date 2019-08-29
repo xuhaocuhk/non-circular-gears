@@ -46,41 +46,6 @@ def math_cut(drive_model: Model, cart_drive: np.ndarray, debugger: MyDebugger, p
     return center_distance, phi, polar_math_drive, polar_math_driven
 
 
-def main(drive_model: Model, driven_model: Model, do_math_cut=True, math_animation=False,
-         reply_cut_anim = False, save_cut_anim = True, opt_config='optimization_config.yaml', ):
-    # initialize logging system, configuration files, etc.
-    debugger, opt_config, plotter = init(drive_model, driven_model, opt_config)
-
-    # get input polygons
-    cart_input_drive, cart_input_driven = get_inputs(debugger, drive_model, driven_model, plotter)
-
-    # math cutting
-    if do_math_cut:
-        center_distance, phi, polar_math_drive, polar_math_driven = math_cut(drive_model=drive_model,
-                                                                             cart_drive=cart_input_drive,
-                                                                             debugger=debugger, plotter=plotter,
-                                                                             animation=math_animation)
-
-    # optimization
-    center, center_distance, cart_drive = optimize_center(cart_input_drive, cart_input_driven, debugger, opt_config,
-                                                          plotter)
-
-    # add teeth
-    cart_drive = add_teeth(center, center_distance, debugger, cart_drive, drive_model, plotter)
-
-    # rotate and cut
-    cart_driven_gear = rotate_and_carve(cart_drive, center, center_distance, debugger, drive_model, phi, plotter, replay_anim = reply_cut_anim, save_anim = save_cut_anim)
-
-    # save 2D contour
-    fabrication.generate_2d_obj(debugger, 'drive_2d.obj', cart_drive)
-    fabrication.generate_2d_obj(debugger, 'driven_2d.obj', cart_driven_gear)
-
-    # generate 3D mesh with axle hole
-    fabrication.generate_3D_with_axles(6, debugger.file_path('drive_2d.obj'), debugger.file_path('driven_2d.obj'),
-                                       (0, 0), (center_distance, 0), debugger, 6)
-
-
-
 def rotate_and_carve(cart_drive, center, center_distance, debugger, drive_model, phi, plotter, replay_anim = False, save_anim = False):
     centered_drive = cart_drive - center
     poly_drive_gear = Polygon(centered_drive)
@@ -109,7 +74,7 @@ def optimize_center(cart_input_drive, cart_input_driven, debugger, opt_config, p
 
 def add_teeth(center, center_distance, debugger, drive, drive_model, plotter):
     drive = counterclockwise_orientation(drive)
-    normals = getNormals(drive, None, center)
+    normals = getNormals(drive, None, center, normal_filter=False)
     drive = addToothToContour(drive, center, center_distance, normals, height=drive_model.tooth_height,
                               tooth_num=drive_model.tooth_num,
                               plt_axis=None, consider_driving_torque=False,
@@ -148,17 +113,52 @@ def init(drive_model, driven_model, opt_config):
 
 def generate_all_models():
     for model_drive, model_driven in itertools.product(our_models, our_models):
-        drive_tooth_contour, final_gear_contour, debugger = generate_gear(model_drive, model_driven, True, True, True,
-                                                                          True)
+        main(find_model_by_name(model_drive.name), find_model_by_name(model_driven.name),
+             do_math_cut=True, math_animation=True,
+             reply_cut_anim=True, save_cut_anim=True)
 
-        # generate fabrication files
-        fabrication.generate_2d_obj(debugger, 'drive_tooth.obj', drive_tooth_contour)
-        fabrication.generate_2d_obj(debugger, 'driven_cut.obj', final_gear_contour)
+
+def main(drive_model: Model, driven_model: Model, do_math_cut=True, math_animation=False,
+         reply_cut_anim = False, save_cut_anim = True, opt_config='optimization_config.yaml', ):
+    # initialize logging system, configuration files, etc.
+    debugger, opt_config, plotter = init(drive_model, driven_model, opt_config)
+
+    # get input polygons
+    cart_input_drive, cart_input_driven = get_inputs(debugger, drive_model, driven_model, plotter)
+
+    # math cutting
+    if do_math_cut:
+        center_distance, phi, polar_math_drive, polar_math_driven = math_cut(drive_model=drive_model,
+                                                                             cart_drive=cart_input_drive,
+                                                                             debugger=debugger, plotter=plotter,
+                                                                             animation=math_animation)
+    # optimization
+    center, center_distance, cart_drive = optimize_center(cart_input_drive, cart_input_driven, debugger, opt_config,
+                                                          plotter)
+
+    ######### Hacking for skipping optimization
+    # cart_drive = cart_input_drive
+    # center = (0, 0)
+    ######### Hacking for skipping optimization
+
+    # add teeth
+    cart_drive = add_teeth(center, center_distance, debugger, cart_drive, drive_model, plotter)
+
+    # rotate and cut
+    cart_driven_gear = rotate_and_carve(cart_drive, center, center_distance, debugger, drive_model, phi, plotter, replay_anim = reply_cut_anim, save_anim = save_cut_anim)
+
+    # save 2D contour
+    fabrication.generate_2d_obj(debugger, 'drive_2d.obj', cart_drive)
+    fabrication.generate_2d_obj(debugger, 'driven_2d.obj', cart_driven_gear)
+
+    # generate 3D mesh with axle hole
+    fabrication.generate_3D_with_axles(6, debugger.file_path('drive_2d.obj'), debugger.file_path('driven_2d.obj'),
+                                       (0, 0), (center_distance, 0), debugger, 6)
 
 
 if __name__ == '__main__':
     # generate_all_models()
 
-    main(find_model_by_name('ellipse'), find_model_by_name('ellipse'),
+    main(find_model_by_name('mahou'), find_model_by_name('ellipse'),
          do_math_cut=True, math_animation=False,
-         reply_cut_anim=False, save_cut_anim=False, )
+         reply_cut_anim=False, save_cut_anim=False)
