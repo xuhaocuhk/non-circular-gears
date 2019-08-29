@@ -180,9 +180,9 @@ def addToothToContour(contour: np.array, center, center_dist, normals, height: i
 
     polar_contour = [np.linalg.norm(p - center) for p in contour]
 
-    tooth_samples = np.full(tooth_num, samplenum_per_teeth, dtype=np.int_)
+    tooth_samples = np.full(tooth_num, samplenum_per_teeth, dtype=np.int_) # how many points compose a tooth
     tooth_samples = np.cumsum(tooth_samples)
-    heights = np.full(tooth_num, height)
+    heights = np.full(tooth_num, height) # what's the height of each tooth
 
     if consider_driving_torque:
         for i in range(10):
@@ -191,14 +191,16 @@ def addToothToContour(contour: np.array, center, center_dist, normals, height: i
                 [gear_tooth.sample_avg(tooth_samples[j], tooth_samples[j + 1], polar_contour, center_dist) for j in
                  range(tooth_num)],
                 dtype=np.float_)
-            driving_ratios = driving_ratios / np.sum(driving_ratios) * n
+            driving_ratios = driving_ratios / np.sum(driving_ratios) * n # resample the samples according to the driving ratio of current tooth
             re_indexing = np.cumsum(driving_ratios)
             tooth_samples = np.round(re_indexing).astype('int32')
 
     if consider_driving_continue:
-        tooth_widths = np.diff(np.insert(tooth_samples, 0, 0))
+        tooth_widths = np.diff(np.insert(tooth_samples, 0, 0)) # again, how many points compose a tooth
         for j in range(tooth_num):
+            # front zero padding
             zero_front_tooth_samples = np.insert(tooth_samples, 0, 0)
+
             curr_normal = gear_tooth.normal_mid(zero_front_tooth_samples[j], zero_front_tooth_samples[j + 1], normals)
             curr_center_direction = gear_tooth.point_mid(zero_front_tooth_samples[j], zero_front_tooth_samples[j + 1],
                                                          contour, center)
@@ -207,10 +209,13 @@ def addToothToContour(contour: np.array, center, center_dist, normals, height: i
             if sin_theta < 0:
                 pass  # heights[j] = height
             else:
-                heights[j] = tooth_widths[j] / 100 * (sin_theta / math.sqrt(1 - sin_theta ** 2))
+                perimeter = Polygon(contour).length
+                heights[j] = (perimeter * tooth_widths[j]/n) * (sin_theta / math.sqrt(1 - sin_theta ** 2)) + 0.005 # 0.005 is the tolarance
+                heights[j] = max(heights[j], height)
 
-    heights = np.clip(heights, height - 0.01, height + 0.03)
+    heights = np.clip(heights, height*0.1, height*10)
 
+    # generate tooth according to calculated width and height
     tooth_func = [gear_tooth.teeth_involute_sin(gear_tooth.get_value_on_tooth_domain(i, tooth_samples),
                                                 heights[gear_tooth.get_teeth_idx(i, tooth_samples)], width=0.5) for i in
                   range(n)]

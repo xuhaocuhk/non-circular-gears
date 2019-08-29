@@ -117,11 +117,11 @@ def optimize_center(cart_input_drive, cart_input_driven, debugger, opt_config, p
 
 def add_teeth(center, center_distance, debugger, drive, drive_model, plotter):
     drive = counterclockwise_orientation(drive)
-    normals = getNormals(drive, None, center)
+    normals = getNormals(drive, None, center, normal_filter=False)
     drive = addToothToContour(drive, center, center_distance, normals, height=drive_model.tooth_height,
                               tooth_num=drive_model.tooth_num,
                               plt_axis=None, consider_driving_torque=False,
-                              consider_driving_continue=False)
+                              consider_driving_continue=True)
     plotter.draw_contours(debugger.file_path('drive_with_teeth.png'), [('input_driven', drive)], None)
     # fabrication.generate_3d_mesh(debugger, 'drive_with_teeth.obj', drive, 1)
     return drive

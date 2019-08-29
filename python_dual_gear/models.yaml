@@ -65,7 +65,7 @@
   k: 1
   name: man
   sample_num: 4096
-  smooth: 0
+  smooth: 64
   tooth_height: 0.03
   tooth_num: 32
 - center_point: [0, 0]
