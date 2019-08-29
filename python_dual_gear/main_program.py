@@ -47,7 +47,7 @@ def math_cut(drive_model: Model, cart_drive: np.ndarray, debugger: MyDebugger, p
 
 
 def main(drive_model: Model, driven_model: Model, do_math_cut=True, math_animation=False,
-         reply_cut_anim = False, save_cut_anim = True, opt_config='optimization_config.yaml', ):
+         reply_cut_anim=False, save_cut_anim=True, opt_config='optimization_config.yaml', ):
     # initialize logging system, configuration files, etc.
     debugger, opt_config, plotter = init(drive_model, driven_model, opt_config)
 
@@ -69,7 +69,8 @@ def main(drive_model: Model, driven_model: Model, do_math_cut=True, math_animati
     cart_drive = add_teeth(center, center_distance, debugger, cart_drive, drive_model, plotter)
 
     # rotate and cut
-    cart_driven_gear = rotate_and_carve(cart_drive, center, center_distance, debugger, drive_model, phi, plotter, replay_anim = reply_cut_anim, save_anim = save_cut_anim)
+    cart_driven_gear = rotate_and_carve(cart_drive, center, center_distance, debugger, drive_model, phi, plotter,
+                                        replay_anim=reply_cut_anim, save_anim=save_cut_anim)
 
     # save 2D contour
     fabrication.generate_2d_obj(debugger, 'drive_2d.obj', cart_drive)
@@ -80,13 +81,14 @@ def main(drive_model: Model, driven_model: Model, do_math_cut=True, math_animati
                                        (0, 0), (center_distance, 0), debugger, 6)
 
 
-
-def rotate_and_carve(cart_drive, center, center_distance, debugger, drive_model, phi, plotter, replay_anim = False, save_anim = False):
+def rotate_and_carve(cart_drive, center, center_distance, debugger, drive_model, phi, plotter, replay_anim=False,
+                     save_anim=False):
     centered_drive = cart_drive - center
     poly_drive_gear = Polygon(centered_drive)
     poly_drive_gear = poly_drive_gear.buffer(0)  # resolve invalid polygon issues
     poly_driven_gear, cut_fig, subplot = rotate_and_cut(poly_drive_gear, center_distance, phi, k=drive_model.k,
-                                                        debugger=debugger if save_anim else None, replay_animation=replay_anim, plotter=plotter)
+                                                        debugger=debugger if save_anim else None,
+                                                        replay_animation=replay_anim, plotter=plotter)
     poly_driven_gear = translate(poly_driven_gear, center_distance).buffer(0).simplify(1e-4)  # as in generate_gear
     if poly_driven_gear.geom_type == 'MultiPolygon':
         poly_driven_gear = max(poly_driven_gear, key=lambda a: a.area)
