@@ -132,20 +132,20 @@ def getUniformContourSampledShape(contour: np.array, n: int, smoothing=True):
     func = getUniformCoordinateFunction(contour, smoothing)
     return np.array([[func(i / n)[0], func(i / n)[1]] for i in range(n)])
 
-
-def getNormals(contour: np.array, plt_axis, center, normal_filter=True):
-    n = len(contour)
+# Warning: this function requires cart_contour to be clockwise
+def getNormals(cart_contour: np.array, plt_axis, center, normal_filter=True):
+    n = len(cart_contour)
     # compute normals perpendicular to countour
-    normals = [(contour[i][1] - contour[i + 1][1], contour[i + 1][0] - contour[i][0]) for i in
+    normals = [(cart_contour[i+1][1] - cart_contour[i][1], cart_contour[i][0] - cart_contour[i + 1][0]) for i in
                range(n - 1)]
-    normals.append((contour[n - 1][1] - contour[0][1], contour[0][0] - contour[n - 1][0]))
+    normals.append((cart_contour[n - 1][1] - cart_contour[0][1], cart_contour[0][0] - cart_contour[n - 1][0]))
     # normalization
     normals = [(normals[i][0] / math.sqrt(normals[i][0] * normals[i][0] + normals[i][1] * normals[i][1]),
                 normals[i][1] / math.sqrt(normals[i][0] * normals[i][0] + normals[i][1] * normals[i][1]))
                for i in range(n)]
-    # normal filtering
+    # filter those normals back to the rotation center to zero
     if normal_filter:
-        directions = [(contour[i][0] - center[0], contour[i][1] - center[1]) for i in range(n)]
+        directions = [(cart_contour[i][0] - center[0], cart_contour[i][1] - center[1]) for i in range(n)]
         normals = [normal if dir[0] * normal[0] + dir[1] * normal[1] > 0 else [normal[0] / 1000, normal[1] / 1000] for
                    dir, normal in zip(directions, normals)]
 
@@ -162,7 +162,7 @@ def getNormals(contour: np.array, plt_axis, center, normal_filter=True):
 
     # normal visualization
     for i, normal in enumerate(normals):
-        start = contour[i]
+        start = cart_contour[i]
         normal_l = [normal[0] * 0.05, normal[1] * 0.05]
         end = start + normal_l
         l = Line2D([start[0], end[0]], [start[1], end[1]], linewidth=1)

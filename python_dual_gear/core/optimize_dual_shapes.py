@@ -27,6 +27,20 @@ def counterclockwise_orientation(contour: np.ndarray) -> np.ndarray:
     else:
         return contour
 
+def clockwise_orientation(contour: np.ndarray) -> np.ndarray:
+    """
+    change a contour to counterclockwise direction
+    """
+    # using the shoelace formula and code adopted from https://stackoverflow.com/questions/14505565/
+    # Wikipedia: det[x_i,x_i+1;y_i,y_i+1]
+    shoelace = sum(
+        [contour[i - 1, 0] * contour[i, 1] - contour[i, 0] * contour[i - 1, 1] for i in range(contour.shape[0])])
+    if shoelace < 0:
+        return contour
+    else:
+        return contour[::-1]
+
+
 
 def draw_contour(subplot: Axes, contour: np.ndarray, color: str = 'black', title: str = None):
     if title is not None:
