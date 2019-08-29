@@ -5,16 +5,15 @@ import struct
 from shapely.geometry import Polygon
 
 
-def standard_deviation_distance(x: Iterable[SupportsFloat], y: Iterable[SupportsFloat]) -> float:
+def standard_deviation_distance(x: Collection[SupportsFloat], y: Collection[SupportsFloat]) -> float:
     """
     return the standard deviation sqrt(sum((x[i]-y[i])^2)) for two equal-sized arrays
-    :param x: the first iterable
-    :param y: the second iterable
+    :param x: the first collection
+    :param y: the second collection
     :return: standard deviation
     """
-    if issubclass(x.__class__, Sized) and issubclass(y.__class__, Sized):
-        assert len(x) == len(y)
-    return math.sqrt(sum(((float(x_i) - float(y_i)) ** 2 for x_i, y_i in zip(x, y))))
+    assert len(x) == len(y)
+    return math.sqrt(sum(((float(x_i) - float(y_i)) ** 2 for x_i, y_i in zip(x, y))) / len(x))
 
 
 def align(array_a: Collection, array_b: Collection, stride: int = 1,

@@ -23,7 +23,7 @@ def pre_process(function: Collection):
     return func
 
 
-def derivative(function: np.ndarray, index: int, start=0, end=2 * pi) -> float:
+def derivative(function: Collection[float], index: int, start=0, end=2 * pi) -> float:
     """
     get the derivative of the function at given index
     :param function: the given function, uniformly sampled in start to end
@@ -38,7 +38,7 @@ def derivative(function: np.ndarray, index: int, start=0, end=2 * pi) -> float:
     return (function[next_index] - function[prev_index]) % (2 * pi) / interval_len
 
 
-def differentiate_function(function: np.ndarray, start=0, end=2 * pi) -> np.ndarray:
+def differentiate_function(function: Collection[float], start=0, end=2 * pi) -> np.ndarray:
     """
     get the derivative of the whole function
     :param function: the given function, uniformly sampled in start to end
@@ -49,7 +49,7 @@ def differentiate_function(function: np.ndarray, start=0, end=2 * pi) -> np.ndar
     return np.array([derivative(function, index, start, end) for index in range(len(function))])
 
 
-def rebuild_polar(center_distance: float, d_phi: np.ndarray) -> np.ndarray:
+def rebuild_polar(center_distance: float, d_phi: Iterable[float]) -> np.ndarray:
     """
     rebuild the polar coordinates from given center distance
     :param center_distance: the center distance
