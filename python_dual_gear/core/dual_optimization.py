@@ -159,7 +159,8 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
         driven_windows = list(itertools.chain.from_iterable(
             [split_window(driven_window, x_sample, y_sample) for driven_window in driven_windows]))
         results = sample_in_windows(drive_contour, driven_contour, drive_windows, driven_windows, keep_count,
-                                    debugging_suite.sub_suite('result_'), sampling_accuracy=sampling_accuracy)
+                                    debugging_suite.sub_suite(os.path.join(path, 'result_')),
+                                    sampling_accuracy=sampling_accuracy)
         _, drive_windows, driven_windows, __ = zip(*results)
     else:
         results = []
