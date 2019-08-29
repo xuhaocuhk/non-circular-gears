@@ -164,6 +164,7 @@ def update_polygon_subplots(drive_contour: np.ndarray, driven_contour: np.ndarra
     draw_contour(subplots[1], driven_contour, 'blue', 'Driven Contour')
     for subplot in subplots:
         subplot.axis('equal')
+        subplot.axis('off')
 
 
 def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray, k: int, sampling_count: (int, int),
