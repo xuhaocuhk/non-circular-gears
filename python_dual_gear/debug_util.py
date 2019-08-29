@@ -2,9 +2,11 @@ import time
 import datetime
 import os
 import logging
-from typing import Union, Iterable, Callable
+from typing import Union, Iterable, Callable, Optional
 from multiprocessing import Process
 import sys
+from plot.qt_plot import Plotter
+from matplotlib.figure import Figure
 
 
 class MyDebugger:
@@ -75,6 +77,21 @@ class SubprocessDebugger:
         if self.process is None:
             raise RuntimeError("Subprocess Not Started")
         self.process.join()
+
+
+class DebuggingSuite:
+    def __init__(self, debugger: MyDebugger, plotter: Optional[Plotter] = None, figure: Optional[Figure] = None,
+                 path_prefix: Optional[str] = None):
+        self.debugger = debugger
+        self.plotter = plotter
+        self.figure = figure
+        self.path_prefix = path_prefix
+
+    def sub_suite(self, additional_path_prefix):
+        if self.path_prefix is None:
+            return DebuggingSuite(self.debugger, self.plotter, self.figure, additional_path_prefix)
+        else:
+            return DebuggingSuite(self.debugger, self.plotter, self.figure, self.path_prefix + additional_path_prefix)
 
 
 def __main__test__function(args):
