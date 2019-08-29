@@ -29,6 +29,7 @@ def get_shape_contour(model: Model, uniform: bool, plots: Union[Iterable[Axes], 
     if uniform:
         # convert to uniform coordinate
         contour = getUniformContourSampledShape(contour, model.sample_num, False)
+        # spline uniform
         if not smooth == 0:
             contour = getUniformContourSampledShape(contour[::smooth], model.sample_num, True)
 

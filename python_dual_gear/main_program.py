@@ -78,7 +78,7 @@ def add_teeth(center, center_distance, debugger, drive, drive_model, plotter):
     drive = addToothToContour(drive, center, center_distance, normals, height=drive_model.tooth_height,
                               tooth_num=drive_model.tooth_num,
                               plt_axis=None, consider_driving_torque=False,
-                              consider_driving_continue=False)
+                              consider_driving_continue=True)
     plotter.draw_contours(debugger.file_path('drive_with_teeth.png'), [('input_driven', drive)], None)
     # fabrication.generate_3d_mesh(debugger, 'drive_with_teeth.obj', drive, 1)
     return drive
@@ -133,12 +133,12 @@ def main(drive_model: Model, driven_model: Model, do_math_cut=True, math_animati
                                                                              debugger=debugger, plotter=plotter,
                                                                              animation=math_animation)
     # optimization
-    center, center_distance, cart_drive = optimize_center(cart_input_drive, cart_input_driven, debugger, opt_config,
-                                                          plotter)
+    # center, center_distance, cart_drive = optimize_center(cart_input_drive, cart_input_driven, debugger, opt_config,
+    #                                                       plotter)
 
     ######### Hacking for skipping optimization
-    # cart_drive = cart_input_drive
-    # center = (0, 0)
+    cart_drive = cart_input_drive
+    center = (0, 0)
     ######### Hacking for skipping optimization
 
     # add teeth
@@ -159,6 +159,6 @@ def main(drive_model: Model, driven_model: Model, do_math_cut=True, math_animati
 if __name__ == '__main__':
     # generate_all_models()
 
-    main(find_model_by_name('mahou'), find_model_by_name('ellipse'),
+    main(find_model_by_name('ellipse'), find_model_by_name('ellipse'),
          do_math_cut=True, math_animation=False,
          reply_cut_anim=False, save_cut_anim=False)
