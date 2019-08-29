@@ -102,7 +102,7 @@ def sample_in_windows(drive_contour: np.ndarray, driven_contour: np.ndarray,
     path_prefix = debugging_suite.path_prefix  # store in a directory
     if debugging_suite.figure is not None:
         plt.figure(debugging_suite.figure.number)
-        fig, subplots = plt.subplots(2, 2)
+        subplots = debugging_suite.figure.subplots(2, 2)
         update_polygon_subplots(drive_contour, driven_contour, subplots[0])
     else:
         subplots = None
@@ -123,13 +123,13 @@ def sample_in_windows(drive_contour: np.ndarray, driven_contour: np.ndarray,
             reconstructed_driven_contour = toCartesianCoordAsNp(reconstructed_driven, 0, 0)
             update_polygon_subplots(reconstructed_drive_contour, reconstructed_driven_contour, subplots[1])
             min_x, max_x, min_y, max_y = drive_window
-            sample_region = Rectangle((min_x, min_y), max_x - min_x, max_y - min_y, color='red', fill=False)
+            sample_region = Rectangle((min_x, -max_y), max_x - min_x, max_y - min_y, color='red', fill=False)
             subplots[1][0].add_patch(sample_region)
             min_x, max_x, min_y, max_y = driven_window
-            sample_region = Rectangle((min_x, min_y), max_x - min_x, max_y - min_y, color='red', fill=False)
+            sample_region = Rectangle((min_x, -max_y), max_x - min_x, max_y - min_y, color='red', fill=False)
             subplots[1][1].add_patch(sample_region)
-            subplots[1][0].scatter(*center_drive, 5)
-            subplots[1][1].scatter(*center_driven, 5)
+            subplots[1][0].scatter(center_drive[0], -center_drive[1], 5)
+            subplots[1][1].scatter(center_driven[0], -center_driven[1], 5)
             subplots[1][0].text(0, 0, str(center_drive))
             subplots[1][1].text(0, 0, str(center_driven) + '\ndist=' + str(distance))
             plt.savefig(path_prefix + f'{index}.png')

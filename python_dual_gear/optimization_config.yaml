@@ -5,5 +5,5 @@ max_iteration: 4
 max_sample_depth: 2
 resampling_accuracy: 1024
 sampling_count:
-  - 5
-  - 5
+  - 3
+  - 3
