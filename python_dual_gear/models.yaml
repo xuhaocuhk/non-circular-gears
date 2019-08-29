@@ -10,7 +10,7 @@
   name: ellipse
   sample_num: 1024
   smooth: 0
-  tooth_height: 0.04
+  tooth_height: 0.025
   tooth_num: 32
 - center_point: [0, 0]
   k: 1

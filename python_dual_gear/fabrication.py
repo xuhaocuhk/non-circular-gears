@@ -9,6 +9,7 @@ from shapely.geometry import LineString
 from shapely.ops import triangulate
 from typing import Tuple
 import os
+import math
 
 
 def read_2d_obj(filename):
@@ -164,8 +165,8 @@ def draw_cross(axis):
     return cross_contour
 
 
-def generate_gear_pair(distance: float, filename_drive: str, filename_driven: str, drive_axis: Tuple[float, float],
-                       driven_axis: Tuple[float, float], debugger: MyDebugger, thickness: float):
+def generate_3D_with_axles(distance: float, filename_drive: str, filename_driven: str, drive_axis: Tuple[float, float],
+                           driven_axis: Tuple[float, float], debugger: MyDebugger, thickness: float):
     """
     :param distance: distance between axes of two gears
     :param filename_drive: file name of the drive gear
@@ -185,8 +186,8 @@ def generate_gear_pair(distance: float, filename_drive: str, filename_driven: st
     driven_axis_scale = Point(driven_axis[0] * scaling_ratio, driven_axis[1] * scaling_ratio)
     interior_drive = draw_cross(drive_axis_scale)
     interior_driven = draw_cross(driven_axis_scale)
-    generate_3d_mesh_hole(debugger, 'drive.obj', np.array(exterior_drive_scale), np.array(interior_drive), thickness)
-    generate_3d_mesh_hole(debugger, 'driven.obj', np.array(exterior_driven_scale), np.array(interior_driven), thickness)
+    generate_3d_mesh_hole(debugger, 'drive_gear_mesh.obj', np.array(exterior_drive_scale), np.array(interior_drive), thickness)
+    generate_3d_mesh_hole(debugger, 'driven_gear_mesh.obj', np.array(exterior_driven_scale), np.array(interior_driven), thickness)
 
 
 if __name__ == '__main__':
@@ -200,8 +201,8 @@ if __name__ == '__main__':
     # polygon_ext = [(-5, -5), (5, -5), (5, 5), (-5, 5)]
 
     # generate_3d_mesh_hole(MyDebugger('test'), 'output.obj', square_contour, cross_contour, 2)
-    filename_drive = 'C:/Users/admin/Documents/GitHub/gears/python_dual_gear/debug/printtest/drive_tooth.obj'
-    filename_driven = 'C:/Users/admin/Documents/GitHub/gears/python_dual_gear/debug/printtest/driven_cut.obj'
+    filename_drive = r'F:\workspace\gears\python_dual_gear\debug\2019-08-29_14-42-06_ellipse_ellipse/drive_2d.obj'
+    filename_driven = r'F:\workspace\gears\python_dual_gear\debug\2019-08-29_14-42-06_ellipse_ellipse/driven_2d.obj'
     drive_axis = (0, 0)
-    driven_axis = (0.6311470734139077, 0)
-    generate_gear_pair(14, filename_drive, filename_driven, drive_axis, driven_axis, MyDebugger('test'), 6)
+    driven_axis = (0.8251464417682275, 0)
+    generate_3D_with_axles(4, filename_drive, filename_driven, drive_axis, driven_axis, MyDebugger('test'), 6)
