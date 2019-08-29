@@ -11,6 +11,7 @@ from core.phi_shape_average import differentiate_function, pre_process, rebuild_
 from shape_processor import toExteriorPolarCoord, toCartesianCoordAsNp
 from shapely.geometry import Point, Polygon
 from core.optimize_dual_shapes import uniform_interval, update_polygon_subplots
+from plot.plot_sampled_function import rotate as psf_rotate
 import itertools
 from debug_util import DebuggingSuite
 import matplotlib.pyplot as plt
@@ -175,7 +176,8 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
                 debugging_suite.plotter.draw_contours(
                     os.path.join(path, f'final_result_{index}_{"%.6f" % (score,)}.png'),
                     [('carve_drive', toCartesianCoordAsNp(reconstructed_drive, 0, 0)),
-                     ('carve_driven', toCartesianCoordAsNp(driven, center_distance, 0))],
+                     ('carve_driven', np.array(
+                         psf_rotate(toCartesianCoordAsNp(driven, center_distance, 0), phi[0], (center_distance, 0))))],
                     [(0, 0), (center_distance, 0)])
     results = results[:keep_count]
     results.sort(key=lambda dist, *_: dist)

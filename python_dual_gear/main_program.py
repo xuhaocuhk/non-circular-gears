@@ -8,7 +8,7 @@ import shape_factory
 from plot.plot_util import plot_cartesian_shape, plot_polar_shape, init_plot, plot_contour_and_save
 import logging
 import sys
-from plot.plot_sampled_function import plot_sampled_function
+from plot.plot_sampled_function import plot_sampled_function, rotate
 import yaml
 from plot.qt_plot import Plotter
 import os
@@ -108,6 +108,7 @@ def optimize_center(cart_input_drive, cart_input_driven, debugger, opt_config, p
     polar_driven, center_distance, phi = compute_dual_gear(polar_drive)
     drive_contour = toCartesianCoordAsNp(polar_drive, 0, 0)
     driven_contour = toCartesianCoordAsNp(polar_driven, center_distance, 0)
+    driven_contour = np.array(rotate(driven_contour, phi[0], (center_distance, 0)))
     plotter.draw_contours(debugger.file_path('optimize_result.png'),
                           [('carve_drive', drive_contour), ('carve_driven', driven_contour)],
                           [(0, 0), (center_distance, 0)])

@@ -21,9 +21,11 @@ def translation(original_points: [(float, float)], translation_vector: (float, f
     return [(x + translation_vector[0], y + translation_vector[1]) for x, y in original_points]
 
 
-def rotate(polygon_points: [(float, float)], rotation_angle: float) -> [(float, float)]:
+def rotate(polygon_points: [(float, float)], rotation_angle: float, axis=(0.0, 0.0)) -> [(float, float)]:
+    p, q = axis
     return [
-        (x * cos(rotation_angle) - y * sin(rotation_angle), x * sin(rotation_angle) + y * cos(rotation_angle))
+        (p + (x - p) * cos(rotation_angle) - (y - q) * sin(rotation_angle),
+         q + (x - p) * sin(rotation_angle) + (y - q) * cos(rotation_angle))
         for x, y in polygon_points
     ]
 
