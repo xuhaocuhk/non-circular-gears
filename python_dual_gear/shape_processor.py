@@ -143,7 +143,7 @@ def getNormals(cart_contour: np.array, plt_axis, center, normal_filter=True):
     normals = [(normals[i][0] / math.sqrt(normals[i][0] * normals[i][0] + normals[i][1] * normals[i][1]),
                 normals[i][1] / math.sqrt(normals[i][0] * normals[i][0] + normals[i][1] * normals[i][1]))
                for i in range(n)]
-    # normal filtering
+    # filter those normals back to the rotation center to zero
     if normal_filter:
         directions = [(cart_contour[i][0] - center[0], cart_contour[i][1] - center[1]) for i in range(n)]
         normals = [normal if dir[0] * normal[0] + dir[1] * normal[1] > 0 else [normal[0] / 1000, normal[1] / 1000] for
