@@ -282,7 +282,7 @@
   k: 1
   name: kangaroo
   sample_num: 1024
-  smooth: 32
+  smooth: 4
   tooth_height: 0.03
   tooth_num: 32
 - center_point: [0.7, 0.7]

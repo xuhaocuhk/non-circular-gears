@@ -288,8 +288,8 @@ if __name__ == '__main__':
         ('pikachu', 'shark'),
         ('pikachu2', 'shark'),
         ('pikachu', 'liyuwang'),
-        ('pikachu2', 'liyuwang')
-        ('huolong', 'liyuwang')
+        ('pikachu2', 'liyuwang'),
+        ('huolong', 'liyuwang'),
         ('huolong', 'liyuwang')
     ]
     for drive, driven in pairs_to_optimize:
