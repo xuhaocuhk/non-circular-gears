@@ -217,8 +217,8 @@ if __name__ == '__main__':
     # polygon_ext = [(-5, -5), (5, -5), (5, 5), (-5, 5)]
 
     # generate_3d_mesh_hole(MyDebugger('test'), 'output.obj', square_contour, cross_contour, 2)
-    filename_drive = './debug/printtest/test 2/drive_2d.obj'
-    filename_driven = './debug/printtest/test 2/driven_2d.obj'
+    filename_drive = r'E:\OneDrive - The Chinese University of Hong Kong\research_PhD\non-circular-gear\exp_drive_continu\2019-08-29_21-19-52_ellipse_ellipse/drive_2d.obj'
+    filename_driven = r'E:\OneDrive - The Chinese University of Hong Kong\research_PhD\non-circular-gear\exp_drive_continu\2019-08-29_21-19-52_ellipse_ellipse/driven_2d.obj'
     drive_axis = (0, 0)
     driven_axis = (0.8251464417682275, 0)
-    generate_3D_with_axles(4, filename_drive, filename_driven, drive_axis, driven_axis, MyDebugger('test'), 6)
+    generate_3D_with_axles(6, filename_drive, filename_driven, drive_axis, driven_axis, MyDebugger('test'), 6)
