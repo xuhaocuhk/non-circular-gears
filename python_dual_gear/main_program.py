@@ -268,8 +268,29 @@ if __name__ == '__main__':
         ('koala', 'kangaroo'),
         ('fish', 'shark'),
         ('fish', 'turtle'),
-        ('turtle', 'shark')
-
+        ('turtle', 'shark'),
+        ('car', 'fighter'),
+        ('pistol', 'gun'),
+        ('tree', 'turtle'),
+        ('tree', 'woniu'),
+        ('drop', 'tree'),
+        ('drop', 'heart'),
+        ('key', 'heart'),
+        ('tree', 'lvmaochong'),
+        ('pikachu', 'lvmaochong'),
+        ('huolong', 'lvmaochong'),
+        ('miaowa', 'lvmaochong'),
+        ('pikachu2', 'lvmaochong'),
+        ('pikachu', 'lvmaochong'),
+        ('pikachu', 'jieni'),
+        ('pikachu2', 'huolong'),
+        ('pikachu', 'huolong'),
+        ('pikachu', 'shark'),
+        ('pikachu2', 'shark'),
+        ('pikachu', 'liyuwang'),
+        ('pikachu2', 'liyuwang')
+        ('huolong', 'liyuwang')
+        ('huolong', 'liyuwang')
     ]
     for drive, driven in pairs_to_optimize:
         try:
