@@ -188,13 +188,20 @@ def get_duals(drive_model: Model, x_sample_count: int, y_sample_count: int, hori
 
         drive_polar = toExteriorPolarCoord(Point(*center), drive_contour, 1024)
         driven_polar, center_distance, phi = compute_dual_gear(drive_polar)
+        drive_new_contour = toCartesianCoordAsNp(drive_polar, horizontal_shifting, 0)
         driven_contour = toCartesianCoordAsNp(driven_polar, horizontal_shifting + center_distance, 0)
         driven_contour = np.array(rotate(driven_contour, phi[0], (horizontal_shifting + center_distance, 0)))
+
+        # move things back to center
+        drive_new_contour += np.array((center[0], center[1]))
+        driven_contour += np.array((center[0], center[1]))
+
         plotter.draw_contours(debugger.file_path(f'{index}.png'), [
             ('input_drive', drive_contour),
-            ('math_drive', toCartesianCoordAsNp(drive_polar, horizontal_shifting, 0)),
+            ('math_drive', drive_new_contour),
             ('math_driven', driven_contour)
-        ], [(horizontal_shifting, 0), (horizontal_shifting + center_distance, 0)])
+        ], [(horizontal_shifting + center[0], center[1]),
+            (horizontal_shifting + center_distance + center[0], center[1])])
 
 
 def generate_all_models():
