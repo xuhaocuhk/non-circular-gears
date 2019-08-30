@@ -98,6 +98,11 @@ def point_in_contour(contour: np.ndarray, x: float, y: float) -> bool:
 
 
 if __name__ == '__main__':
-    x_values = list(range(10))
-    y_values = np.array([x * x for x in x_values])
-    print(inverse_function(y_values, (0, 10), (0, 100), 100))
+    test_array = np.array([
+        (0, 0),
+        (1, 2),
+        (3, 4),
+        (12.0, 2.23)
+    ])
+    save_contour('test.dat', test_array)
+    print(read_contour('test.dat'))

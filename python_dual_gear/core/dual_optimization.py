@@ -84,22 +84,20 @@ def align_and_average(array_a: List, array_b: List) -> List:
 
 
 def sample_in_windows(drive_contour: np.ndarray, driven_contour: np.ndarray,
-                      drive_windows: List[Window_T], driven_windows: List[Window_T], keep_count: int,
+                      window_pairs: List[Tuple[Window_T, Window_T]], keep_count: int,
                       debugging_suite: DebuggingSuite, center_determine_function=center_of_window,
                       sampling_accuracy=1024) -> List[Tuple[float, Window_T, Window_T, Polar_T]]:
     """
     find the best sample windows
     :param drive_contour: the drive contour
     :param driven_contour: the driven contour
-    :param drive_windows: windows to sample of the drive contour
-    :param driven_windows: windows to sample of the driven contour
+    :param window_pairs: pair of windows
     :param keep_count: count of the windows to be kept
     :param debugging_suite: the debugging suite
     :param center_determine_function: function to determine from window to center
     :param sampling_accuracy: number of samples when converting to polar contour
     :return: list of (score, drive_window, driven_window, reconstructed_drive)
     """
-    window_pairs = itertools.product(drive_windows, driven_windows)
     results = []
     path_prefix = debugging_suite.path_prefix  # store in a directory
     if debugging_suite.figure is not None:
@@ -152,9 +150,9 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
     drive_polygon = Polygon(drive_contour)
     driven_polygon = Polygon(driven_contour)
     min_x, min_y, max_x, max_y = drive_polygon.bounds
-    drive_windows = [(min_x, max_x, min_y, max_y)]
+    window_pairs = (min_x, max_x, min_y, max_y)
     min_x, min_y, max_x, max_y = driven_polygon.bounds
-    driven_windows = [(min_x, max_x, min_y, max_y)]
+    window_pairs = [(window_pairs, (min_x, max_x, min_y, max_y))]
     x_sample, y_sample = sampling_count
 
     # start iteration
@@ -162,14 +160,15 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
     for iteration in range(iteration_count):
         path = debugging_suite.debugger.file_path('iteration_' + str(iteration))
         os.makedirs(path, exist_ok=True)
-        drive_windows = list(itertools.chain.from_iterable(
-            [split_window(drive_window, x_sample, y_sample) for drive_window in drive_windows]))
-        driven_windows = list(itertools.chain.from_iterable(
-            [split_window(driven_window, x_sample, y_sample) for driven_window in driven_windows]))
-        results = sample_in_windows(drive_contour, driven_contour, drive_windows, driven_windows, keep_count,
+        window_pairs = list(itertools.chain.from_iterable([
+            itertools.product(split_window(drive_window, x_sample, y_sample),
+                              split_window(driven_window, x_sample, y_sample))
+            for drive_window, driven_window in window_pairs
+        ]))
+        results = sample_in_windows(drive_contour, driven_contour, window_pairs, keep_count,
                                     debugging_suite.sub_suite(os.path.join(path, 'result_')),
                                     sampling_accuracy=sampling_accuracy)
-        _, drive_windows, driven_windows, __ = zip(*results)
+        window_pairs = [(drive_window, driven_window) for _, drive_window, driven_window, __ in results]
         if debugging_suite.plotter is not None:
             for index, final_result in enumerate(results):
                 score, *_, reconstructed_drive = final_result
