@@ -260,7 +260,15 @@ if __name__ == '__main__':
         ('bird', 'butterfly'),
         ('car', 'airplane'),
         ('fighter', 'airplane'),
-        ('fish', 'butterfly')
+        ('fish', 'butterfly'),
+        ('australia', 'kangaroo'),
+        ('australia', 'koala'),
+        ('australia', 'shark'),
+        ('koala', 'shark'),
+        ('koala', 'kangaroo'),
+        ('fish', 'shark'),
+        ('fish', 'turtle'),
+        ('turtle', 'shark')
 
     ]
     for drive, driven in pairs_to_optimize:
