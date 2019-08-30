@@ -225,8 +225,42 @@ if __name__ == '__main__':
     #      reply_cut_anim=False, save_cut_anim=False, )
 
     pairs_to_optimize = [
-        ('square', 'square'),  # example
-        # TODO: Prof. Xu: add pairs to optimize here
+        ('square', 'square'),
+        ('circular', 'drop'),
+        ('ellipse', 'wandou'),
+        ('square', 'the key'),
+        ('triangle', 'qingtianwa'),
+        ('wolf', 'gun'),
+        ('wolf', 'bat'),
+        ('trump', 'chicken_leg'),
+        ('trump', 'usmap'),
+        ('trump', 'china_map'),
+        ('canadamap', 'maple'),
+        ('starfish', 'starfish'),
+        ('turtle', 'fish'),
+        ('airplane', 'bat'),
+        ('airplane', 'wingsuit'),
+        ('bat', 'wingsuit'),
+        ('bird', 'tree'),
+        ('boy', 'girl'),
+        ('butterfly', 'fighter'),
+        ('butterfly', 'bat'),
+        ('fish', 'guo'),
+        ('mickey', 'minnie'),
+        ('miaowa', 'mohaima'),
+        ('jieni', 'kabi'),
+        ('huolong', 'liyuwang'),
+        ('tiejiayong', 'fish'),
+        ('tiejiayong', 'woniu'),
+        ('heart', 'heart'),
+        ('man', 'pistol'),
+        ('mickey', 'shoe'),
+        ('man', 'shoe'),
+        ('bird', 'butterfly'),
+        ('car', 'airplane'),
+        ('fighter', 'airplane'),
+        ('fish', 'butterfly')
+
     ]
     for drive, driven in pairs_to_optimize:
         main(find_model_by_name(drive), find_model_by_name(driven), True, False, True, True)
