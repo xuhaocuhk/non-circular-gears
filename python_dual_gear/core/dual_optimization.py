@@ -174,12 +174,17 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
             for index, final_result in enumerate(results):
                 score, *_, reconstructed_drive = final_result
                 driven, center_distance, phi = compute_dual_gear(reconstructed_drive)
+                final_drive = toCartesianCoordAsNp(reconstructed_drive, 0, 0)
+                final_driven = np.array(
+                    psf_rotate(toCartesianCoordAsNp(driven, center_distance, 0), phi[0], (center_distance, 0)))
                 debugging_suite.plotter.draw_contours(
                     os.path.join(path, f'final_result_{index}_{"%.6f" % (score,)}.png'),
-                    [('carve_drive', toCartesianCoordAsNp(reconstructed_drive, 0, 0)),
-                     ('carve_driven', np.array(
-                         psf_rotate(toCartesianCoordAsNp(driven, center_distance, 0), phi[0], (center_distance, 0))))],
+                    [('carve_drive', final_drive),
+                     ('carve_driven', final_driven)],
                     [(0, 0), (center_distance, 0)])
+                save_contour(os.path.join(path, f'final_result_{index}_drive.dat'), final_drive)
+                save_contour(os.path.join(path, f'final_result_{index}_driven.dat'), final_driven)
+
     results = results[:keep_count]
     results.sort(key=lambda dist, *_: dist)
     results = [(score, reconstructed_drive)
