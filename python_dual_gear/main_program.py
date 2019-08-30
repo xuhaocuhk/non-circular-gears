@@ -15,7 +15,7 @@ import itertools
 from typing import Optional, Iterable, List
 from core.optimize_dual_shapes import counterclockwise_orientation, clockwise_orientation
 from core.dual_optimization import sampling_optimization, dual_annealing_optimization, split_window, center_of_window
-from util_functions import point_in_contour
+from util_functions import point_in_contour, save_contour
 
 # writing log to file
 logging.basicConfig(filename='debug\\info.log', level=logging.INFO)
@@ -110,6 +110,8 @@ def optimize_center(cart_input_drive, cart_input_driven, debugger, opt_config, p
     plotter.draw_contours(debugger.file_path('optimize_result.png'),
                           [('carve_drive', drive_contour), ('carve_driven', driven_contour)],
                           [(0, 0), (center_distance, 0)])
+    save_contour('optimized_drive.dat', drive_contour)
+    save_contour('optimized_driven.dat', driven_contour)
     return (0, 0), center_distance, toCartesianCoordAsNp(polar_drive, 0, 0)
 
 
