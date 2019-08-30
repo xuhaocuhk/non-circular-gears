@@ -40,7 +40,7 @@
   smooth: 0
   tooth_height: 0.02
   tooth_num: 32
- - center_point: [0, 0.5773]
+- center_point: [0, 0.5773]
   k: 1
   name: triangle
   sample_num: 256
@@ -75,24 +75,94 @@
   smooth: 64
   tooth_height: 0.03
   tooth_num: 32
-- center_point: [158, 119]
-  k: 1
-  name: horse
-  sample_num: 1024
-  smooth: 0
-  tooth_height: 0.03
-  tooth_num: 32
-- center_point: [171, 241]
+- center_point: [0.7, 0.7]
   k: 1
   name: pikachu
   sample_num: 1024
   smooth: 0
   tooth_height: 0.03
   tooth_num: 32
-- center_point: [2.3, 0.5]
+- center_point: [0.7, 0.7]
   k: 1
-  name: spiral_circle
-  sample_num: 512
+  name: maple
+  sample_num: 1024
+  smooth: 0
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: starfish
+  sample_num: 1024
+  smooth: 0
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: turtle
+  sample_num: 1024
+  smooth: 0
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: airplane
+  sample_num: 1024
+  smooth: 0
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: bird
+  sample_num: 1024
+  smooth: 0
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: boy
+  sample_num: 1024
+  smooth: 0
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: girl
+  sample_num: 1024
+  smooth: 0
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: butterfly
+  sample_num: 1024
+  smooth: 0
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: car
+  sample_num: 1024
+  smooth: 0
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: fish
+  sample_num: 1024
+  smooth: 0
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: mickey
+  sample_num: 1024
+  smooth: 0
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: minnie
+  sample_num: 1024
   smooth: 0
   tooth_height: 0.03
   tooth_num: 32
