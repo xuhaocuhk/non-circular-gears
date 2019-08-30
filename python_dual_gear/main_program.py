@@ -17,7 +17,7 @@ import itertools
 import figure_config
 from typing import Optional
 from core.optimize_dual_shapes import counterclockwise_orientation, clockwise_orientation
-from core.dual_optimization import sampling_optimization
+from core.dual_optimization import sampling_optimization, dual_annealing_optimization
 
 # writing log to file
 logging.basicConfig(filename='debug\\info.log', level=logging.INFO)
@@ -112,6 +112,13 @@ def optimize_center(cart_input_drive, cart_input_driven, debugger, opt_config, p
     plotter.draw_contours(debugger.file_path('optimize_result.png'),
                           [('carve_drive', drive_contour), ('carve_driven', driven_contour)],
                           [(0, 0), (center_distance, 0)])
+    return (0, 0), center_distance, toCartesianCoordAsNp(polar_drive, 0, 0)
+
+
+def optimize_center_annealing(cart_input_drive, cart_input_driven, debugger, opt_config, plotter):
+    # compatible with optimize_center
+    score, polar_drive = dual_annealing_optimization(cart_input_drive, cart_input_driven)
+    polar_driven, center_distance, phi = compute_dual_gear(polar_drive)
     return (0, 0), center_distance, toCartesianCoordAsNp(polar_drive, 0, 0)
 
 
