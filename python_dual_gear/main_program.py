@@ -16,6 +16,7 @@ from typing import Optional, Iterable, List
 from core.optimize_dual_shapes import counterclockwise_orientation, clockwise_orientation
 from core.dual_optimization import sampling_optimization, dual_annealing_optimization, split_window, center_of_window
 from util_functions import point_in_contour, save_contour
+import traceback
 
 # writing log to file
 logging.basicConfig(filename='debug\\info.log', level=logging.INFO)
@@ -263,4 +264,7 @@ if __name__ == '__main__':
 
     ]
     for drive, driven in pairs_to_optimize:
-        main(find_model_by_name(drive), find_model_by_name(driven), True, False, True, True)
+        try:
+            main(find_model_by_name(drive), find_model_by_name(driven), True, False, True, True)
+        except:
+            traceback.print_stack()
