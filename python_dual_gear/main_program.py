@@ -143,8 +143,9 @@ def get_inputs(debugger, drive_model, driven_model, plotter):
     return cart_drive, cart_driven
 
 
-def init(models: Iterable[Model], opt_config, additional_debugging_names: List[str]):
+def init(models: Iterable[Model], opt_config, additional_debugging_names: Optional[List[str]] = None):
     # debugger and logging
+    if additional_debugging_names is None: additional_debugging_names = []
     debugger = MyDebugger([model.name for model in models] + additional_debugging_names)
     logging_fh = logging.FileHandler(debugger.file_path('logs.log'), 'w')
     logging_fh.setLevel(logging.DEBUG)
