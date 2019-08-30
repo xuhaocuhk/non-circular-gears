@@ -5,19 +5,17 @@ from core.compute_dual_gear import compute_dual_gear, rotate_and_cut
 from shapely.affinity import translate
 import fabrication
 import shape_factory
-from plot.plot_util import plot_cartesian_shape, plot_polar_shape, init_plot, plot_contour_and_save
 import logging
 import sys
 from plot.plot_sampled_function import plot_sampled_function, rotate
 import yaml
 from plot.qt_plot import Plotter
 import os
-from optimization import optimize_pair_from_config
 import itertools
-import figure_config
-from typing import Optional
+from typing import Optional, Iterable, List
 from core.optimize_dual_shapes import counterclockwise_orientation, clockwise_orientation
-from core.dual_optimization import sampling_optimization, dual_annealing_optimization
+from core.dual_optimization import sampling_optimization, dual_annealing_optimization, split_window, center_of_window
+from util_functions import point_in_contour
 
 # writing log to file
 logging.basicConfig(filename='debug\\info.log', level=logging.INFO)
@@ -49,7 +47,7 @@ def math_cut(drive_model: Model, cart_drive: np.ndarray, debugger: MyDebugger, p
 def main(drive_model: Model, driven_model: Model, do_math_cut=True, math_animation=False,
          reply_cut_anim=False, save_cut_anim=True, opt_config='optimization_config.yaml', ):
     # initialize logging system, configuration files, etc.
-    debugger, opt_config, plotter = init(drive_model, driven_model, opt_config)
+    debugger, opt_config, plotter = init((drive_model, driven_model), opt_config)
 
     # get input polygons
     cart_input_drive, cart_input_driven = get_inputs(debugger, drive_model, driven_model, plotter)
@@ -143,9 +141,9 @@ def get_inputs(debugger, drive_model, driven_model, plotter):
     return cart_drive, cart_driven
 
 
-def init(drive_model, driven_model, opt_config):
+def init(models: Iterable[Model], opt_config, additional_debugging_names: List[str]):
     # debugger and logging
-    debugger = MyDebugger([model.name for model in (drive_model, driven_model)])
+    debugger = MyDebugger([model.name for model in models] + additional_debugging_names)
     logging_fh = logging.FileHandler(debugger.file_path('logs.log'), 'w')
     logging_fh.setLevel(logging.DEBUG)
     logging_fh.setFormatter(logging.Formatter('[%(asctime)s][%(name)s][%(levelname)s] %(message)s'))
@@ -153,12 +151,50 @@ def init(drive_model, driven_model, opt_config):
     # initialize plotter
     plotter = Plotter()
     # parse config
-    if isinstance(opt_config, str) and os.path.isfile(opt_config):
-        with open(opt_config) as config_file:
-            opt_config = yaml.safe_load(config_file)
-            opt_config['sampling_count'] = tuple(opt_config['sampling_count'])
+    if opt_config is not None:
+        if isinstance(opt_config, str) and os.path.isfile(opt_config):
+            with open(opt_config) as config_file:
+                opt_config = yaml.safe_load(config_file)
+                opt_config['sampling_count'] = tuple(opt_config['sampling_count'])
     logging.debug('optimization config parse complete, config:' + repr(opt_config))
     return debugger, opt_config, plotter
+
+
+def get_duals(drive_model: Model, x_sample_count: int, y_sample_count: int, horizontal_shifting: float):
+    """
+    Get duals of a given drive model, self-creating debugger
+    :param drive_model: the driving model
+    :param x_sample_count: count of samples in x direction
+    :param y_sample_count: count of samples in y direction
+    :param horizontal_shifting: shifting in x direction to keep the drive away from input
+    :return: None
+    """
+    debugger, _, plotter = init((drive_model,), None, ['duals'])
+    drive_contour = shape_factory.get_shape_contour(drive_model, True, None, drive_model.smooth)
+    logging.debug('drive model loaded')
+
+    # get the bounding
+    drive_polygon = Polygon(drive_contour)
+    min_x, min_y, max_x, max_y = drive_polygon.bounds
+    drive_windows = [(min_x, max_x, min_y, max_y)]
+    drive_windows = split_window(drive_windows[0], x_sample_count, y_sample_count)
+    centers = [center_of_window(window) for window in drive_windows]
+
+    # start finding the dual
+    for index, center in enumerate(centers):
+        if not point_in_contour(drive_contour, *center):
+            logging.info(f'Point #{index}{center} not in contour')
+            continue
+
+        drive_polar = toExteriorPolarCoord(Point(*center), drive_contour, 1024)
+        driven_polar, center_distance, phi = compute_dual_gear(drive_polar)
+        driven_contour = toCartesianCoordAsNp(driven_polar, horizontal_shifting + center_distance, 0)
+        driven_contour = np.array(rotate(driven_contour, phi[0], (horizontal_shifting + center_distance, 0)))
+        plotter.draw_contours(debugger.file_path(f'{index}.png'), [
+            ('input_drive', drive_contour),
+            ('math_drive', toCartesianCoordAsNp(drive_polar, horizontal_shifting, 0)),
+            ('math_driven', driven_contour)
+        ], [(horizontal_shifting, 0), (horizontal_shifting + center_distance, 0)])
 
 
 def generate_all_models():
@@ -173,7 +209,9 @@ def generate_all_models():
 
 if __name__ == '__main__':
     # generate_all_models()
+    #
+    # main(find_model_by_name('ellipse'), find_model_by_name('ellipse'),
+    #      do_math_cut=True, math_animation=False,
+    #      reply_cut_anim=False, save_cut_anim=False, )
 
-    main(find_model_by_name('ellipse'), find_model_by_name('ellipse'),
-         do_math_cut=True, math_animation=False,
-         reply_cut_anim=False, save_cut_anim=False, )
+    get_duals(find_model_by_name('ellipse'), 5, 5, 1.2)
