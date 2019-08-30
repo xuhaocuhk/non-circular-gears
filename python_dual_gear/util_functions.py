@@ -2,7 +2,7 @@ from typing import Iterable, Collection, SupportsFloat, Sized, Callable, Tuple
 import math
 import numpy as np
 import struct
-from shapely.geometry import Polygon
+from shapely.geometry import Polygon, Point
 
 
 def standard_deviation_distance(x: Collection[SupportsFloat], y: Collection[SupportsFloat]) -> float:
@@ -73,6 +73,17 @@ def inverse_function(function: np.ndarray, x_range: Tuple[float, float], y_range
     n = len(function)
     y_samples = np.linspace(*y_range, n + 1, False)
     return np.interp(y_samples, list(function) + [final_value], np.linspace(*x_range, n + 1, endpoint=True))[:-1]
+
+
+def point_in_contour(contour: np.ndarray, x: float, y: float) -> bool:
+    """
+    Determines whether the point is in the contour by shapely
+    :param contour: the contour to check
+    :param x: x-value of the point
+    :param y: y-value of the point
+    :return: whether the point is in the contour
+    """
+    return Polygon(contour).contains(Point(x, y))
 
 
 if __name__ == '__main__':

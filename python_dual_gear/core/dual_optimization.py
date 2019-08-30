@@ -4,7 +4,7 @@ WARNING: assuming k=1
 """
 
 import numpy as np
-from util_functions import standard_deviation_distance, align, save_contour
+from util_functions import standard_deviation_distance, align, save_contour, point_in_contour
 from typing import Iterable, Tuple, List
 from core.compute_dual_gear import compute_dual_gear
 from core.phi_shape_average import differentiate_function, pre_process, rebuild_polar
@@ -16,6 +16,7 @@ import itertools
 from debug_util import DebuggingSuite
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
+import scipy.optimize as opt
 import os
 
 Window_T = Tuple[float, float, float, float]
@@ -184,6 +185,45 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
     results = [(score, reconstructed_drive)
                for score, drive_window, driven_window, reconstructed_drive in results]
     return results
+
+
+def dual_objective_function(positions: Tuple[float, float, float, float], drive_contour: np.ndarray,
+                            driven_contour: np.ndarray, resampling_accuracy: int = 1024) -> float:
+    """
+    The objective function for dual annealing
+    :param positions: (drive_x, drive_y, driven_x, driven_y)
+    :param drive_contour: the target drive contour
+    :param driven_contour: the target driven contour
+    :param resampling_accuracy: count of polar coordinate samples
+    :return: the distance
+    """
+    drive_x, drive_y, driven_x, driven_y = positions
+    # check whether the center is in the polygon
+    if point_in_contour(drive_contour, drive_x, drive_y) and point_in_contour(driven_contour, driven_x, driven_y):
+        return contour_distance(drive_contour, (drive_x, drive_y), driven_contour, (driven_x, driven_y),
+                                resampling_accuracy)[0]
+    else:
+        return float('inf')
+
+
+def dual_annealing_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray, resampling_accuracy=1024,
+                                **annealing_args) -> Tuple[float, Polar_T]:
+    # prepare the ranges
+    arg_range = []
+    drive_polygon = Polygon(drive_contour)
+    min_x, min_y, max_x, max_y = drive_polygon.bounds
+    arg_range += [(min_x, max_x), (min_y, max_y)]
+    driven_polygon = Polygon(driven_contour)
+    min_x, min_y, max_x, max_y = driven_polygon.bounds
+    arg_range += [(min_x, max_x), (min_y, max_y)]
+    assert len(arg_range) == 4
+
+    result = opt.dual_annealing(dual_objective_function, arg_range,
+                                (drive_contour, driven_contour, resampling_accuracy), **annealing_args)
+    drive_x, drive_y, driven_x, driven_y = result.x
+    score, d_phi_drive, d_phi_driven, dist_drive, dist_driven = \
+        contour_distance(drive_contour, (drive_x, drive_y), driven_contour, (driven_x, driven_y), resampling_accuracy)
+    return score, list(rebuild_polar((dist_drive + dist_driven) / 2, align_and_average(d_phi_drive, d_phi_driven)))
 
 
 if __name__ == '__main__':
