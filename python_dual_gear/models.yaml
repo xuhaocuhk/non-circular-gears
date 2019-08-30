@@ -166,3 +166,38 @@
   smooth: 0
   tooth_height: 0.03
   tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: miaowa
+  sample_num: 1024
+  smooth: 0
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: jieni
+  sample_num: 1024
+  smooth: 0
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: huolong
+  sample_num: 1024
+  smooth: 0
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: tiejiayong
+  sample_num: 1024
+  smooth: 0
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: aixinyu
+  sample_num: 1024
+  smooth: 0
+  tooth_height: 0.03
+  tooth_num: 32
