@@ -45,6 +45,17 @@ def save_contour(filename: str, contour: np.ndarray):
         file.write(pack_contour(contour))
 
 
+def read_contour(filename: str) -> np.ndarray:
+    with open(filename, 'rb') as file:
+        data = file.read()
+        length, = struct.unpack('i', data[:struct.calcsize('i')])
+        array = np.empty((length, 2), dtype=float)
+        for index, (x, y) in enumerate(struct.iter_unpack('dd', data[struct.calcsize('i'):])):
+            array[index] = x, y
+        assert index == length - 1
+        return array
+
+
 def shapely_polygon_to_numpy_contour(polygon: Polygon) -> np.ndarray:
     return np.array(list(zip(*polygon.exterior.xy)))
 
