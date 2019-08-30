@@ -221,4 +221,9 @@ if __name__ == '__main__':
     #      do_math_cut=True, math_animation=False,
     #      reply_cut_anim=False, save_cut_anim=False, )
 
-    get_duals(find_model_by_name('ellipse'), 5, 5, 1.2)
+    pairs_to_optimize = [
+        ('square', 'square'),  # example
+        # TODO: Prof. Xu: add pairs to optimize here
+    ]
+    for drive, driven in pairs_to_optimize:
+        main(find_model_by_name(drive), find_model_by_name(driven), True, False, True, True)
