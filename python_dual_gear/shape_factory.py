@@ -4,6 +4,7 @@ from drive_gears.generate_standard_shapes import std_shapes, generate_std_shapes
 from plot.plot_util import plot_cartesian_shape
 from matplotlib.axes import Axes
 from typing import Union, Iterable
+import os
 
 
 def get_shape_contour(model: Model, uniform: bool, plots: Union[Iterable[Axes], None], smooth=0,
@@ -13,7 +14,7 @@ def get_shape_contour(model: Model, uniform: bool, plots: Union[Iterable[Axes], 
         contour = generate_std_shapes(model.name, model.sample_num, model.center_point)
     else:
         # read the contour shape
-        contour = getSVGShapeAsNp(filename=f"../silhouette/{model.name}.txt")
+        contour = getSVGShapeAsNp(filename=os.path.join(os.path.dirname(__file__), f"../silhouette/{model.name}.txt"))
 
     # shape normalization
     poly_bound = Polygon(contour).bounds
