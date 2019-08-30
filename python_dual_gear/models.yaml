@@ -201,3 +201,213 @@
   smooth: 0
   tooth_height: 0.03
   tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: australia
+  sample_num: 1024
+  smooth: 32
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: bat
+  sample_num: 1024
+  smooth: 32
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: chicken_leg
+  sample_num: 1024
+  smooth: 32
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: china_map
+  sample_num: 1024
+  smooth: 32
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: chinese_cup
+  sample_num: 1024
+  smooth: 32
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: drop
+  sample_num: 1024
+  smooth: 32
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: fighter
+  sample_num: 1024
+  smooth: 32
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: gun
+  sample_num: 1024
+  smooth: 32
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: guo
+  sample_num: 1024
+  smooth: 32
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: heart
+  sample_num: 1024
+  smooth: 32
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: kabi
+  sample_num: 1024
+  smooth: 32
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: kangaroo
+  sample_num: 1024
+  smooth: 32
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: key
+  sample_num: 1024
+  smooth: 32
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: koala
+  sample_num: 1024
+  smooth: 32
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: liyuwang
+  sample_num: 1024
+  smooth: 32
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: lvmaochong
+  sample_num: 1024
+  smooth: 32
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: mohaima
+  sample_num: 1024
+  smooth: 32
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: pikachu2
+  sample_num: 1024
+  smooth: 32
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: pistol
+  sample_num: 1024
+  smooth: 32
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: qingtianwa
+  sample_num: 1024
+  smooth: 32
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: shark
+  sample_num: 1024
+  smooth: 32
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: shoes
+  sample_num: 1024
+  smooth: 32
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: sweden_map
+  sample_num: 1024
+  smooth: 32
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: tree
+  sample_num: 1024
+  smooth: 32
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: trump2
+  sample_num: 1024
+  smooth: 32
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: turtle
+  sample_num: 1024
+  smooth: 32
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: usmap
+  sample_num: 1024
+  smooth: 32
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: wandou
+  sample_num: 1024
+  smooth: 32
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: wingsuit
+  sample_num: 1024
+  smooth: 32
+  tooth_height: 0.03
+  tooth_num: 32
+- center_point: [0.7, 0.7]
+  k: 1
+  name: woniu
+  sample_num: 1024
+  smooth: 32
+  tooth_height: 0.03
+  tooth_num: 32
