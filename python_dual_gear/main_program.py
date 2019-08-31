@@ -111,8 +111,8 @@ def optimize_center(cart_input_drive, cart_input_driven, debugger, opt_config, p
     plotter.draw_contours(debugger.file_path('optimize_result.png'),
                           [('carve_drive', drive_contour), ('carve_driven', driven_contour)],
                           [(0, 0), (center_distance, 0)])
-    save_contour('optimized_drive.dat', drive_contour)
-    save_contour('optimized_driven.dat', driven_contour)
+    save_contour(debugger.file_path('optimized_drive.dat'), drive_contour)
+    save_contour(debugger.file_path('optimized_driven.dat'), driven_contour)
     return (0, 0), center_distance, toCartesianCoordAsNp(polar_drive, 0, 0)
 
 
@@ -292,8 +292,8 @@ if __name__ == '__main__':
         ('huolong', 'liyuwang'),
         ('huolong', 'liyuwang')
     ]
-    for drive, driven in pairs_to_optimize:
+    for drive, driven in pairs_to_optimize[:30]:
         try:
-            main(find_model_by_name(drive), find_model_by_name(driven), True, False, True, True)
+            main(find_model_by_name(drive), find_model_by_name(driven), False, False, True, True)
         except:
             traceback.print_stack()
