@@ -53,16 +53,16 @@ def main(drive_model: Model, driven_model: Model, do_math_cut=True, math_animati
     # get input polygons
     cart_input_drive, cart_input_driven = get_inputs(debugger, drive_model, driven_model, plotter)
 
+    # optimization
+    center, center_distance, cart_drive = optimize_center(cart_input_drive, cart_input_driven, debugger, opt_config,
+                                                          plotter)
+
     # math cutting
     if do_math_cut:
         center_distance, phi, polar_math_drive, polar_math_driven = math_cut(drive_model=drive_model,
                                                                              cart_drive=cart_input_drive,
                                                                              debugger=debugger, plotter=plotter,
                                                                              animation=math_animation)
-
-    # optimization
-    center, center_distance, cart_drive = optimize_center(cart_input_drive, cart_input_driven, debugger, opt_config,
-                                                          plotter)
 
     # add teeth
     cart_drive = add_teeth(center, center_distance, debugger, cart_drive, drive_model, plotter)
