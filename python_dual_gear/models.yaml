@@ -121,14 +121,14 @@
   k: 1
   name: boy
   sample_num: 1024
-  smooth: 0
+  smooth: 16
   tooth_height: 0.03
   tooth_num: 32
 - center_point: [0.7, 0.7]
   k: 1
   name: girl
   sample_num: 1024
-  smooth: 0
+  smooth: 16
   tooth_height: 0.03
   tooth_num: 32
 - center_point: [0.7, 0.7]
