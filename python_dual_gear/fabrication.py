@@ -194,6 +194,8 @@ def generate_3D_with_axles(distance: float, filename_drive: str, filename_driven
     :param debugger: None to save in the same directory as the input
     :return:
     """
+    filename_drive = os.path.abspath(filename_drive)
+    filename_driven = os.path.abspath(filename_driven)
     assert os.path.isfile(filename_drive)
     assert os.path.isfile(filename_driven)
     exterior_drive = read_2d_obj(filename_drive)
@@ -227,8 +229,8 @@ if __name__ == '__main__':
     # polygon_ext = [(-5, -5), (5, -5), (5, 5), (-5, 5)]
 
     # generate_3d_mesh_hole(MyDebugger('test'), 'output.obj', square_contour, cross_contour, 2)
-    filename_drive = 'optimized_drive.dat'
-    filename_driven = 'optimized_driven.dat'
+    filename_drive = 'drive_2d.obj'
+    filename_driven = 'driven_2d.obj'
     drive_axis = (0, 0)
     driven_axis = (0.8251464417682275, 0)
     generate_3D_with_axles(6, filename_drive, filename_driven, drive_axis, driven_axis, None, 6)
