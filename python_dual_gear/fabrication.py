@@ -7,7 +7,7 @@ from shapely.geometry import Polygon
 from shapely.geometry import Point
 from shapely.geometry import LineString
 from shapely.ops import triangulate
-from typing import Tuple
+from typing import Tuple, Union, Optional
 import os
 from core.optimize_dual_shapes import clockwise_orientation
 import math
@@ -83,7 +83,7 @@ def generate_3d_mesh(debugger: MyDebugger, filename: str, contour: np.ndarray, t
             print('f ' + ' '.join([str(point) for point in (upper_prev, lower_prev, lower_point)]), file=obj_file)
 
 
-def generate_3d_mesh_hole(debugger: MyDebugger, filename: str, contour: np.ndarray, interiors: np.ndarray,
+def generate_3d_mesh_hole(debugger: Union[MyDebugger, str], filename: str, contour: np.ndarray, interiors: np.ndarray,
                           thickness: float):
     """
     this is the function to generate an obj file of a polygon with an inner hole (serves as the axis hole)
@@ -92,9 +92,13 @@ def generate_3d_mesh_hole(debugger: MyDebugger, filename: str, contour: np.ndarr
     :param contour:  the contour to create 3d object with (exterior of a polygon)
     :param interiors: the interior pts of the polygon
     :param thickness: the thickness of the object
-    :return:
+    :return: None
     """
-    destination = debugger.file_path(filename)
+    if isinstance(debugger, MyDebugger):
+        destination = debugger.file_path(filename)
+    else:
+        assert os.path.isdir(debugger)
+        destination = os.path.join(debugger, filename)
     with open(destination, 'w') as obj_file:
         point_to_vertex = {}
         for index, point in enumerate(contour):
@@ -182,11 +186,12 @@ def draw_cross(axis):
 
 
 def generate_3D_with_axles(distance: float, filename_drive: str, filename_driven: str, drive_axis: Tuple[float, float],
-                           driven_axis: Tuple[float, float], debugger: MyDebugger, thickness: float):
+                           driven_axis: Tuple[float, float], debugger: Optional[MyDebugger], thickness: float):
     """
     :param distance: distance between axes of two gears
     :param filename_drive: file name of the drive gear
     :param filename_driven: file name of the driven gear
+    :param debugger: None to save in the same directory as the input
     :return:
     """
     assert os.path.isfile(filename_drive)
@@ -202,8 +207,13 @@ def generate_3D_with_axles(distance: float, filename_drive: str, filename_driven
     driven_axis_scale = Point(driven_axis[0] * scaling_ratio, driven_axis[1] * scaling_ratio)
     interior_drive = draw_cross(drive_axis_scale)
     interior_driven = draw_cross(driven_axis_scale)
-    generate_3d_mesh_hole(debugger, 'drive_gear_mesh.obj', np.array(exterior_drive_scale), np.array(interior_drive), thickness)
-    generate_3d_mesh_hole(debugger, 'driven_gear_mesh.obj', np.array(exterior_driven_scale), np.array(interior_driven), thickness)
+    if debugger is None:
+        destination_directory = os.path.dirname(filename_drive)
+        debugger = destination_directory
+    generate_3d_mesh_hole(debugger, 'drive_gear_mesh.obj', np.array(exterior_drive_scale), np.array(interior_drive),
+                          thickness)
+    generate_3d_mesh_hole(debugger, 'driven_gear_mesh.obj', np.array(exterior_driven_scale), np.array(interior_driven),
+                          thickness)
 
 
 if __name__ == '__main__':
@@ -217,8 +227,8 @@ if __name__ == '__main__':
     # polygon_ext = [(-5, -5), (5, -5), (5, 5), (-5, 5)]
 
     # generate_3d_mesh_hole(MyDebugger('test'), 'output.obj', square_contour, cross_contour, 2)
-    filename_drive = r'E:\OneDrive - The Chinese University of Hong Kong\research_PhD\non-circular-gear\exp_drive_continu\2019-08-29_21-19-52_ellipse_ellipse/drive_2d.obj'
-    filename_driven = r'E:\OneDrive - The Chinese University of Hong Kong\research_PhD\non-circular-gear\exp_drive_continu\2019-08-29_21-19-52_ellipse_ellipse/driven_2d.obj'
+    filename_drive = 'optimized_drive.dat'
+    filename_driven = 'optimized_driven.dat'
     drive_axis = (0, 0)
     driven_axis = (0.8251464417682275, 0)
-    generate_3D_with_axles(6, filename_drive, filename_driven, drive_axis, driven_axis, MyDebugger('test'), 6)
+    generate_3D_with_axles(6, filename_drive, filename_driven, drive_axis, driven_axis, None, 6)
