@@ -84,7 +84,7 @@ def generate_3d_mesh(debugger: MyDebugger, filename: str, contour: np.ndarray, t
 
 
 def generate_3d_mesh_hole(debugger: Union[MyDebugger, str], filename: str, contour: np.ndarray, interiors: np.ndarray,
-                          thickness: float):
+                          thickness=7.76):
     """
     this is the function to generate an obj file of a polygon with an inner hole (serves as the axis hole)
     :param debugger: the debugger to provide directory for obj to be stored
@@ -186,7 +186,7 @@ def draw_cross(axis):
 
 
 def generate_3D_with_axles(distance: float, filename_drive: str, filename_driven: str, drive_axis: Tuple[float, float],
-                           driven_axis: Tuple[float, float], debugger: Optional[MyDebugger], thickness: float):
+                           driven_axis: Tuple[float, float], debugger: Optional[MyDebugger], thickness=7.76):
     """
     :param distance: distance between axes of two gears
     :param filename_drive: file name of the drive gear
@@ -233,4 +233,4 @@ if __name__ == '__main__':
     filename_driven = 'driven_2d.obj'
     drive_axis = (0, 0)
     driven_axis = (0.8251464417682275, 0)
-    generate_3D_with_axles(6, filename_drive, filename_driven, drive_axis, driven_axis, None, 6)
+    generate_3D_with_axles(6, filename_drive, filename_driven, drive_axis, driven_axis, None, 7.76)
