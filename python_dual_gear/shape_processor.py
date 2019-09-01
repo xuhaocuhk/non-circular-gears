@@ -150,7 +150,7 @@ def getNormals(cart_contour: np.array, plt_axis, center, normal_filter=True):
                    dir, normal in zip(directions, normals)]
 
     # moving average for normal smoothing
-    SMOOTH_RANGE = 10
+    SMOOTH_RANGE = 8
     normal_smoothed = []
     extended_normal = normals[-SMOOTH_RANGE:] + normals + normals[:SMOOTH_RANGE]
     for i in range(n):

@@ -17,6 +17,7 @@ from core.optimize_dual_shapes import counterclockwise_orientation, clockwise_or
 from core.dual_optimization import sampling_optimization, dual_annealing_optimization, split_window, center_of_window
 from util_functions import point_in_contour, save_contour
 import traceback
+import util_functions
 
 # writing log to file
 logging.basicConfig(filename='debug\\info.log', level=logging.INFO)
@@ -44,47 +45,10 @@ def math_cut(drive_model: Model, cart_drive: np.ndarray, debugger: MyDebugger, p
     logging.info(f'Center Distance = {center_distance}')
     return center_distance, phi, polar_math_drive, polar_math_driven
 
-
-def main(drive_model: Model, driven_model: Model, do_math_cut=True, math_animation=False,
-         reply_cut_anim=False, save_cut_anim=True, opt_config='optimization_config.yaml', ):
-    # initialize logging system, configuration files, etc.
-    debugger, opt_config, plotter = init((drive_model, driven_model), opt_config)
-
-    # get input polygons
-    cart_input_drive, cart_input_driven = get_inputs(debugger, drive_model, driven_model, plotter)
-
-    # optimization
-    center, center_distance, cart_drive = optimize_center(cart_input_drive, cart_input_driven, debugger, opt_config,
-                                                          plotter)
-
-    # math cutting
-    if do_math_cut:
-        center_distance, phi, polar_math_drive, polar_math_driven = math_cut(drive_model=drive_model,
-                                                                             cart_drive=cart_input_drive,
-                                                                             debugger=debugger, plotter=plotter,
-                                                                             animation=math_animation)
-
-    # add teeth
-    cart_drive = add_teeth(center, center_distance, debugger, cart_drive, drive_model, plotter)
-
-    # rotate and cut
-    cart_driven_gear = rotate_and_carve(cart_drive, center, center_distance, debugger, drive_model, phi, plotter,
-                                        replay_anim=reply_cut_anim, save_anim=save_cut_anim)
-
-    # save 2D contour
-    fabrication.generate_2d_obj(debugger, 'drive_2d.obj', cart_drive)
-    fabrication.generate_2d_obj(debugger, 'driven_2d.obj', cart_driven_gear)
-
-    # generate 3D mesh with axle hole
-    fabrication.generate_3D_with_axles(6, debugger.file_path('drive_2d.obj'), debugger.file_path('driven_2d.obj'),
-                                       (0, 0), (center_distance, 0), debugger, 6)
-
-
 def rotate_and_carve(cart_drive, center, center_distance, debugger, drive_model, phi, plotter, replay_anim=False,
                      save_anim=False):
     centered_drive = cart_drive - center
     poly_drive_gear = Polygon(centered_drive)
-    poly_drive_gear = poly_drive_gear.buffer(0)  # resolve invalid polygon issues
     poly_driven_gear, cut_fig, subplot = rotate_and_cut(poly_drive_gear, center_distance, phi, k=drive_model.k,
                                                         debugger=debugger if save_anim else None,
                                                         replay_animation=replay_anim, plotter=plotter)
@@ -129,15 +93,16 @@ def add_teeth(center, center_distance, debugger, drive, drive_model, plotter):
     drive = addToothToContour(drive, center, center_distance, normals, height=drive_model.tooth_height,
                               tooth_num=drive_model.tooth_num,
                               plt_axis=None, consider_driving_torque=False,
-                              consider_driving_continue=True)
+                              consider_driving_continue=False)
+    drive = Polygon(drive).buffer(0.002) # resolve invalid polygon issues, and add tolarance 0.015
+    drive = np.array(drive.exterior.coords)
     plotter.draw_contours(debugger.file_path('drive_with_teeth.png'), [('input_driven', drive)], None)
-    # fabrication.generate_3d_mesh(debugger, 'drive_with_teeth.obj', drive, 1)
     return drive
 
 
 def get_inputs(debugger, drive_model, driven_model, plotter):
-    cart_drive = shape_factory.get_shape_contour(drive_model, uniform=True, plots=None, smooth=drive_model.smooth)
-    cart_driven = shape_factory.get_shape_contour(driven_model, uniform=True, plots=None, smooth=driven_model.smooth)
+    cart_drive = shape_factory.get_shape_contour(drive_model, uniform=True, plots=None)
+    cart_driven = shape_factory.get_shape_contour(driven_model, uniform=True, plots=None)
     plotter.draw_contours(debugger.file_path('input_drive.png'), [('input_drive', cart_drive)], None)
     plotter.draw_contours(debugger.file_path('input_driven.png'), [('input_driven', cart_driven)], None)
     logging.debug('original 3D meshes generated')
@@ -217,83 +182,130 @@ def generate_all_models():
         fabrication.generate_2d_obj(debugger, 'drive_tooth.obj', drive_tooth_contour)
         fabrication.generate_2d_obj(debugger, 'driven_cut.obj', final_gear_contour)
 
+def main_stage_one(drive_model: Model, driven_model: Model, do_math_cut=True, math_animation=False,
+                   reply_cut_anim=False, save_cut_anim=True, opt_config='optimization_config.yaml', ):
+    # initialize logging system, configuration files, etc.
+    debugger, opt_config, plotter = init((drive_model, driven_model), opt_config)
 
-if __name__ == '__main__':
-    # generate_all_models()
-    #
-    # main(find_model_by_name('ellipse'), find_model_by_name('ellipse'),
-    #      do_math_cut=True, math_animation=False,
-    #      reply_cut_anim=False, save_cut_anim=False, )
+    # get input polygons
+    cart_input_drive, cart_input_driven = get_inputs(debugger, drive_model, driven_model, plotter)
 
+    # optimization
+    center, center_distance, cart_drive = optimize_center(cart_input_drive, cart_input_driven, debugger, opt_config,
+                                                          plotter)
+
+
+def main_stage_two():
+    # init
+    # dir_path = r"E:\OneDrive - The Chinese University of Hong Kong\research_PhD\non-circular-gear\basic_results\finalist\square_square\iteration_2\final_result_0_drive.dat"
+    # model_name = "square"
+    dir_path = r"E:\OneDrive - The Chinese University of Hong Kong\research_PhD\non-circular-gear\basic_results\finalist\heart_heart\iteration_2\final_result_0_drive.dat"
+    model_name = "heart"
+    drive_model = find_model_by_name(model_name)
+    drive_model.center_point = (0,0)
+    debugger = MyDebugger("stage_2_"+model_name)
+    plotter = Plotter()
+
+    # read shape
+    cart_input_drive = util_functions.read_contour(dir_path)
+    cart_input_drive = shape_factory.uniform_and_smooth(cart_input_drive, drive_model )
+
+    # math cutting
+    center_distance, phi, polar_math_drive, polar_math_driven = math_cut(drive_model=drive_model,
+                                                                         cart_drive=cart_input_drive,
+                                                                         debugger=debugger, plotter=plotter,
+                                                                         animation=False)
+
+    # add teeth
+    cart_drive = add_teeth( (0,0), center_distance, debugger, cart_input_drive, drive_model, plotter )
+
+    # rotate and cut
+    cart_driven_gear = rotate_and_carve(cart_drive, (0,0), center_distance, debugger, drive_model, phi, plotter,
+                                        replay_anim=False, save_anim=True)
+
+    # save 2D contour
+    fabrication.generate_2d_obj(debugger, 'drive_2d.obj', cart_drive)
+    fabrication.generate_2d_obj(debugger, 'driven_2d.obj', cart_driven_gear)
+
+    # generate 3D mesh with axle hole
+    fabrication.generate_3D_with_axles(6, debugger.file_path('drive_2d.obj'), debugger.file_path('driven_2d.obj'),
+                                       (0, 0), (center_distance, 0), debugger, 6)
+
+
+def optimize_pairs():
     pairs_to_optimize = [
-        ('square', 'square'),
-        ('circular', 'drop'),
-        ('ellipse', 'wandou'),
-        ('square', 'key'),
-        ('triangle', 'qingtianwa'),
-        ('wolf', 'gun'),
-        ('wolf', 'bat'),
-        ('trump', 'chicken_leg'),
-        ('trump', 'usmap'),
-        ('trump', 'china_map'),
-        ('heart', 'maple'),
-        ('starfish', 'starfish'),
+        # ('square', 'square'),
+        # ('circular', 'drop'),
+        # ('ellipse', 'wandou'),
+        # ('square', 'key'),
+        # ('triangle', 'qingtianwa'),
+        # ('wolf', 'gun'),
+        # ('wolf', 'bat'),
+        # ('trump', 'chicken_leg'),
+        # ('trump', 'usmap'),
+        # ('trump', 'china_map'),
+        # ('heart', 'maple'),
+        # ('starfish', 'starfish'),
         ('turtle', 'fish'),
-        ('airplane', 'bat'),
-        ('airplane', 'wingsuit'),
-        ('bat', 'wingsuit'),
-        ('bird', 'tree'),
-        ('boy', 'girl'),
-        ('butterfly', 'fighter'),
-        ('butterfly', 'bat'),
-        ('fish', 'guo'),
-        ('mickey', 'minnie'),
-        ('miaowa', 'mohaima'),
-        ('jieni', 'kabi'),
-        ('huolong', 'liyuwang'),
-        ('tiejiayong', 'fish'),
-        ('tiejiayong', 'woniu'),
-        ('heart', 'heart'),
-        ('man', 'pistol'),
-        ('mickey', 'shoes'),
-        ('man', 'shoes'),
-        ('bird', 'butterfly'),
-        ('car', 'airplane'),
-        ('fighter', 'airplane'),
-        ('fish', 'butterfly'),
-        ('australia', 'kangaroo'),
-        ('australia', 'koala'),
-        ('australia', 'shark'),
-        ('koala', 'shark'),
-        ('koala', 'kangaroo'),
-        ('fish', 'shark'),
+        # ('airplane', 'bat'),
+        # ('airplane', 'wingsuit'),
+        # ('bat', 'wingsuit'),
+        # ('bird', 'tree'),
+        # ('boy', 'girl'),
+        # ('butterfly', 'fighter'),
+        # ('butterfly', 'bat'),
+        # ('fish', 'guo'),
+        # ('mickey', 'minnie'),
+        # ('miaowa', 'mohaima'),
+        # ('jieni', 'kabi'),
+        # ('huolong', 'liyuwang'),
+        # ('tiejiayong', 'fish'),
+        # ('tiejiayong', 'woniu'),
+        # ('heart', 'heart'),
+        # ('man', 'pistol'),
+        # ('mickey', 'shoes'),
+        # ('man', 'shoes'),
+        # ('bird', 'butterfly'),
+        # ('car', 'airplane'),
+        # ('fighter', 'airplane'),
+        # ('fish', 'butterfly'),
+        # ('australia', 'kangaroo'),
+        # ('australia', 'koala'),
+        # ('australia', 'shark'),
+        # ('koala', 'shark'),
+        # ('koala', 'kangaroo'),
+        # ('fish', 'shark'),
         ('fish', 'turtle'),
         ('turtle', 'shark'),
-        ('car', 'fighter'),
-        ('pistol', 'gun'),
-        ('tree', 'turtle'),
-        ('tree', 'woniu'),
-        ('drop', 'tree'),
-        ('drop', 'heart'),
-        ('key', 'heart'),
-        ('tree', 'lvmaochong'),
-        ('pikachu', 'lvmaochong'),
-        ('huolong', 'lvmaochong'),
-        ('miaowa', 'lvmaochong'),
-        ('pikachu2', 'lvmaochong'),
-        ('pikachu', 'lvmaochong'),
-        ('pikachu', 'jieni'),
-        ('pikachu2', 'huolong'),
-        ('pikachu', 'huolong'),
-        ('pikachu', 'shark'),
-        ('pikachu2', 'shark'),
-        ('pikachu', 'liyuwang'),
-        ('pikachu2', 'liyuwang'),
-        ('huolong', 'liyuwang'),
-        ('huolong', 'liyuwang')
+        # ('car', 'fighter'),
+        # ('pistol', 'gun'),
+        ('tree', 'turtle')
+        # ('tree', 'woniu'),
+        # ('drop', 'tree'),
+        # ('drop', 'heart'),
+        # ('key', 'heart'),
+        # ('tree', 'lvmaochong'),
+        # ('pikachu', 'lvmaochong'),
+        # ('huolong', 'lvmaochong'),
+        # ('miaowa', 'lvmaochong'),
+        # ('pikachu2', 'lvmaochong'),
+        # ('pikachu', 'lvmaochong'),
+        # ('pikachu', 'jieni'),
+        # ('pikachu2', 'huolong'),
+        # ('pikachu', 'huolong'),
+        # ('pikachu', 'shark'),
+        # ('pikachu2', 'shark'),
+        # ('pikachu', 'liyuwang'),
+        # ('pikachu2', 'liyuwang'),
+        # ('huolong', 'liyuwang'),
+        # ('huolong', 'liyuwang')
     ]
     for drive, driven in pairs_to_optimize[:30]:
         try:
-            main(find_model_by_name(drive), find_model_by_name(driven), False, False, True, True)
+            main_stage_one(find_model_by_name(drive), find_model_by_name(driven), False, False, True, True)
         except:
             traceback.print_stack()
+
+if __name__ == '__main__':
+    main_stage_two()
+

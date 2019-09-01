@@ -149,7 +149,7 @@ def draw_cross(axis):
     """
     x = axis.x
     y = axis.y
-    tolerance = 0.34
+    tolerance = 0.3
     cross_contour = [(x + 1.20, y + 1.20),
                      (x + 0.90, y + 1.20),
                      (x + 0.90, y + 2.40),

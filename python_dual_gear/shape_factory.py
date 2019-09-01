@@ -28,13 +28,18 @@ def get_shape_contour(model: Model, uniform: bool, plots: Union[Iterable[Axes], 
 
     # uniform vertex on contour
     if uniform:
-        # convert to uniform coordinate
-        contour = getUniformContourSampledShape(contour, model.sample_num, False)
-        # spline uniform
-        if not smooth == 0:
-            contour = getUniformContourSampledShape(contour[::smooth], model.sample_num, True)
+        contour = uniform_and_smooth(contour, model)
 
         if plots is not None:
             plot_cartesian_shape(subplots[1], "Uniform boundary sampling", contour)
 
+    return contour
+
+
+def uniform_and_smooth(contour, model):
+    # convert to uniform coordinate
+    contour = getUniformContourSampledShape(contour, model.sample_num, False)
+    # spline uniform
+    if not model.smooth == 0:
+        contour = getUniformContourSampledShape(contour[::model.smooth], model.sample_num, True)
     return contour
