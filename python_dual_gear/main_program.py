@@ -53,16 +53,16 @@ def main(drive_model: Model, driven_model: Model, do_math_cut=True, math_animati
     # get input polygons
     cart_input_drive, cart_input_driven = get_inputs(debugger, drive_model, driven_model, plotter)
 
-    # optimization
-    center, center_distance, cart_drive = optimize_center(cart_input_drive, cart_input_driven, debugger, opt_config,
-                                                          plotter)
-
     # math cutting
     if do_math_cut:
         center_distance, phi, polar_math_drive, polar_math_driven = math_cut(drive_model=drive_model,
                                                                              cart_drive=cart_input_drive,
                                                                              debugger=debugger, plotter=plotter,
                                                                              animation=math_animation)
+
+    # optimization
+    center, center_distance, cart_drive = optimize_center(cart_input_drive, cart_input_driven, debugger, opt_config,
+                                                          plotter)
 
     # add teeth
     cart_drive = add_teeth(center, center_distance, debugger, cart_drive, drive_model, plotter)
@@ -220,80 +220,7 @@ def generate_all_models():
 
 if __name__ == '__main__':
     # generate_all_models()
-    #
-    # main(find_model_by_name('ellipse'), find_model_by_name('ellipse'),
-    #      do_math_cut=True, math_animation=False,
-    #      reply_cut_anim=False, save_cut_anim=False, )
 
-    pairs_to_optimize = [
-        ('square', 'square'),
-        ('circular', 'drop'),
-        ('ellipse', 'wandou'),
-        ('square', 'key'),
-        ('triangle', 'qingtianwa'),
-        ('wolf', 'gun'),
-        ('wolf', 'bat'),
-        ('trump', 'chicken_leg'),
-        ('trump', 'usmap'),
-        ('trump', 'china_map'),
-        ('heart', 'maple'),
-        ('starfish', 'starfish'),
-        ('turtle', 'fish'),
-        ('airplane', 'bat'),
-        ('airplane', 'wingsuit'),
-        ('bat', 'wingsuit'),
-        ('bird', 'tree'),
-        ('boy', 'girl'),
-        ('butterfly', 'fighter'),
-        ('butterfly', 'bat'),
-        ('fish', 'guo'),
-        ('mickey', 'minnie'),
-        ('miaowa', 'mohaima'),
-        ('jieni', 'kabi'),
-        ('huolong', 'liyuwang'),
-        ('tiejiayong', 'fish'),
-        ('tiejiayong', 'woniu'),
-        ('heart', 'heart'),
-        ('man', 'pistol'),
-        ('mickey', 'shoes'),
-        ('man', 'shoes'),
-        ('bird', 'butterfly'),
-        ('car', 'airplane'),
-        ('fighter', 'airplane'),
-        ('fish', 'butterfly'),
-        ('australia', 'kangaroo'),
-        ('australia', 'koala'),
-        ('australia', 'shark'),
-        ('koala', 'shark'),
-        ('koala', 'kangaroo'),
-        ('fish', 'shark'),
-        ('fish', 'turtle'),
-        ('turtle', 'shark'),
-        ('car', 'fighter'),
-        ('pistol', 'gun'),
-        ('tree', 'turtle'),
-        ('tree', 'woniu'),
-        ('drop', 'tree'),
-        ('drop', 'heart'),
-        ('key', 'heart'),
-        ('tree', 'lvmaochong'),
-        ('pikachu', 'lvmaochong'),
-        ('huolong', 'lvmaochong'),
-        ('miaowa', 'lvmaochong'),
-        ('pikachu2', 'lvmaochong'),
-        ('pikachu', 'lvmaochong'),
-        ('pikachu', 'jieni'),
-        ('pikachu2', 'huolong'),
-        ('pikachu', 'huolong'),
-        ('pikachu', 'shark'),
-        ('pikachu2', 'shark'),
-        ('pikachu', 'liyuwang'),
-        ('pikachu2', 'liyuwang'),
-        ('huolong', 'liyuwang'),
-        ('huolong', 'liyuwang')
-    ]
-    for drive, driven in pairs_to_optimize[:30]:
-        try:
-            main(find_model_by_name(drive), find_model_by_name(driven), False, False, True, True)
-        except:
-            traceback.print_stack()
+    main(find_model_by_name('square'), find_model_by_name('square'),
+         do_math_cut=True, math_animation=True,
+         reply_cut_anim=False, save_cut_anim=False, )

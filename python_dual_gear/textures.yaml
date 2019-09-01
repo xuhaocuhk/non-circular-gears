@@ -1,0 +1,8 @@
+- name: name of texture
+  translation:
+    - 3 # x
+    - 3 # y
+  file: somefile.png
+  center:
+    - 1
+    - 1
