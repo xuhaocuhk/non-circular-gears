@@ -77,10 +77,12 @@ def center_of_window(window: Window_T) -> Tuple[float, float]:
     return (min_x + max_x) / 2, (min_y + max_y) / 2
 
 
-def align_and_average(array_a: List, array_b: List) -> List:
+def align_and_average(array_a: List, array_b: List, average_factor: float = 0.5) -> List:
     assert len(array_a) == len(array_b)
+    assert 0 <= average_factor <= 1
     offset = align(array_a, array_b)
-    return [(array_a[index - offset] + array_b[index]) / 2 for index in range(len(array_a))]
+    return [array_a[index - offset] * average_factor + array_b[index] * (1 - average_factor)
+            for index in range(len(array_a))]
 
 
 def save_information(filename: str, center_drive: Point_T, center_driven: Point_T, distance: Point_T):
