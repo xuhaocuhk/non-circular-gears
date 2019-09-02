@@ -50,6 +50,7 @@ def rotate_painter(painter: QtGui.QPainter, center: Point_T, rotation_angle: Rad
     painter.translate(-x, -y)
     painter.rotate(np.degrees(rotation_angle))
     painter.translate(x, y)
+    return painter
 
 
 class Texture:
@@ -57,9 +58,16 @@ class Texture:
         self.name = name
         self.image = load_image(image_file=file)
 
-    def generate_painter(self, painter_device: QtGui.QPaintDevice, rotation_angle=0.0) -> QtGui.QPainter:
+    def generate_painter(self, painter_device: QtGui.QPaintDevice, contour: np.ndarray,
+                         rotation_angle: Radian_T = 0.0, center: Point_T = (0, 0)) -> QtGui.QPainter:
         painter = QtGui.QPainter(painter_device)
-        # TODO: scale, align and rotate
+        min_x, min_y, max_x, max_y = Polygon(contour).bounds
+        painter.scale(painter_device.width() / (max_x - min_x), painter_device.height() / (max_y - min_y))
+        painter.translate(min_x, min_y)
+        painter = rotate_painter(painter, center, rotation_angle)
+
+        # TODO: set painter texture
+
 
 
 def load_textures_from_file(texture_file: str):
