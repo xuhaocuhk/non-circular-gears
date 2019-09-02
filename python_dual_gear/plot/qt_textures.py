@@ -46,6 +46,10 @@ def rotate_painter(painter: QtGui.QPainter, center: Point_T, rotation_angle: Rad
     :param rotation_angle: angle in radians
     :return: rotated painter
     """
+    x, y = center
+    painter.translate(-x, -y)
+    painter.rotate(np.degrees(rotation_angle))
+    painter.translate(x, y)
 
 
 class Texture:
@@ -55,6 +59,7 @@ class Texture:
 
     def generate_painter(self, painter_device: QtGui.QPaintDevice, rotation_angle=0.0) -> QtGui.QPainter:
         painter = QtGui.QPainter(painter_device)
+        # TODO: scale, align and rotate
 
 
 def load_textures_from_file(texture_file: str):
