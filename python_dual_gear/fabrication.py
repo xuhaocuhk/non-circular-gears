@@ -205,8 +205,8 @@ def generate_3D_with_axles(distance: float, filename_drive: str, filename_driven
                             exterior_drive]
     exterior_driven_scale = [(scaling_ratio * driven_point[0], scaling_ratio * driven_point[1]) for driven_point in
                              exterior_driven]
-    drive_eroded = Polygon(exterior_drive_scale).buffer(-0.3)
-    driven_eroded = Polygon(exterior_driven_scale).buffer(-0.3)
+    drive_eroded = Polygon(exterior_drive_scale).buffer(-0.25)
+    driven_eroded = Polygon(exterior_driven_scale).buffer(-0.25)
     exterior_drive_eroded = drive_eroded.exterior.coords
     exterior_driven_eroded = driven_eroded.exterior.coords
     drive_axis_scale = Point(drive_axis[0] * scaling_ratio, drive_axis[1] * scaling_ratio)
