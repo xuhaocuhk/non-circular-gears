@@ -27,6 +27,7 @@ def counterclockwise_orientation(contour: np.ndarray) -> np.ndarray:
     else:
         return contour
 
+
 def clockwise_orientation(contour: np.ndarray) -> np.ndarray:
     """
     change a contour to counterclockwise direction
@@ -39,7 +40,6 @@ def clockwise_orientation(contour: np.ndarray) -> np.ndarray:
         return contour
     else:
         return contour[::-1]
-
 
 
 def draw_contour(subplot: Axes, contour: np.ndarray, color: str = 'black', title: str = None):
@@ -157,11 +157,12 @@ def sample_drive_gear(drive_contour: np.ndarray, target_driven_contour: np.ndarr
     return result_pool
 
 
-def update_polygon_subplots(drive_contour: np.ndarray, driven_contour: np.ndarray, subplots: List[Axes]):
+def update_polygon_subplots(drive_contour: np.ndarray, driven_contour: np.ndarray, subplots: List[Axes],
+                            use_title=False):
     for subplot in subplots:
         subplot.clear()
-    draw_contour(subplots[0], drive_contour, 'orange', 'Drive Contour')
-    draw_contour(subplots[1], driven_contour, 'blue', 'Driven Contour')
+    draw_contour(subplots[0], drive_contour, 'orange', 'Drive Contour' if use_title else None)
+    draw_contour(subplots[1], driven_contour, 'blue', 'Driven Contour' if use_title else None)
     for subplot in subplots:
         subplot.axis('equal')
         subplot.axis('off')

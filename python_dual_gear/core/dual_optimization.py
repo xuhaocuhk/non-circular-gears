@@ -83,6 +83,17 @@ def align_and_average(array_a: List, array_b: List) -> List:
     return [(array_a[index - offset] + array_b[index]) / 2 for index in range(len(array_a))]
 
 
+def save_information(filename: str, center_drive: Point_T, center_driven: Point_T, distance: Point_T):
+    """
+    save related information of a result
+    :return: None
+    """
+    with open(filename, 'w') as file:
+        print(f'center_drive={center_drive}', file=file)
+        print(f'center_driven={center_driven}', file=file)
+        print(f'distance={distance}', file=file)
+
+
 def sample_in_windows(drive_contour: np.ndarray, driven_contour: np.ndarray,
                       window_pairs: List[Tuple[Window_T, Window_T]], keep_count: int,
                       debugging_suite: DebuggingSuite, center_determine_function=center_of_window,
@@ -132,14 +143,12 @@ def sample_in_windows(drive_contour: np.ndarray, driven_contour: np.ndarray,
             subplots[0][1].add_patch(sample_region)
             subplots[0][0].scatter(*center_drive, 5)
             subplots[0][1].scatter(*center_driven, 5)
-            subplots[0][0].text(0, 0, str(center_drive))
-            subplots[0][1].text(0, 0, str(center_driven))
             subplots[1][0].scatter(0, 0, 5)
             subplots[1][1].scatter(0, 0, 5)
-            subplots[1][0].text(0, 0, 'dist=' + str(distance))
             plt.savefig(path_prefix + f'{index}.png')
             save_contour(path_prefix + f'{index}_drive.dat', reconstructed_drive_contour)
             save_contour(path_prefix + f'{index}_driven.dat', reconstructed_driven_contour)
+            save_information(path_prefix + f'{index}.txt', center_drive, center_driven, distance)
     results.sort(key=lambda dist, *_: dist)
     return results[:keep_count]
 
@@ -183,6 +192,7 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
                     [(0, 0), (center_distance, 0)])
                 save_contour(os.path.join(path, f'final_result_{index}_drive.dat'), final_drive)
                 save_contour(os.path.join(path, f'final_result_{index}_driven.dat'), final_driven)
+                save_information(os.path.join(path, f'final_result_{index}.txt'), (0, 0), (center_distance, 0), score)
 
     results = results[:keep_count]
     results.sort(key=lambda dist, *_: dist)
