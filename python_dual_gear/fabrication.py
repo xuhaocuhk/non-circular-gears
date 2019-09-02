@@ -205,6 +205,10 @@ def generate_3D_with_axles(distance: float, filename_drive: str, filename_driven
                             exterior_drive]
     exterior_driven_scale = [(scaling_ratio * driven_point[0], scaling_ratio * driven_point[1]) for driven_point in
                              exterior_driven]
+    drive_eroded = Polygon(exterior_drive_scale).buffer(-0.3)
+    driven_eroded = Polygon(exterior_driven_scale).buffer(-0.3)
+    exterior_drive_eroded = drive_eroded.exterior.coords
+    exterior_driven_eroded = driven_eroded.exterior.coords
     drive_axis_scale = Point(drive_axis[0] * scaling_ratio, drive_axis[1] * scaling_ratio)
     driven_axis_scale = Point(driven_axis[0] * scaling_ratio, driven_axis[1] * scaling_ratio)
     interior_drive = draw_cross(drive_axis_scale)
@@ -212,9 +216,9 @@ def generate_3D_with_axles(distance: float, filename_drive: str, filename_driven
     if debugger is None:
         destination_directory = os.path.dirname(filename_drive)
         debugger = destination_directory
-    generate_3d_mesh_hole(debugger, 'drive_gear_mesh.obj', np.array(exterior_drive_scale), np.array(interior_drive),
+    generate_3d_mesh_hole(debugger, 'drive_gear_mesh.obj', np.array(exterior_drive_eroded), np.array(interior_drive),
                           thickness)
-    generate_3d_mesh_hole(debugger, 'driven_gear_mesh.obj', np.array(exterior_driven_scale), np.array(interior_driven),
+    generate_3d_mesh_hole(debugger, 'driven_gear_mesh.obj', np.array(exterior_driven_eroded), np.array(interior_driven),
                           thickness)
 
 
@@ -229,8 +233,8 @@ if __name__ == '__main__':
     # polygon_ext = [(-5, -5), (5, -5), (5, 5), (-5, 5)]
 
     # generate_3d_mesh_hole(MyDebugger('test'), 'output.obj', square_contour, cross_contour, 2)
-    filename_drive = 'drive_2d.obj'
-    filename_driven = 'driven_2d.obj'
+    filename_drive = './debug/drive_2d.obj'
+    filename_driven = './debug/driven_2d.obj'
     drive_axis = (0, 0)
     driven_axis = (0.8251464417682275, 0)
-    generate_3D_with_axles(6, filename_drive, filename_driven, drive_axis, driven_axis, None, 7.76)
+    generate_3D_with_axles(8, filename_drive, filename_driven, drive_axis, driven_axis, None, 7.76)
