@@ -213,7 +213,7 @@ def addToothToContour(contour: np.array, center, center_dist, normals, height: i
                 heights[j] = (perimeter * tooth_widths[j]/n) * (sin_theta / math.sqrt(1 - sin_theta ** 2)) + 0.005 # 0.005 is the tolarance
                 heights[j] = max(heights[j], height)
 
-    heights = np.clip(heights, height*0.1, height*10)
+    heights = np.clip(heights, height*1, height*2)
 
     # generate tooth according to calculated width and height
     tooth_func = [gear_tooth.teeth_involute_sin(gear_tooth.get_value_on_tooth_domain(i, tooth_samples),

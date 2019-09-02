@@ -48,11 +48,11 @@ def math_cut(drive_model: Model, cart_drive: np.ndarray, debugger: MyDebugger, p
 def rotate_and_carve(cart_drive, center, center_distance, debugger, drive_model, phi, plotter, replay_anim=False,
                      save_anim=False):
     centered_drive = cart_drive - center
-    poly_drive_gear = Polygon(centered_drive)
+    poly_drive_gear = Polygon(centered_drive).buffer(0)
     poly_driven_gear, cut_fig, subplot = rotate_and_cut(poly_drive_gear, center_distance, phi, k=drive_model.k,
                                                         debugger=debugger if save_anim else None,
                                                         replay_animation=replay_anim, plotter=plotter)
-    poly_driven_gear = translate(poly_driven_gear, center_distance).buffer(0).simplify(1e-4)  # as in generate_gear
+    poly_driven_gear = translate(poly_driven_gear, center_distance).buffer(0).simplify(1e-5)  # as in generate_gear
     if poly_driven_gear.geom_type == 'MultiPolygon':
         poly_driven_gear = max(poly_driven_gear, key=lambda a: a.area)
     cart_driven_gear = np.array(poly_driven_gear.exterior.coords)
@@ -93,9 +93,7 @@ def add_teeth(center, center_distance, debugger, drive, drive_model, plotter):
     drive = addToothToContour(drive, center, center_distance, normals, height=drive_model.tooth_height,
                               tooth_num=drive_model.tooth_num,
                               plt_axis=None, consider_driving_torque=False,
-                              consider_driving_continue=False)
-    drive = Polygon(drive).buffer(0.002) # resolve invalid polygon issues, and add tolarance 0.015
-    drive = np.array(drive.exterior.coords)
+                              consider_driving_continue=True)
     plotter.draw_contours(debugger.file_path('drive_with_teeth.png'), [('input_driven', drive)], None)
     return drive
 
@@ -199,8 +197,13 @@ def main_stage_two():
     # init
     # dir_path = r"E:\OneDrive - The Chinese University of Hong Kong\research_PhD\non-circular-gear\basic_results\finalist\square_square\iteration_2\final_result_0_drive.dat"
     # model_name = "square"
-    dir_path = r"E:\OneDrive - The Chinese University of Hong Kong\research_PhD\non-circular-gear\basic_results\finalist\heart_heart\iteration_2\final_result_0_drive.dat"
-    model_name = "heart"
+    # dir_path = r"E:\OneDrive - The Chinese University of Hong Kong\research_PhD\non-circular-gear\basic_results\finalist\heart_heart\iteration_2\final_result_0_drive.dat"
+    # model_name = "heart"
+    # dir_path = r"E:\OneDrive - The Chinese University of Hong Kong\research_PhD\non-circular-gear\basic_results\finalist\fish_guo\iteration_2\final_result_0_drive.dat"
+    # model_name = "fish"
+    dir_path = r"E:\OneDrive - The Chinese University of Hong Kong\research_PhD\non-circular-gear\basic_results\finalist\drop_heart\iteration_2\final_result_0_drive.dat"
+    model_name = "drop"
+
     drive_model = find_model_by_name(model_name)
     drive_model.center_point = (0,0)
     debugger = MyDebugger("stage_2_"+model_name)
@@ -221,14 +224,14 @@ def main_stage_two():
 
     # rotate and cut
     cart_driven_gear = rotate_and_carve(cart_drive, (0,0), center_distance, debugger, drive_model, phi, plotter,
-                                        replay_anim=False, save_anim=True)
+                                        replay_anim=True, save_anim=True)
 
     # save 2D contour
     fabrication.generate_2d_obj(debugger, 'drive_2d.obj', cart_drive)
     fabrication.generate_2d_obj(debugger, 'driven_2d.obj', cart_driven_gear)
 
     # generate 3D mesh with axle hole
-    fabrication.generate_3D_with_axles(6, debugger.file_path('drive_2d.obj'), debugger.file_path('driven_2d.obj'),
+    fabrication.generate_3D_with_axles(10, debugger.file_path('drive_2d.obj'), debugger.file_path('driven_2d.obj'),
                                        (0, 0), (center_distance, 0), debugger, 6)
 
 
@@ -241,12 +244,12 @@ def optimize_pairs():
         # ('triangle', 'qingtianwa'),
         # ('wolf', 'gun'),
         # ('wolf', 'bat'),
-        # ('trump', 'chicken_leg'),
-        # ('trump', 'usmap'),
-        # ('trump', 'china_map'),
+        # ('trump2', 'chicken_leg'),
+        # ('trump2', 'usmap'),
+        # ('trump2', 'china_map'),
         # ('heart', 'maple'),
         # ('starfish', 'starfish'),
-        ('turtle', 'fish'),
+        # ('turtle', 'fish'),
         # ('airplane', 'bat'),
         # ('airplane', 'wingsuit'),
         # ('bat', 'wingsuit'),
@@ -275,11 +278,11 @@ def optimize_pairs():
         # ('koala', 'shark'),
         # ('koala', 'kangaroo'),
         # ('fish', 'shark'),
-        ('fish', 'turtle'),
-        ('turtle', 'shark'),
+        # ('fish', 'turtle'),
+        # ('turtle', 'shark'),
         # ('car', 'fighter'),
         # ('pistol', 'gun'),
-        ('tree', 'turtle')
+        # ('tree', 'turtle')
         # ('tree', 'woniu'),
         # ('drop', 'tree'),
         # ('drop', 'heart'),
@@ -299,8 +302,18 @@ def optimize_pairs():
         # ('pikachu2', 'liyuwang'),
         # ('huolong', 'liyuwang'),
         # ('huolong', 'liyuwang')
+        # ('bunny', 'moon'),
+        # ('bunny', 'bird'),
+        # ('bunny', 'fish'),
+        # ('hand', 'hand'),
+        # ('maple', 'maple'),
+        # ('bird', 'fish'),
+        # ('bunny', 'carrot'),
+        ('cat', 'fish'),
+        # TODO: 'S‘ and 'S', 'hand' and 'hand'
+
     ]
-    for drive, driven in pairs_to_optimize[:30]:
+    for drive, driven in pairs_to_optimize:
         try:
             main_stage_one(find_model_by_name(drive), find_model_by_name(driven), False, False, True, True)
         except:
@@ -308,4 +321,5 @@ def optimize_pairs():
 
 if __name__ == '__main__':
     main_stage_two()
+    # optimize_pairs()
 
