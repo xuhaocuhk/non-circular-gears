@@ -9,6 +9,7 @@ import figure_config as conf
 import logging
 import itertools
 from typing import Iterable, Tuple, Optional
+from plot.qt_textures import Texture
 import time
 
 logger = logging.getLogger(__name__)
@@ -65,7 +66,7 @@ class Plotter:
         contours = list(contours)
         self.window.polygons = [self.scaled_polygon(contour) for _, contour in contours]
         self.window.pens = [self.pens[config] for config, _ in contours]
-        self.window.brushes = [self.brushes[config] for config, _ in contours]
+        self.window.brushes = [self._get_brush(config) for config, _ in contours]
         self.window.setStyleSheet('background-color: white;')
         if centers is not None:
             self.window.centers = [tuple(self.scaling * (np.array(center) + self.translation)) for center in centers]
@@ -76,6 +77,12 @@ class Plotter:
     def _save_canvas(self, file_path: str):
         self.window.repaint()
         self.window.grab().save(file_path)
+
+    def _get_brush(self, config: str):
+        if 'text_' in config:
+            return config[5:]
+        else:
+            return self.brushes[config]
 
     def __del__(self):
         self.window.close()
@@ -98,9 +105,13 @@ class PlotterWindow(QtWidgets.QWidget):
         assert len(self.pens) == len(self.brushes) and len(self.brushes) == len(self.polygons)
         painter = QtGui.QPainter(self)
         for pen, brush, polygon in zip(self.pens, self.brushes, self.polygons):
-            painter.setPen(pen)
-            painter.setBrush(brush)
-            painter.drawPolygon(polygon)
+            if isinstance(brush, QtGui.QBrush):
+                painter.setPen(pen)
+                painter.setBrush(brush)
+                painter.drawPolygon(polygon)
+            else:
+                assert isinstance(brush, str)
+                texture = Texture(brush)
         if self.center_brush is not None and self.center_pen is not None:
             painter.setPen(self.center_pen)
             painter.setBrush(self.center_brush)
