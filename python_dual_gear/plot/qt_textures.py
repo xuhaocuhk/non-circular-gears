@@ -59,15 +59,20 @@ class Texture:
         self.image = load_image(image_file=file)
 
     def generate_painter(self, painter_device: QtGui.QPaintDevice, contour: np.ndarray,
-                         rotation_angle: Radian_T = 0.0, center: Point_T = (0, 0)) -> QtGui.QPainter:
+                         rotation_angle: Radian_T = 0.0, center: Point_T = (0, 0),
+                         pen: QtGui.QPen = None) -> QtGui.QPainter:
         painter = QtGui.QPainter(painter_device)
         min_x, min_y, max_x, max_y = Polygon(contour).bounds
         painter.scale(painter_device.width() / (max_x - min_x), painter_device.height() / (max_y - min_y))
+        pen.setWidthF(pen.widthF() * painter_device.width() / (max_x - min_x)) # reset pen width
         painter.translate(min_x, min_y)
         painter = rotate_painter(painter, center, rotation_angle)
 
-        # TODO: set painter texture
+        brush = QtGui.QBrush()
+        brush.setTextureImage(self.image)
+        painter.setBrush(brush)
 
+        return painter
 
 
 def load_textures_from_file(texture_file: str):
