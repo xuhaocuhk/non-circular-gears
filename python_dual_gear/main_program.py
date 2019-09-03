@@ -312,7 +312,7 @@ def optimize_pairs():
         # ('maple', 'maple'),
         # ('bird', 'fish'),
         # ('bunny', 'carrot'),
-        ('cat', 'fish'),
+        ('fish', 'butterfly'),
         # TODO: 'S‘ and 'S', 'hand' and 'hand'
 
     ]
@@ -343,7 +343,7 @@ def gradual_average(drive_model: Model, driven_model: Model, drive_center: Tuple
     for average in np.linspace(0, 1, count_of_averages, True):
         center_dist = dist_drive * average + dist_driven * (1 - average)
         reconstructed_drive = rebuild_polar(center_dist, align_and_average(d_drive, d_driven, average))
-        reconstructed_driven = compute_dual_gear(reconstructed_drive)
+        reconstructed_driven, center_dist, phi = compute_dual_gear(list(reconstructed_drive))
         reconstructed_drive_contour = toCartesianCoordAsNp(reconstructed_drive, 0, 0)
         reconstructed_driven_contour = toCartesianCoordAsNp(reconstructed_driven, center_dist, 0)
         plotter.draw_contours(debugger.file_path(f'{average}.png'), [
@@ -355,5 +355,5 @@ def gradual_average(drive_model: Model, driven_model: Model, drive_center: Tuple
 
 
 if __name__ == '__main__':
-    main_stage_two()
-    # optimize_pairs()
+    gradual_average(find_model_by_name('fish'), find_model_by_name('butterfly'),
+                    (0.586269239439921, 0.6331503727314829), (0.5490357715218726, 0.5500494966539466), 5)
