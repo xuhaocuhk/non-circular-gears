@@ -346,6 +346,7 @@ def gradual_average(drive_model: Model, driven_model: Model, drive_center: Tuple
         reconstructed_driven, center_dist, phi = compute_dual_gear(list(reconstructed_drive))
         reconstructed_drive_contour = toCartesianCoordAsNp(reconstructed_drive, 0, 0)
         reconstructed_driven_contour = toCartesianCoordAsNp(reconstructed_driven, center_dist, 0)
+        reconstructed_driven_contour = np.array(rotate(reconstructed_driven_contour, phi[0], (center_dist, 0)))
         plotter.draw_contours(debugger.file_path(f'{average}.png'), [
             ('math_drive', reconstructed_drive_contour),
             ('math_driven', reconstructed_driven_contour)
