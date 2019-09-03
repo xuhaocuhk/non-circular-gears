@@ -341,20 +341,21 @@ def gradual_average(drive_model: Model, driven_model: Model, drive_center: Tuple
     distance, d_drive, d_driven, dist_drive, dist_driven = \
         contour_distance(drive_contour, drive_center, driven_contour, driven_center, 1024)
     for average in np.linspace(0, 1, count_of_averages, True):
-        center_dist = dist_drive * average + dist_driven * (1 - average)
+        center_dist = dist_drive * 0.5 + dist_driven * 0.5
         reconstructed_drive = rebuild_polar(center_dist, align_and_average(d_drive, d_driven, average))
         reconstructed_driven, center_dist, phi = compute_dual_gear(list(reconstructed_drive))
         reconstructed_drive_contour = toCartesianCoordAsNp(reconstructed_drive, 0, 0)
         reconstructed_driven_contour = toCartesianCoordAsNp(reconstructed_driven, center_dist, 0)
         reconstructed_driven_contour = np.array(rotate(reconstructed_driven_contour, phi[0], (center_dist, 0)))
-        plotter.draw_contours(debugger.file_path(f'{average}.png'), [
+        average_str = '%1.8f' % average
+        plotter.draw_contours(debugger.file_path(average_str + '.png'), [
             ('math_drive', reconstructed_drive_contour),
             ('math_driven', reconstructed_driven_contour)
         ], [(0, 0), (center_dist, 0)])
-        save_contour(debugger.file_path(f'{average}_drive.dat'), reconstructed_drive_contour)
-        save_contour(debugger.file_path(f'{average}_driven.dat'), reconstructed_driven_contour)
+        save_contour(debugger.file_path(average_str + '_drive.dat'), reconstructed_drive_contour)
+        save_contour(debugger.file_path(average_str + '_driven.dat'), reconstructed_driven_contour)
 
 
 if __name__ == '__main__':
     gradual_average(find_model_by_name('fish'), find_model_by_name('butterfly'),
-                    (0.586269239439921, 0.6331503727314829), (0.5490357715218726, 0.5500494966539466), 5)
+                    (0.586269239439921, 0.6331503727314829), (0.5490357715218726, 0.5500494966539466), 101)
