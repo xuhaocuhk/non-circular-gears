@@ -150,14 +150,13 @@ def getNormals(cart_contour: np.array, plt_axis, center, normal_filter=True):
                    dir, normal in zip(directions, normals)]
 
     # moving average for normal smoothing
-    SMOOTH_RANGE = 8
+    SMOOTH_RANGE = 1
     normal_smoothed = []
     extended_normal = normals[-SMOOTH_RANGE:] + normals + normals[:SMOOTH_RANGE]
     for i in range(n):
-        avg_norm = np.mean([math.sqrt(n[0] ** 2 + n[1] ** 2) for n in extended_normal[i: i + 2 * SMOOTH_RANGE]])
-        current_norm = math.sqrt(extended_normal[i + SMOOTH_RANGE][0] ** 2 + extended_normal[i + SMOOTH_RANGE][1] ** 2)
-        normal_smoothed.append([extended_normal[i + SMOOTH_RANGE][0] / current_norm * avg_norm,
-                                extended_normal[i + SMOOTH_RANGE][1] / current_norm * avg_norm])
+        new_normal = [ (extended_normal[i + SMOOTH_RANGE][0] + extended_normal[i - SMOOTH_RANGE][0])/2, (extended_normal[i + SMOOTH_RANGE][1] + extended_normal[i - SMOOTH_RANGE][1])/2 ]
+        new_normal = [new_normal[0] / math.sqrt(new_normal[0] * new_normal[0] + new_normal[1] * new_normal[1]), new_normal[1] / math.sqrt(new_normal[0] * new_normal[0] + new_normal[1] * new_normal[1])]
+        normal_smoothed.append(new_normal)
     normals = normal_smoothed
 
     # normal visualization
@@ -188,9 +187,9 @@ def addToothToContour(contour: np.array, center, center_dist, normals, height: i
         for i in range(10):
             tooth_samples = np.insert(tooth_samples, 0, 0)
             driving_ratios = np.array(
-                [gear_tooth.sample_avg(tooth_samples[j], tooth_samples[j + 1], polar_contour, center_dist) for j in
-                 range(tooth_num)],
+                [gear_tooth.sample_avg(tooth_samples[j], tooth_samples[j + 1], polar_contour, center_dist) for j in range(tooth_num)],
                 dtype=np.float_)
+            driving_ratios = np.array(list(map(lambda x : x** (1/3), driving_ratios))) # to discriminish the gaps
             driving_ratios = driving_ratios / np.sum(driving_ratios) * n # resample the samples according to the driving ratio of current tooth
             re_indexing = np.cumsum(driving_ratios)
             tooth_samples = np.round(re_indexing).astype('int32')
@@ -213,7 +212,7 @@ def addToothToContour(contour: np.array, center, center_dist, normals, height: i
                 heights[j] = (perimeter * tooth_widths[j]/n) * (sin_theta / math.sqrt(1 - sin_theta ** 2)) + 0.005 # 0.005 is the tolarance
                 heights[j] = max(heights[j], height)
 
-    heights = np.clip(heights, height*1, height*2)
+    heights = np.clip( heights, height*1, height*2 )
 
     # generate tooth according to calculated width and height
     tooth_func = [gear_tooth.teeth_involute_sin(gear_tooth.get_value_on_tooth_domain(i, tooth_samples),
