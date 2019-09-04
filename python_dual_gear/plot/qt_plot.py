@@ -9,7 +9,7 @@ import figure_config as conf
 import logging
 import itertools
 from typing import Iterable, Tuple, Optional
-from plot.qt_textures import Texture
+from plot.qt_textures import predefined_textures
 import time
 
 logger = logging.getLogger(__name__)
@@ -111,7 +111,8 @@ class PlotterWindow(QtWidgets.QWidget):
                 painter.drawPolygon(polygon)
             else:
                 assert isinstance(brush, str)
-                texture = Texture(brush)
+                texture = predefined_textures[brush]
+
         if self.center_brush is not None and self.center_pen is not None:
             painter.setPen(self.center_pen)
             painter.setBrush(self.center_brush)

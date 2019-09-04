@@ -64,7 +64,7 @@ class Texture:
         painter = QtGui.QPainter(painter_device)
         min_x, min_y, max_x, max_y = Polygon(contour).bounds
         painter.scale(painter_device.width() / (max_x - min_x), painter_device.height() / (max_y - min_y))
-        pen.setWidthF(pen.widthF() * painter_device.width() / (max_x - min_x)) # reset pen width
+        pen.setWidthF(pen.widthF() * painter_device.width() / (max_x - min_x))  # reset pen width
         painter.translate(min_x, min_y)
         painter = rotate_painter(painter, center, rotation_angle)
 
@@ -77,7 +77,7 @@ class Texture:
 
 def load_textures_from_file(texture_file: str):
     with open(texture_file) as file:
-        return [Texture(**data) for data in yaml.safe_load(file)]
+        return {data['name']: Texture(**data) for data in yaml.safe_load(file)}
 
 
 predefined_textures = load_textures_from_file(os.path.join(os.path.dirname(__file__), '../textures.yaml'))
