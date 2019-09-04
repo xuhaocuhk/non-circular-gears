@@ -1,4 +1,4 @@
-##### This file is for scripting annimations
+##### This file is for scripting annimations, and for illustration figure generation
 from models import find_model_by_name
 import main_program
 
