@@ -12,9 +12,10 @@ import yaml
 from plot.qt_plot import Plotter
 import os
 import itertools
-from typing import Optional, Iterable, List
+from typing import Optional, Iterable, List, Tuple
 from core.optimize_dual_shapes import counterclockwise_orientation, clockwise_orientation
-from core.dual_optimization import sampling_optimization, dual_annealing_optimization, split_window, center_of_window
+from core.dual_optimization import sampling_optimization, dual_annealing_optimization, split_window, center_of_window, \
+    align_and_average, contour_distance, rebuild_polar
 from util_functions import point_in_contour, save_contour
 import traceback
 import util_functions
@@ -44,6 +45,7 @@ def math_cut(drive_model: Model, cart_drive: np.ndarray, debugger: MyDebugger, p
     logging.info('math rotate complete')
     logging.info(f'Center Distance = {center_distance}')
     return center_distance, phi, polar_math_drive, polar_math_driven
+
 
 def rotate_and_carve(cart_drive, center, center_distance, debugger, drive_model, phi, plotter, replay_anim=False,
                      save_anim=False):
@@ -186,6 +188,7 @@ def generate_all_models():
         fabrication.generate_2d_obj(debugger, 'drive_tooth.obj', drive_tooth_contour)
         fabrication.generate_2d_obj(debugger, 'driven_cut.obj', final_gear_contour)
 
+
 def main_stage_one(drive_model: Model, driven_model: Model, do_math_cut=True, math_animation=False,
                    reply_cut_anim=False, save_cut_anim=True, opt_config='optimization_config.yaml', ):
     # initialize logging system, configuration files, etc.
@@ -224,13 +227,13 @@ def main_stage_two():
 
 
     drive_model = find_model_by_name(model_name)
-    drive_model.center_point = (0,0)
-    debugger = MyDebugger("stage_2_"+model_name)
+    drive_model.center_point = (0, 0)
+    debugger = MyDebugger("stage_2_" + model_name)
     plotter = Plotter()
 
     # read shape
     cart_input_drive = util_functions.read_contour(dir_path)
-    cart_input_drive = shape_factory.uniform_and_smooth(cart_input_drive, drive_model )
+    cart_input_drive = shape_factory.uniform_and_smooth(cart_input_drive, drive_model)
 
     # math cutting
     center_distance, phi, polar_math_drive, polar_math_driven = math_cut(drive_model=drive_model,
@@ -239,10 +242,10 @@ def main_stage_two():
                                                                          animation=False)
 
     # add teeth
-    cart_drive = add_teeth( (0,0), center_distance, debugger, cart_input_drive, drive_model, plotter )
+    cart_drive = add_teeth((0, 0), center_distance, debugger, cart_input_drive, drive_model, plotter)
 
     # rotate and cut
-    cart_driven_gear = rotate_and_carve(cart_drive, (0,0), center_distance, debugger, drive_model, phi, plotter,
+    cart_driven_gear = rotate_and_carve(cart_drive, (0, 0), center_distance, debugger, drive_model, phi, plotter,
                                         replay_anim=True, save_anim=True)
 
     # save 2D contour
@@ -329,7 +332,6 @@ def optimize_pairs():
         # ('bird', 'fish'),
         # ('bunny', 'carrot'),
         ('cat', 'fish'),
-
     ]
     for drive, driven in pairs_to_optimize:
         try:
@@ -337,7 +339,40 @@ def optimize_pairs():
         except:
             traceback.print_stack()
 
-if __name__ == '__main__':
-    main_stage_two()
-    # optimize_pairs()
 
+def gradual_average(drive_model: Model, driven_model: Model, drive_center: Tuple[float, float],
+                    driven_center: Tuple[float, float], count_of_averages: int):
+    """
+    Gradually average two contours
+    :param drive_model: The drive model
+    :param driven_model: The driven model
+    :param drive_center: center of drive
+    :param driven_center: center of driven
+    :param count_of_averages: count of average values
+    :return: None
+    """
+
+    debugger, opt_config, plotter = init((drive_model, driven_model), 'optimization_config.yaml')
+    drive_contour, driven_contour = get_inputs(debugger, drive_model, driven_model, plotter)
+
+    distance, d_drive, d_driven, dist_drive, dist_driven = \
+        contour_distance(drive_contour, drive_center, driven_contour, driven_center, 1024)
+    for average in np.linspace(0, 1, count_of_averages, True):
+        center_dist = dist_drive * 0.5 + dist_driven * 0.5
+        reconstructed_drive = rebuild_polar(center_dist, align_and_average(d_drive, d_driven, average))
+        reconstructed_driven, center_dist, phi = compute_dual_gear(list(reconstructed_drive))
+        reconstructed_drive_contour = toCartesianCoordAsNp(reconstructed_drive, 0, 0)
+        reconstructed_driven_contour = toCartesianCoordAsNp(reconstructed_driven, center_dist, 0)
+        reconstructed_driven_contour = np.array(rotate(reconstructed_driven_contour, phi[0], (center_dist, 0)))
+        average_str = '%1.8f' % average
+        plotter.draw_contours(debugger.file_path(average_str + '.png'), [
+            ('math_drive', reconstructed_drive_contour),
+            ('math_driven', reconstructed_driven_contour)
+        ], [(0, 0), (center_dist, 0)])
+        save_contour(debugger.file_path(average_str + '_drive.dat'), reconstructed_drive_contour)
+        save_contour(debugger.file_path(average_str + '_driven.dat'), reconstructed_driven_contour)
+
+
+if __name__ == '__main__':
+    gradual_average(find_model_by_name('fish'), find_model_by_name('butterfly'),
+                    (0.586269239439921, 0.6331503727314829), (0.5490357715218726, 0.5500494966539466), 101)
