@@ -4,7 +4,7 @@ all colors shall be in Qt style
 """
 
 figure_size = (2000, 2000)
-figure_translation = (0.7, 2)
+figure_translation = (1.4, 2)
 figure_scale = 500  # translation done before scaling
 edge_width = 5  # in pixels
 axis_range = {

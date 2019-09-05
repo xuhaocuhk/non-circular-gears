@@ -91,11 +91,17 @@ def optimize_center_annealing(cart_input_drive, cart_input_driven, debugger, opt
 
 def add_teeth(center, center_distance, debugger, drive, drive_model, plotter):
     drive = counterclockwise_orientation(drive)
-    normals = getNormals(drive, None, center, normal_filter=False)
+    normals = getNormals(drive, None, center, normal_filter=True)
     drive = addToothToContour(drive, center, center_distance, normals, height=drive_model.tooth_height,
                               tooth_num=drive_model.tooth_num,
                               plt_axis=None, consider_driving_torque=False,
-                              consider_driving_continue=True)
+                              consider_driving_continue=False)
+    plotter.draw_contours(debugger.file_path('drive_with_teeth_before.png'), [('input_driven', drive)], None)
+
+    drive = Polygon(drive).buffer(0).simplify(0.000)
+    if drive.geom_type == 'MultiPolygon':
+        drive = max(drive, key=lambda a: a.area)
+    drive = np.array(drive.exterior.coords)
     plotter.draw_contours(debugger.file_path('drive_with_teeth.png'), [('input_driven', drive)], None)
     return drive
 
@@ -204,8 +210,21 @@ def main_stage_two():
     # model_name = "heart"
     # dir_path = r"E:\OneDrive - The Chinese University of Hong Kong\research_PhD\non-circular-gear\basic_results\finalist\fish_guo\iteration_2\final_result_0_drive.dat"
     # model_name = "fish"
-    dir_path = r"E:\OneDrive - The Chinese University of Hong Kong\research_PhD\non-circular-gear\basic_results\finalist\drop_heart\iteration_2\final_result_0_drive.dat"
-    model_name = "drop"
+    # dir_path = r"E:\OneDrive - The Chinese University of Hong Kong\research_PhD\non-circular-gear\basic_results\finalist\drop_heart\iteration_2\final_result_0_drive.dat"
+    # model_name = "drop"
+    # dir_path = r"E:\OneDrive - The Chinese University of Hong Kong\research_PhD\non-circular-gear\basic_results\finalist\fish_butterfly\iteration_2\final_result_0_drive.dat"
+    # model_name = "fish"
+    # dir_path = r"E:\OneDrive - The Chinese University of Hong Kong\research_PhD\non-circular-gear\basic_results\finalist\starfish_starfish\iteration_2\final_result_0_drive.dat"
+    # model_name = "starfish"
+    # dir_path = r"E:\OneDrive - The Chinese University of Hong Kong\research_PhD\non-circular-gear\basic_results\finalist\triangle_qingtianwa\iteration_2\final_result_0_drive.dat"
+    # model_name = "triangle"
+    # dir_path = r"E:\OneDrive - The Chinese University of Hong Kong\research_PhD\non-circular-gear\basic_results\finalist\trump_chicken_leg\iteration_2\final_result_0_drive.dat"
+    # model_name = "trump"
+    dir_path = r"E:\OneDrive - The Chinese University of Hong Kong\research_PhD\non-circular-gear\basic_results\finalist\butterfly_fighter\iteration_2\final_result_0_drive.dat"
+    model_name = "butterfly"
+    # dir_path = r"E:\OneDrive - The Chinese University of Hong Kong\research_PhD\non-circular-gear\basic_results\finalist\boy_girl\iteration_2\final_result_0_drive.dat"
+    # model_name = "boy"
+
 
     drive_model = find_model_by_name(model_name)
     drive_model.center_point = (0, 0)
@@ -230,11 +249,11 @@ def main_stage_two():
                                         replay_anim=True, save_anim=True)
 
     # save 2D contour
-    fabrication.generate_2d_obj(debugger, 'drive_2d.obj', cart_drive)
-    fabrication.generate_2d_obj(debugger, 'driven_2d.obj', cart_driven_gear)
+    fabrication.generate_2d_obj(debugger, 'drive_2d_(0,0).obj', cart_drive)
+    fabrication.generate_2d_obj(debugger, f'driven_2d_({center_distance,0}).obj', cart_driven_gear)
 
     # generate 3D mesh with axle hole
-    fabrication.generate_3D_with_axles(10, debugger.file_path('drive_2d.obj'), debugger.file_path('driven_2d.obj'),
+    fabrication.generate_3D_with_axles(8, debugger.file_path('drive_2d_(0,0).obj'), debugger.file_path(f'driven_2d_({center_distance,0}).obj'),
                                        (0, 0), (center_distance, 0), debugger, 6)
 
 
@@ -312,9 +331,7 @@ def optimize_pairs():
         # ('maple', 'maple'),
         # ('bird', 'fish'),
         # ('bunny', 'carrot'),
-        ('fish', 'butterfly'),
-        # TODO: 'S‘ and 'S', 'hand' and 'hand'
-
+        ('cat', 'fish'),
     ]
     for drive, driven in pairs_to_optimize:
         try:

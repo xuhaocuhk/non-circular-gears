@@ -43,10 +43,10 @@
 - center_point: [0, 0.5773]
   k: 1
   name: triangle
-  sample_num: 256
-  smooth: 0
-  tooth_height: 0.02
-  tooth_num: 32
+  sample_num: 1920
+  smooth: 24
+  tooth_height: 0.015
+  tooth_num: 48
 - center_point: [0.5, 0.5]
   k: 1
   name: mahou
@@ -64,10 +64,10 @@
 - center_point: [0.8, 0.6]
   k: 1
   name: trump
-  sample_num: 1024
-  smooth: 0
-  tooth_height: 0.015
-  tooth_num: 64
+  sample_num: 1920
+  smooth: 2
+  tooth_height: 0.010
+  tooth_num: 48
 - center_point: [0.5, 0.6]
   k: 1
   name: man
@@ -85,17 +85,17 @@
 - center_point: [0.7, 0.7]
   k: 1
   name: maple
-  sample_num: 1024
-  smooth: 0
-  tooth_height: 0.03
-  tooth_num: 32
+  sample_num: 1920
+  smooth: 16
+  tooth_height: 0.018
+  tooth_num: 48
 - center_point: [0.7, 0.7]
   k: 1
   name: starfish
-  sample_num: 2048
+  sample_num: 1920
   smooth: 0
-  tooth_height: 0.03
-  tooth_num: 32
+  tooth_height: 0.012
+  tooth_num: 48
 - center_point: [0.7, 0.7]
   k: 1
   name: turtle
@@ -120,10 +120,10 @@
 - center_point: [0.7, 0.7]
   k: 1
   name: boy
-  sample_num: 1024
+  sample_num: 4096
   smooth: 16
-  tooth_height: 0.03
-  tooth_num: 32
+  tooth_height: 0.017
+  tooth_num: 64
 - center_point: [0.7, 0.7]
   k: 1
   name: girl
@@ -134,10 +134,10 @@
 - center_point: [0.7, 0.7]
   k: 1
   name: butterfly
-  sample_num: 1024
-  smooth: 0
-  tooth_height: 0.03
-  tooth_num: 32
+  sample_num: 4096
+  smooth: 60
+  tooth_height: 0.015
+  tooth_num: 64
 - center_point: [0.7, 0.7]
   k: 1
   name: car
@@ -145,13 +145,22 @@
   smooth: 0
   tooth_height: 0.03
   tooth_num: 32
+# fish_butterfly
 - center_point: [0.7, 0.7]
   k: 1
   name: fish
   sample_num: 1920
-  smooth: 16
-  tooth_height: 0.02
-  tooth_num: 48
+  smooth: 40 # 16 for fish_guo
+  tooth_height: 0.010
+  tooth_num: 48 # 48 for fish_guo,
+# fish_guo
+#- center_point: [0.7, 0.7]
+#  k: 1
+#  name: fish
+#  sample_num: 1920
+#  smooth: 16
+#  tooth_height: 0.010
+#  tooth_num: 48
 - center_point: [0.7, 0.7]
   k: 1
   name: mickey
@@ -183,10 +192,10 @@
 - center_point: [0.7, 0.7]
   k: 1
   name: huolong
-  sample_num: 1024
+  sample_num: 4096
   smooth: 4
-  tooth_height: 0.03
-  tooth_num: 32
+  tooth_height: 0.01
+  tooth_num: 64
 - center_point: [0.7, 0.7]
   k: 1
   name: tiejiayong
@@ -240,7 +249,7 @@
   k: 1
   name: drop
   sample_num: 2048
-  smooth: 32
+  smooth: 84
   tooth_height: 0.015
   tooth_num: 32
 - center_point: [0.7, 0.7]
