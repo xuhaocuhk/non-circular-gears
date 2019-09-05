@@ -225,7 +225,6 @@ def main_stage_two():
     # dir_path = r"E:\OneDrive - The Chinese University of Hong Kong\research_PhD\non-circular-gear\basic_results\finalist\boy_girl\iteration_2\final_result_0_drive.dat"
     # model_name = "boy"
 
-
     drive_model = find_model_by_name(model_name)
     drive_model.center_point = (0, 0)
     debugger = MyDebugger("stage_2_" + model_name)
@@ -250,10 +249,11 @@ def main_stage_two():
 
     # save 2D contour
     fabrication.generate_2d_obj(debugger, 'drive_2d_(0,0).obj', cart_drive)
-    fabrication.generate_2d_obj(debugger, f'driven_2d_({center_distance,0}).obj', cart_driven_gear)
+    fabrication.generate_2d_obj(debugger, f'driven_2d_({center_distance, 0}).obj', cart_driven_gear)
 
     # generate 3D mesh with axle hole
-    fabrication.generate_3D_with_axles(8, debugger.file_path('drive_2d_(0,0).obj'), debugger.file_path(f'driven_2d_({center_distance,0}).obj'),
+    fabrication.generate_3D_with_axles(8, debugger.file_path('drive_2d_(0,0).obj'),
+                                       debugger.file_path(f'driven_2d_({center_distance, 0}).obj'),
                                        (0, 0), (center_distance, 0), debugger, 6)
 
 
