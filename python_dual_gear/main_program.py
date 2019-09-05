@@ -13,10 +13,10 @@ from plot.qt_plot import Plotter
 import os
 import itertools
 from typing import Optional, Iterable, List, Tuple
-from core.optimize_dual_shapes import counterclockwise_orientation, clockwise_orientation
+from core.optimize_dual_shapes import counterclockwise_orientation
 from core.dual_optimization import sampling_optimization, dual_annealing_optimization, split_window, center_of_window, \
     align_and_average, contour_distance, rebuild_polar
-from util_functions import point_in_contour, save_contour
+from util_functions import save_contour
 import traceback
 import util_functions
 
@@ -133,50 +133,6 @@ def init(models: Iterable[Model], opt_config, additional_debugging_names: Option
                 opt_config['sampling_count'] = tuple(opt_config['sampling_count'])
     logging.debug('optimization config parse complete, config:' + repr(opt_config))
     return debugger, opt_config, plotter
-
-
-def get_duals(drive_model: Model, x_sample_count: int, y_sample_count: int, horizontal_shifting: float):
-    """
-    Get duals of a given drive model, self-creating debugger
-    :param drive_model: the driving model
-    :param x_sample_count: count of samples in x direction
-    :param y_sample_count: count of samples in y direction
-    :param horizontal_shifting: shifting in x direction to keep the drive away from input
-    :return: None
-    """
-    debugger, _, plotter = init((drive_model,), None, ['duals'])
-    drive_contour = shape_factory.get_shape_contour(drive_model, True, None, drive_model.smooth)
-    logging.debug('drive model loaded')
-
-    # get the bounding
-    drive_polygon = Polygon(drive_contour)
-    min_x, min_y, max_x, max_y = drive_polygon.bounds
-    drive_windows = [(min_x, max_x, min_y, max_y)]
-    drive_windows = split_window(drive_windows[0], x_sample_count, y_sample_count)
-    centers = [center_of_window(window) for window in drive_windows]
-
-    # start finding the dual
-    for index, center in enumerate(centers):
-        if not point_in_contour(drive_contour, *center):
-            logging.info(f'Point #{index}{center} not in contour')
-            continue
-
-        drive_polar = toExteriorPolarCoord(Point(*center), drive_contour, 1024)
-        driven_polar, center_distance, phi = compute_dual_gear(drive_polar)
-        drive_new_contour = toCartesianCoordAsNp(drive_polar, horizontal_shifting, 0)
-        driven_contour = toCartesianCoordAsNp(driven_polar, horizontal_shifting + center_distance, 0)
-        driven_contour = np.array(rotate(driven_contour, phi[0], (horizontal_shifting + center_distance, 0)))
-
-        # move things back to center
-        drive_new_contour += np.array((center[0], center[1]))
-        driven_contour += np.array((center[0], center[1]))
-
-        plotter.draw_contours(debugger.file_path(f'{index}.png'), [
-            ('input_drive', drive_contour),
-            ('math_drive', drive_new_contour),
-            ('math_driven', driven_contour)
-        ], [(horizontal_shifting + center[0], center[1]),
-            (horizontal_shifting + center_distance + center[0], center[1])])
 
 
 def generate_all_models():
