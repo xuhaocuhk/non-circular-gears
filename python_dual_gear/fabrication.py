@@ -189,6 +189,7 @@ def generate_3D_with_axles(distance: float, filename_drive: str, filename_driven
                            driven_axis: Tuple[float, float], debugger: Optional[MyDebugger], thickness=7.76):
     """
     :param distance: distance between axes of two gears
+    (distance between 2 adjacent horizontal holes is 7.97, vertical holes is 9.6)
     :param filename_drive: file name of the drive gear
     :param filename_driven: file name of the driven gear
     :param debugger: None to save in the same directory as the input
@@ -200,13 +201,17 @@ def generate_3D_with_axles(distance: float, filename_drive: str, filename_driven
     assert os.path.isfile(filename_driven)
     exterior_drive = read_2d_obj(filename_drive)
     exterior_driven = read_2d_obj(filename_driven)
-    scaling_ratio = distance * 7.97 / (math.fabs(drive_axis[0] - driven_axis[0]))
+    scaling_ratio = distance / (math.fabs(drive_axis[0] - driven_axis[0]))
     exterior_drive_scale = [(scaling_ratio * drive_point[0], scaling_ratio * drive_point[1]) for drive_point in
                             exterior_drive]
     exterior_driven_scale = [(scaling_ratio * driven_point[0], scaling_ratio * driven_point[1]) for driven_point in
                              exterior_driven]
-    drive_eroded = Polygon(exterior_drive_scale).buffer(-0.25)
-    driven_eroded = Polygon(exterior_driven_scale).buffer(-0.25)
+    drive_eroded = Polygon(exterior_drive_scale).buffer(0)
+    driven_eroded = Polygon(exterior_driven_scale).buffer(0)
+    if drive_eroded.geom_type == 'MultiPolygon':
+        drive_eroded = max(drive_eroded, key=lambda a: a.area)
+    if driven_eroded.geom_type == 'MultiPolygon':
+        driven_eroded = max(driven_eroded, key=lambda a: a.area)
     exterior_drive_eroded = drive_eroded.exterior.coords
     exterior_driven_eroded = driven_eroded.exterior.coords
     drive_axis_scale = Point(drive_axis[0] * scaling_ratio, drive_axis[1] * scaling_ratio)
@@ -227,6 +232,7 @@ if __name__ == '__main__':
 
     square_contour = np.array(
         [(6 * math.cos(theta), 6 * math.sin(theta)) for theta in np.linspace(0, 2 * math.pi, 1024, endpoint=False)])
+
     # generate_3d_mesh(MyDebugger('test'), 'output.obj', square_contour, 0.5)
 
     # cross_contour = draw_cross(Point(0, 0))
@@ -236,5 +242,6 @@ if __name__ == '__main__':
     filename_drive = './debug/drive_2d.obj'
     filename_driven = './debug/driven_2d.obj'
     drive_axis = (0, 0)
-    driven_axis = (0.8251464417682275, 0)
-    generate_3D_with_axles(8, filename_drive, filename_driven, drive_axis, driven_axis, None, 7.76)
+    # driven_axis should be modified each time according to the given driven gear.
+    driven_axis = (0.8179967301226316, 0)
+    generate_3D_with_axles(7*9.6, filename_drive, filename_driven, drive_axis, driven_axis, None, 7.76)
