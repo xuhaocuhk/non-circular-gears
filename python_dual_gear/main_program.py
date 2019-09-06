@@ -19,6 +19,7 @@ from core.dual_optimization import sampling_optimization, dual_annealing_optimiz
 from util_functions import save_contour
 import traceback
 import util_functions
+import opt_groups
 
 # writing log to file
 logging.basicConfig(filename='debug\\info.log', level=logging.INFO)
@@ -174,10 +175,10 @@ def main_stage_two():
     # model_name = "starfish"
     # dir_path = r"E:\OneDrive - The Chinese University of Hong Kong\research_PhD\non-circular-gear\basic_results\finalist\triangle_qingtianwa\iteration_2\final_result_0_drive.dat"
     # model_name = "triangle"
-    # dir_path = r"E:\OneDrive - The Chinese University of Hong Kong\research_PhD\non-circular-gear\basic_results\finalist\trump_chicken_leg\iteration_2\final_result_0_drive.dat"
-    # model_name = "trump"
-    dir_path = r"E:\OneDrive - The Chinese University of Hong Kong\research_PhD\non-circular-gear\basic_results\finalist\butterfly_fighter\iteration_2\final_result_0_drive.dat"
-    model_name = "butterfly"
+    dir_path = r"E:\OneDrive - The Chinese University of Hong Kong\research_PhD\non-circular-gear\basic_results\finalist\trump_chicken_leg\iteration_2\final_result_0_drive.dat"
+    model_name = "trump"
+    # dir_path = r"E:\OneDrive - The Chinese University of Hong Kong\research_PhD\non-circular-gear\basic_results\finalist\butterfly_fighter\iteration_2\final_result_0_drive.dat"
+    # model_name = "butterfly"
     # dir_path = r"E:\OneDrive - The Chinese University of Hong Kong\research_PhD\non-circular-gear\basic_results\finalist\boy_girl\iteration_2\final_result_0_drive.dat"
     # model_name = "boy"
 
@@ -194,14 +195,14 @@ def main_stage_two():
     center_distance, phi, polar_math_drive, polar_math_driven = math_cut(drive_model=drive_model,
                                                                          cart_drive=cart_input_drive,
                                                                          debugger=debugger, plotter=plotter,
-                                                                         animation=False)
+                                                                         animation=True)
 
     # add teeth
     cart_drive = add_teeth((0, 0), center_distance, debugger, cart_input_drive, drive_model, plotter)
 
     # rotate and cut
     cart_driven_gear = rotate_and_carve(cart_drive, (0, 0), center_distance, debugger, drive_model, phi, plotter,
-                                        replay_anim=True, save_anim=True)
+                                        replay_anim=False, save_anim=False)
 
     # save 2D contour
     fabrication.generate_2d_obj(debugger, 'drive_2d_(0,0).obj', cart_drive)
@@ -214,82 +215,8 @@ def main_stage_two():
 
 
 def optimize_pairs():
-    pairs_to_optimize = [
-        # ('square', 'square'),
-        # ('circular', 'drop'),
-        # ('ellipse', 'wandou'),
-        # ('square', 'key'),
-        # ('triangle', 'qingtianwa'),
-        # ('wolf', 'gun'),
-        # ('wolf', 'bat'),
-        # ('trump2', 'chicken_leg'),
-        # ('trump2', 'usmap'),
-        # ('trump2', 'china_map'),
-        # ('heart', 'maple'),
-        # ('starfish', 'starfish'),
-        # ('turtle', 'fish'),
-        # ('airplane', 'bat'),
-        # ('airplane', 'wingsuit'),
-        # ('bat', 'wingsuit'),
-        # ('bird', 'tree'),
-        # ('boy', 'girl'),
-        # ('butterfly', 'fighter'),
-        # ('butterfly', 'bat'),
-        # ('fish', 'guo'),
-        # ('mickey', 'minnie'),
-        # ('miaowa', 'mohaima'),
-        # ('jieni', 'kabi'),
-        # ('huolong', 'liyuwang'),
-        # ('tiejiayong', 'fish'),
-        # ('tiejiayong', 'woniu'),
-        # ('heart', 'heart'),
-        # ('man', 'pistol'),
-        # ('mickey', 'shoes'),
-        # ('man', 'shoes'),
-        # ('bird', 'butterfly'),
-        # ('car', 'airplane'),
-        # ('fighter', 'airplane'),
-        # ('fish', 'butterfly'),
-        # ('australia', 'kangaroo'),
-        # ('australia', 'koala'),
-        # ('australia', 'shark'),
-        # ('koala', 'shark'),
-        # ('koala', 'kangaroo'),
-        # ('fish', 'shark'),
-        # ('fish', 'turtle'),
-        # ('turtle', 'shark'),
-        # ('car', 'fighter'),
-        # ('pistol', 'gun'),
-        # ('tree', 'turtle')
-        # ('tree', 'woniu'),
-        # ('drop', 'tree'),
-        # ('drop', 'heart'),
-        # ('key', 'heart'),
-        # ('tree', 'lvmaochong'),
-        # ('pikachu', 'lvmaochong'),
-        # ('huolong', 'lvmaochong'),
-        # ('miaowa', 'lvmaochong'),
-        # ('pikachu2', 'lvmaochong'),
-        # ('pikachu', 'lvmaochong'),
-        # ('pikachu', 'jieni'),
-        # ('pikachu2', 'huolong'),
-        # ('pikachu', 'huolong'),
-        # ('pikachu', 'shark'),
-        # ('pikachu2', 'shark'),
-        # ('pikachu', 'liyuwang'),
-        # ('pikachu2', 'liyuwang'),
-        # ('huolong', 'liyuwang'),
-        # ('huolong', 'liyuwang')
-        # ('bunny', 'moon'),
-        # ('bunny', 'bird'),
-        # ('bunny', 'fish'),
-        # ('hand', 'hand'),
-        # ('maple', 'maple'),
-        # ('bird', 'fish'),
-        # ('bunny', 'carrot'),
-        ('cat', 'fish'),
-    ]
-    for drive, driven in pairs_to_optimize:
+
+    for drive, driven in opt_groups.pairs_to_optimize:
         try:
             main_stage_one(find_model_by_name(drive), find_model_by_name(driven), False, False, True, True)
         except:
@@ -330,5 +257,6 @@ def gradual_average(drive_model: Model, driven_model: Model, drive_center: Tuple
 
 
 if __name__ == '__main__':
-    gradual_average(find_model_by_name('fish'), find_model_by_name('butterfly'),
-                    (0.586269239439921, 0.6331503727314829), (0.5490357715218726, 0.5500494966539466), 101)
+    main_stage_two()
+    # gradual_average(find_model_by_name('fish'), find_model_by_name('butterfly'),
+    #                 (0.586269239439921, 0.6331503727314829), (0.5490357715218726, 0.5500494966539466), 101)

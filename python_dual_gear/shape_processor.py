@@ -189,7 +189,7 @@ def addToothToContour(contour: np.array, center, center_dist, normals, height: i
             driving_ratios = np.array(
                 [gear_tooth.sample_avg(tooth_samples[j], tooth_samples[j + 1], polar_contour, center_dist) for j in range(tooth_num)],
                 dtype=np.float_)
-            driving_ratios = np.array(list(map(lambda x : x** (1/3), driving_ratios))) # to discriminish the gaps
+            driving_ratios = np.array(list(map(lambda x : x** (1/4), driving_ratios))) # to discriminish the gaps
             driving_ratios = driving_ratios / np.sum(driving_ratios) * n # resample the samples according to the driving ratio of current tooth
             re_indexing = np.cumsum(driving_ratios)
             tooth_samples = np.round(re_indexing).astype('int32')
