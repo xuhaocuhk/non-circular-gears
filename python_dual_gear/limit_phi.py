@@ -4,7 +4,7 @@ Limiting the maximum phi of a polar contour
 import numpy as np
 from typing import List, Optional, Tuple
 from core.compute_dual_gear import compute_dual_gear
-from core.phi_shape_average import differentiate_function, rebuild_polar
+from core.phi_shape_average import differentiate_function, rebuild_polar, pre_process
 from shape_processor import toCartesianCoordAsNp
 from plot.plot_sampled_function import rotate
 from math import pi
@@ -36,7 +36,7 @@ def limit_phi_derivative(polar: Polar_T, max_phi: float, iteration: int) -> np.n
     """
     assert not isinstance(polar, np.ndarray)
     y, center_dist, phi = compute_dual_gear(polar)
-    d_phi = differentiate_function(phi)
+    d_phi = differentiate_function(pre_process(phi))
     for _ in range(iteration):
         d_phi = [min(max_phi, value) for value in d_phi]
         s = integrate_circle(d_phi)
