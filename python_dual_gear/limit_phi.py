@@ -88,4 +88,5 @@ if __name__ == '__main__':
     cart_drive = shape_factory.get_shape_contour(find_model_by_name('starfish'), uniform=True, plots=None)
     drive_polar = shape_processor.toExteriorPolarCoord(Point(0.4402, 0.5096), cart_drive, 1024)
     debugger = MyDebugger(['phi_lim'])
-    plot_limited_phi(drive_polar, debugger.get_root_debug_dir_name(), 1.2, 10)
+    for limit in np.linspace(1, 4, 400, endpoint=True):
+        plot_limited_phi(drive_polar, debugger.get_root_debug_dir_name(), limit, 10)
