@@ -65,7 +65,7 @@ class Plotter:
         """
         contours = list(contours)
         self.window.polygons = [self.scaled_polygon(contour) for _, contour in contours]
-        self.window.pens = [self.pens[config] for config, _ in contours]
+        self.window.pens = [self._get_pen(config) for config, _ in contours]
         self.window.brushes = [self._get_brush(config) for config, _ in contours]
         self.window.setStyleSheet('background-color: white;')
         if centers is not None:
@@ -77,6 +77,12 @@ class Plotter:
     def _save_canvas(self, file_path: str):
         self.window.repaint()
         self.window.grab().save(file_path)
+
+    def _get_pen(self, config: str):
+        if 'text_' in config:
+            return self.pens['math_drive']
+        else:
+            return self.pens[config]
 
     def _get_brush(self, config: str):
         if 'text_' in config:
@@ -112,6 +118,7 @@ class PlotterWindow(QtWidgets.QWidget):
             else:
                 assert isinstance(brush, str)
                 texture = predefined_textures[brush]
+                painter = texture.generate_painter(self, np.array(polygon), 0, self.centers[0], pen)
 
         if self.center_brush is not None and self.center_pen is not None:
             painter.setPen(self.center_pen)
@@ -127,4 +134,4 @@ if __name__ == '__main__':
         [(.3 * cos(theta), .4 * sin(theta)) for theta in np.linspace(0, 2 * pi, 1024, endpoint=True)]
     )
     plotter = Plotter()
-    plotter.draw_contours('test.png', [('math_drive', test_gear)], [(0, 0)])
+    plotter.draw_contours('test.png', [('text_awesomeface', test_gear)], [(0, 0)])

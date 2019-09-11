@@ -1,2 +1,2 @@
-- name: name of texture
-  file: awesomeface.jpg
+- name: awesomeface
+  file: awesomeface.png

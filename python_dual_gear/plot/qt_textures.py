@@ -7,6 +7,7 @@ import logging
 from shapely.geometry import Polygon
 
 logger = logging.getLogger(__name__)
+texture_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../textures/'))
 
 Point_T = Tuple[float, float]
 Radian_T = float
@@ -82,4 +83,3 @@ def load_textures_from_file(texture_file: str):
 
 
 predefined_textures = load_textures_from_file(os.path.join(os.path.dirname(__file__), '../textures.yaml'))
-texture_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../textures/'))
