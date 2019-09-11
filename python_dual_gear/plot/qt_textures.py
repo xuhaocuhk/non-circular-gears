@@ -18,8 +18,9 @@ def load_image(image_file: str) -> QtGui.QImage:
     :param image_file: the image file to load
     :return: QImage object
     """
-    assert os.path.isfile(image_file)
-    return QtGui.QImage(image_file)
+    abs_path = os.path.join(texture_root, image_file)
+    assert os.path.isfile(abs_path)
+    return QtGui.QImage(abs_path)
 
 
 def align_center(contour: np.ndarray, center: Point_T, image: QtGui.QImage) -> Point_T:
@@ -81,3 +82,4 @@ def load_textures_from_file(texture_file: str):
 
 
 predefined_textures = load_textures_from_file(os.path.join(os.path.dirname(__file__), '../textures.yaml'))
+texture_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../textures/'))
