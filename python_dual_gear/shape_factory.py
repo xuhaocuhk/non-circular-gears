@@ -7,6 +7,7 @@ from typing import Union, Iterable
 import os
 import cv2
 
+
 def get_shape_contour(model: Model, uniform: bool, plots: Union[Iterable[Axes], None], smooth=0,
                       face_color=None, edge_color=None):
     contour = None
@@ -44,13 +45,19 @@ def uniform_and_smooth(contour, model):
         contour = getUniformContourSampledShape(contour[::model.smooth], model.sample_num, True)
     return contour
 
-if __name__ == '__main__':
-    img = cv2.imread(f'F:/workspace/gears/binary_images/selected_pairs/1-1.png')
+
+def read_binary_image(file_path):
+    img = cv2.imread(file_path)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     ret, binary = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
+    return np.squeeze(cv2.findContours(binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[0])
 
-    contours, hierarchy = cv2.findContours(binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    cv2.drawContours(img, contours, -1, (0, 0, 255), 3)
 
-    cv2.imshow("img", img)
-    cv2.waitKey(0)
+def export_contour_as_text(output_path, contour):
+    with open(output_path, 'w') as file:
+        print(*['{0} {1}'.format(x, y) for x, y in contour], sep=',', file=file)
+
+
+if __name__ == '__main__':
+    contour = read_binary_image(r'C:\Projects\gears\binary_images\animal_fly\4dove.png')
+    export_contour_as_text('test.txt', contour)
