@@ -1,0 +1,8 @@
+error: C:\Projects\gears\silhouette\animal_fly\bird-7.txt
+error: C:\Projects\gears\silhouette\animal_fly\bird16.txt
+error: C:\Projects\gears\silhouette\animal_fly\flyingbird17.txt
+error: C:\Projects\gears\silhouette\animal_land\cattle-16.txt
+error: C:\Projects\gears\silhouette\animal_land\tortoise1.txt
+error: C:\Projects\gears\silhouette\animal_sea\fish27.txt
+error: C:\Projects\gears\silhouette\human\shoe-3.txt
+error: C:\Projects\gears\silhouette\plant\tree-14.txt
