@@ -58,6 +58,19 @@ def export_contour_as_text(output_path, contour):
         print(*['{0} {1}'.format(x, y) for x, y in contour], sep=',', file=file)
 
 
+def transform_all_binary_images(root_path):
+    if os.path.isdir(root_path):
+        # process the whole directory
+        files = os.listdir(root_path)
+        files = [file for file in files if file[0] != '.' and file[:2] != '__']
+        for file in files:
+            transform_all_binary_images(os.path.join(root_path, file))
+    elif os.path.isfile(root_path):
+        if '.txt' not in root_path:
+            export_contour_as_text(root_path[:-4] + '.txt', read_binary_image(root_path))
+    else:
+        raise FileNotFoundError('Invalid Filename')
+
+
 if __name__ == '__main__':
-    contour = read_binary_image(r'C:\Projects\gears\binary_images\animal_fly\4dove.png')
-    export_contour_as_text('test.txt', contour)
+    transform_all_binary_images(r'C:\Projects\gears\binary_images\animal_fly')
