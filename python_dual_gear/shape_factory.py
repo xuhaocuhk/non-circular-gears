@@ -54,8 +54,11 @@ def read_binary_image(file_path):
 
 
 def export_contour_as_text(output_path, contour):
-    with open(output_path, 'w') as file:
-        print(*['{0} {1}'.format(x, y) for x, y in contour], sep=',', file=file)
+    if len(contour.shape) == 1:
+        print("error: " + output_path)
+    else:
+        with open(output_path, 'w') as file:
+            print(*['{0} {1}'.format(x, y) for x, y in contour], sep=',', file=file)
 
 
 def transform_all_binary_images(root_path):
@@ -66,11 +69,12 @@ def transform_all_binary_images(root_path):
         for file in files:
             transform_all_binary_images(os.path.join(root_path, file))
     elif os.path.isfile(root_path):
-        if '.txt' not in root_path:
-            export_contour_as_text(root_path[:-4] + '.txt', read_binary_image(root_path))
+        target_contour_name = root_path[:-4] + '.txt'
+        if '.txt' not in root_path and not os.path.exists(target_contour_name):
+            export_contour_as_text(target_contour_name, read_binary_image(root_path))
     else:
         raise FileNotFoundError('Invalid Filename')
 
 
 if __name__ == '__main__':
-    transform_all_binary_images(r'C:\Projects\gears\binary_images\animal_fly')
+    transform_all_binary_images(r'C:\Projects\gears\silhouette')
