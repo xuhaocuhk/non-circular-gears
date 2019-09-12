@@ -5,3 +5,4 @@ venv
 __pycache__
 /python_dual_gear/.idea
 /python_dual_gear/debug
+.DS_Store
