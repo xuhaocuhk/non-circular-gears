@@ -215,10 +215,35 @@ def main_stage_two():
 
 
 def optimize_pairs():
-
     for drive, driven in opt_groups.pairs_to_optimize:
         try:
             main_stage_one(find_model_by_name(drive), find_model_by_name(driven), False, False, True, True)
+        except:
+            traceback.print_stack()
+
+
+def retrieve_models_from_folder(folder_name):
+    assert os.path.isdir(folder_name)
+    return [Model(
+        name=f'({os.path.basename(folder_name)}){filename[:-4]}',
+        sample_num=1024,
+        center_point=(0, 0),
+        tooth_num=32,
+        tooth_height=0.05,
+        k=1,
+        smooth=0
+    ) for filename in os.listdir(folder_name) if '.txt' in filename]
+
+
+def optimize_pairs_in_folder(source_folder, dest_folder):
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../silhouette/'))
+    source_folder = os.path.join(base_dir, source_folder)
+    dest_folder = os.path.join(base_dir, dest_folder)
+    source_models = retrieve_models_from_folder(source_folder)
+    dest_models = retrieve_models_from_folder(dest_folder)
+    for source_model, dest_model in itertools.product(source_models, dest_models):
+        try:
+            main_stage_one(source_model, dest_model, False, False, True, True)
         except:
             traceback.print_stack()
 
@@ -257,6 +282,6 @@ def gradual_average(drive_model: Model, driven_model: Model, drive_center: Tuple
 
 
 if __name__ == '__main__':
-    main_stage_two()
+    optimize_pairs_in_folder('animal_fly', 'animal_sea')
     # gradual_average(find_model_by_name('fish'), find_model_by_name('butterfly'),
     #                 (0.586269239439921, 0.6331503727314829), (0.5490357715218726, 0.5500494966539466), 101)
