@@ -243,6 +243,7 @@ def optimize_pairs_in_folder(source_folder, dest_folder):
     dest_models = retrieve_models_from_folder(dest_folder)
     for source_model, dest_model in itertools.product(source_models, dest_models):
         try:
+            logging.info(f'Playing models drive = {source_model.name}, driven = {dest_model.name}')
             main_stage_one(source_model, dest_model, False, False, True, True)
         except:
             traceback.print_stack()
