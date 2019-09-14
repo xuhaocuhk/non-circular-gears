@@ -3,7 +3,7 @@ from models import Model
 from drive_gears.generate_standard_shapes import std_shapes, generate_std_shapes
 from plot.plot_util import plot_cartesian_shape
 from matplotlib.axes import Axes
-from typing import Union, Iterable
+from typing import Union, Iterable, Optional
 import os
 import cv2
 
@@ -15,7 +15,10 @@ def get_shape_contour(model: Model, uniform: bool, plots: Union[Iterable[Axes], 
         contour = generate_std_shapes(model.name, model.sample_num, model.center_point)
     else:
         # read the contour shape
-        contour = getSVGShapeAsNp(filename=os.path.join(os.path.dirname(__file__), f"../silhouette/{model.name}.txt"))
+        silhouette_file = find_silhouette_file(model.name)
+        if silhouette_file is None:
+            raise FileNotFoundError(f'silhouette {model.name} not found!')
+        contour = getSVGShapeAsNp(filename=silhouette_file)
 
     # shape normalization
     poly_bound = Polygon(contour).bounds
@@ -35,6 +38,22 @@ def get_shape_contour(model: Model, uniform: bool, plots: Union[Iterable[Axes], 
             plot_cartesian_shape(subplots[1], "Uniform boundary sampling", contour)
 
     return contour
+
+
+def find_silhouette_file(model_name: str, base_path: Optional[str] = None):
+    if base_path is None:
+        base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../silhouette'))
+    target_file = os.path.join(base_path, model_name + '.txt')
+    if os.path.isfile(target_file):
+        return target_file  # found file
+    else:
+        dirs = [directory for directory in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, directory))]
+        for path in dirs:
+            result = find_silhouette_file(model_name, os.path.join(base_path, path))
+            if result is not None:
+                return result
+        else:
+            return None
 
 
 def uniform_and_smooth(contour, model):
