@@ -48,8 +48,7 @@ def get_shape_contour(model: Model, uniform: bool, plots: Union[Iterable[Axes], 
 
 
 def find_silhouette_file(model_name: str, base_path: Optional[str] = None):
-    if base_path is None:
-        base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../silhouette'))
+    base_path = base_path or os.path.abspath(os.path.join(os.path.dirname(__file__), '../silhouette'))
     target_file = os.path.join(base_path, model_name + '.txt')
     if os.path.isfile(target_file):
         return target_file  # found file
