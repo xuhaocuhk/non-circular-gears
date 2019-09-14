@@ -77,4 +77,4 @@ def transform_all_binary_images(root_path):
 
 
 if __name__ == '__main__':
-    transform_all_binary_images(r'C:\Projects\gears\silhouette')
+    transform_all_binary_images(os.path.abspath(os.path.join(os.path.dirname(__file__), '../silhouette/')))
