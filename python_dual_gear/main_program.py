@@ -241,10 +241,17 @@ def optimize_pairs_in_folder(source_folder, dest_folder):
     dest_folder = os.path.join(base_dir, dest_folder)
     source_models = retrieve_models_from_folder(source_folder)
     dest_models = retrieve_models_from_folder(dest_folder)
-    for source_model, dest_model in itertools.product(source_models, dest_models):
+
+    pairs_to_optimize = list(itertools.product(source_models, dest_models))
+    existing_names = set(
+        tuple(sorted((drive_model.name, driven_model.name))) for drive_model, driven_model in pairs_to_optimize)
+    pairs_to_optimize = [(drive_model, driven_model) for drive_model, driven_model in pairs_to_optimize if
+                         (driven_model.name, drive_model.name) not in existing_names]
+
+    for source_model, dest_model in pairs_to_optimize:
         try:
             logging.info(f'Playing models drive = {source_model.name}, driven = {dest_model.name}')
-            main_stage_one(source_model, dest_model, False, False, True, True)
+            # main_stage_one(source_model, dest_model, False, False, True, True)
         except:
             traceback.print_stack()
 
@@ -283,6 +290,6 @@ def gradual_average(drive_model: Model, driven_model: Model, drive_center: Tuple
 
 
 if __name__ == '__main__':
-    optimize_pairs_in_folder('animal_fly', 'animal_sea')
+    optimize_pairs_in_folder('animal_fly', 'animal_fly')
     # gradual_average(find_model_by_name('fish'), find_model_by_name('butterfly'),
     #                 (0.586269239439921, 0.6331503727314829), (0.5490357715218726, 0.5500494966539466), 101)
