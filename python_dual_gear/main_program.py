@@ -80,7 +80,7 @@ def optimize_center(cart_input_drive, cart_input_driven, debugger, opt_config, p
                           [(0, 0), (center_distance, 0)])
     save_contour(debugger.file_path('optimized_drive.dat'), drive_contour)
     save_contour(debugger.file_path('optimized_driven.dat'), driven_contour)
-    return (0, 0), center_distance, toCartesianCoordAsNp(polar_drive, 0, 0)
+    return (0, 0), center_distance, toCartesianCoordAsNp(polar_drive, 0, 0), score
 
 
 def optimize_center_annealing(cart_input_drive, cart_input_driven, debugger, opt_config, plotter):
@@ -155,8 +155,9 @@ def main_stage_one(drive_model: Model, driven_model: Model, do_math_cut=True, ma
     cart_input_drive, cart_input_driven = get_inputs(debugger, drive_model, driven_model, plotter)
 
     # optimization
-    center, center_distance, cart_drive = optimize_center(cart_input_drive, cart_input_driven, debugger, opt_config,
-                                                          plotter)
+    center, center_distance, cart_drive, score = optimize_center(cart_input_drive, cart_input_driven, debugger,
+                                                                 opt_config, plotter)
+    return score
 
 
 def main_stage_two():
@@ -251,7 +252,9 @@ def optimize_pairs_in_folder(source_folder, dest_folder):
     for source_model, dest_model in pairs_to_optimize:
         try:
             logging.info(f'Playing models drive = {source_model.name}, driven = {dest_model.name}')
-            # main_stage_one(source_model, dest_model, False, False, True, True)
+            score = main_stage_one(source_model, dest_model, False, False, True, True)
+            with open(os.path.abspath(os.path.join(os.path.dirname(__file__), 'debug/scores.log')),'a') as file:
+                print(f'{source_model.name},{dest_model.name},{score}', file=file)
         except:
             traceback.print_stack()
 
