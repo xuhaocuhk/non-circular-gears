@@ -255,8 +255,8 @@ def optimize_pairs_in_folder(source_folder, dest_folder):
             score = main_stage_one(source_model, dest_model, False, False, True, True)
             with open(os.path.abspath(os.path.join(os.path.dirname(__file__), 'debug/scores.log')),'a') as file:
                 print(f'{source_model.name},{dest_model.name},{score}', file=file)
-        except:
-            traceback.print_stack()
+        except Exception:
+            print(sys.exc_info())
 
 
 def gradual_average(drive_model: Model, driven_model: Model, drive_center: Tuple[float, float],
