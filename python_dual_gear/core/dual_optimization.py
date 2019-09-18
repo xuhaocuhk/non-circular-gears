@@ -151,6 +151,7 @@ def sample_in_windows(drive_contour: np.ndarray, driven_contour: np.ndarray,
             save_contour(path_prefix + f'{index}_drive.dat', reconstructed_drive_contour)
             save_contour(path_prefix + f'{index}_driven.dat', reconstructed_driven_contour)
             save_information(path_prefix + f'{index}.txt', center_drive, center_driven, distance)
+    plt.close(debugging_suite.figure)
     results.sort(key=lambda dist, *_: dist)
     return results[:keep_count]
 
