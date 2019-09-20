@@ -20,6 +20,7 @@ from util_functions import save_contour
 import traceback
 import util_functions
 import opt_groups
+import matplotlib.pyplot as plt
 
 # writing log to file
 logging.basicConfig(filename='debug\\info.log', level=logging.INFO)
@@ -253,8 +254,9 @@ def optimize_pairs_in_folder(source_folder, dest_folder):
         try:
             logging.info(f'Playing models drive = {source_model.name}, driven = {dest_model.name}')
             score = main_stage_one(source_model, dest_model, False, False, True, True)
-            with open(os.path.abspath(os.path.join(os.path.dirname(__file__), 'debug/scores.log')),'a') as file:
+            with open(os.path.abspath(os.path.join(os.path.dirname(__file__), 'debug/scores.log')), 'a') as file:
                 print(f'{source_model.name},{dest_model.name},{score}', file=file)
+            plt.close('all')
         except Exception:
             print(sys.exc_info())
 
