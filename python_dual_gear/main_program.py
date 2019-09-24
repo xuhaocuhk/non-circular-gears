@@ -245,10 +245,11 @@ def optimize_pairs_in_folder(source_folder, dest_folder):
     dest_models = retrieve_models_from_folder(dest_folder)
 
     pairs_to_optimize = list(itertools.product(source_models, dest_models))
-    existing_names = set(
-        tuple(sorted((drive_model.name, driven_model.name))) for drive_model, driven_model in pairs_to_optimize)
-    pairs_to_optimize = [(drive_model, driven_model) for drive_model, driven_model in pairs_to_optimize if
-                         (driven_model.name, drive_model.name) not in existing_names]
+    if source_folder == dest_folder:
+        existing_names = set(
+            tuple(sorted((drive_model.name, driven_model.name))) for drive_model, driven_model in pairs_to_optimize)
+        pairs_to_optimize = [(drive_model, driven_model) for drive_model, driven_model in pairs_to_optimize if
+                             (driven_model.name, drive_model.name) not in existing_names]
 
     for source_model, dest_model in pairs_to_optimize:
         try:
