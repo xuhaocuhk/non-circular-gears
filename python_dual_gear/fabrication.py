@@ -243,5 +243,5 @@ if __name__ == '__main__':
     filename_driven = './debug/driven_2d.obj'
     drive_axis = (0, 0)
     # driven_axis should be modified each time according to the given driven gear.
-    driven_axis = (0.8179967301226316, 0)
-    generate_3D_with_axles(7*9.6, filename_drive, filename_driven, drive_axis, driven_axis, None, 7.76)
+    driven_axis = (0.7708278302522964, 0)
+    generate_3D_with_axles(10*7.97, filename_drive, filename_driven, drive_axis, driven_axis, None, 7.76)
