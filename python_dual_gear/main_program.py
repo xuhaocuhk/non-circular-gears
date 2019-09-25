@@ -253,7 +253,7 @@ def optimize_pairs_in_folder(source_folder, dest_folder):
         try:
             logging.info(f'Playing models drive = {source_model.name}, driven = {dest_model.name}')
             score = main_stage_one(source_model, dest_model, False, False, True, True)
-            with open(os.path.abspath(os.path.join(os.path.dirname(__file__), 'debug/scores.log')),'a') as file:
+            with open(os.path.abspath(os.path.join(os.path.dirname(__file__), 'debug/scores.log')), 'a') as file:
                 print(f'{source_model.name},{dest_model.name},{score}', file=file)
         except:
             traceback.print_stack()
@@ -293,6 +293,7 @@ def gradual_average(drive_model: Model, driven_model: Model, drive_center: Tuple
 
 
 if __name__ == '__main__':
-    optimize_pairs_in_folder('animal_fly', 'animal_fly')
+    # optimize_pairs_in_folder('animal_fly', 'animal_fly')
     # gradual_average(find_model_by_name('fish'), find_model_by_name('butterfly'),
     #                 (0.586269239439921, 0.6331503727314829), (0.5490357715218726, 0.5500494966539466), 101)
+    main_stage_one(find_model_by_name('heart'), find_model_by_name('heart'), False, False, True, True)

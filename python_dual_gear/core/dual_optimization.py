@@ -23,6 +23,8 @@ Window_T = Tuple[float, float, float, float]
 Point_T = Tuple[float, float]
 Polar_T = List[float]
 
+Hack_Torque_Parameter = 0.5
+
 
 def phi_distance(polar_drive: Iterable[float], polar_driven: Iterable[float],
                  distance_function=standard_deviation_distance) -> Tuple[float, List[float], List[float], float, float]:
@@ -41,8 +43,9 @@ def phi_distance(polar_drive: Iterable[float], polar_driven: Iterable[float],
     # d_phi_driven = [1.0 / phi for phi in differentiate_function(pre_process(phi_driven))]
 
     offset = align(d_phi_drive, d_phi_driven, distance_function=distance_function)
-    return distance_function(d_phi_drive, d_phi_driven[offset:] + d_phi_driven[:offset]), d_phi_drive, d_phi_driven, \
-           dist_drive, dist_driven
+    return distance_function(d_phi_drive, d_phi_driven[offset:] + d_phi_driven[:offset]) + \
+           Hack_Torque_Parameter * max(d_phi_drive), \
+           d_phi_drive, d_phi_driven, dist_drive, dist_driven
 
 
 def contour_distance(drive_contour: np.ndarray, drive_center: Tuple[float, float], driven_contour: np.ndarray,
