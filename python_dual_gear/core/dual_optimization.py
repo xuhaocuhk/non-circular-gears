@@ -23,7 +23,7 @@ Window_T = Tuple[float, float, float, float]
 Point_T = Tuple[float, float]
 Polar_T = List[float]
 
-Hack_Torque_Parameter = 0.5
+Hack_Torque_Parameter = 0.2
 
 
 def phi_distance(polar_drive: Iterable[float], polar_driven: Iterable[float],
