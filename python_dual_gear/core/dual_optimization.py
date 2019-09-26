@@ -207,8 +207,10 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
                     [(0, 0), (center_distance, 0)])
                 save_contour(os.path.join(path, f'final_result_{index}_drive.dat'), final_drive)
                 save_contour(os.path.join(path, f'final_result_{index}_driven.dat'), final_driven)
+                d_drive = differentiate_function(pre_process(phi))
                 save_information(os.path.join(path, f'final_result_{index}.txt'), (0, 0), (center_distance, 0), score,
-                                 )
+                                 max_dphi_drive=max(d_drive),
+                                 actual_distance=score - torque_weight * max(d_drive))
 
     results = results[:keep_count]
     results.sort(key=lambda dist, *_: dist)
