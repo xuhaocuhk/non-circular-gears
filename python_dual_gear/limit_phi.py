@@ -84,9 +84,20 @@ if __name__ == '__main__':
     import shape_processor
     from shapely.geometry import Point
     from debug_util import MyDebugger
+    from util_functions import read_contour
 
-    cart_drive = shape_factory.get_shape_contour(find_model_by_name('starfish'), uniform=True, plots=None)
-    drive_polar = shape_processor.toExteriorPolarCoord(Point(0.4402, 0.5096), cart_drive, 1024)
+    """
+    Usage: 
+    1. move the directory to use into the debug directory 
+    2. change dat_path
+    3. run
+    """
+
+    dat_path = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                            'debug/2019-09-25_21-55-14_heart_heart/iteration_2/final_result_0_drive.dat'
+                                            ))
+    cart_drive = read_contour(dat_path)
+    drive_polar = shape_processor.toExteriorPolarCoord(Point(0, 0), cart_drive, 1024)
     debugger = MyDebugger(['phi_lim'])
-    for limit in np.linspace(1, 4, 400, endpoint=True):
+    for limit in np.linspace(1, 4, 200, endpoint=True):
         plot_limited_phi(drive_polar, debugger.get_root_debug_dir_name(), limit, 10)
