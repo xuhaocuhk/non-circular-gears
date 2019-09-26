@@ -67,7 +67,7 @@ def optimize_center(cart_input_drive, cart_input_driven, debugger, opt_config, p
     debug_suite = DebuggingSuite(debugger, plotter, plt.figure(figsize=(16, 9)))
     results = sampling_optimization(cart_input_drive, cart_input_driven, opt_config['sampling_count'],
                                     opt_config['keep_count'], opt_config['resampling_accuracy'],
-                                    opt_config['max_sample_depth'], debug_suite)
+                                    opt_config['max_sample_depth'], debug_suite, opt_config['torque_weight'])
     results.sort(key=lambda total_score, *_: total_score)
     best_result = results[0]
     logging.info(f'Best result with score {best_result[0]}')
@@ -150,6 +150,7 @@ def generate_all_models():
 def main_stage_one(drive_model: Model, driven_model: Model, do_math_cut=True, math_animation=False,
                    reply_cut_anim=False, save_cut_anim=True, opt_config='optimization_config.yaml', ):
     # initialize logging system, configuration files, etc.
+    opt_config = os.path.join(os.path.dirname(__file__), opt_config)
     debugger, opt_config, plotter = init((drive_model, driven_model), opt_config)
 
     # get input polygons

@@ -7,3 +7,4 @@ resampling_accuracy: 1024
 sampling_count:
   - 3
   - 3
+torque_weight: 0.01
