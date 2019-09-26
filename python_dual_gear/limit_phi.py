@@ -11,6 +11,7 @@ from math import pi
 import math
 from plot.qt_plot import Plotter
 import os
+from util_functions import save_contour
 
 Polar_T = List[float]
 Func_T = List[float]
@@ -54,7 +55,8 @@ def to_cartesian(polar_contour: Polar_T, center: Tuple[float, float], rotation: 
     return contour
 
 
-def plot_limited_phi(polar_contour: Polar_T, folder: str, max_phi: float, iteration: int) -> Polar_T:
+def plot_limited_phi(polar_contour: Polar_T, folder: str, max_phi: float, iteration: int,
+                     draw_original: bool = False) -> Polar_T:
     """
     plot a contour with derivative of phi limited to the given max phi
     :param polar_contour: the contour to be smoothed
@@ -65,15 +67,23 @@ def plot_limited_phi(polar_contour: Polar_T, folder: str, max_phi: float, iterat
     """
     plotter = Plotter()
     driven, center_dist, phi = compute_dual_gear(polar_contour)
-    plotter.draw_contours(os.path.join(folder, 'original_contour.png'),
-                          [('math_drive', to_cartesian(polar_contour, (0, 0))),
-                           ('math_driven', to_cartesian(driven, (center_dist, 0), phi[0]))],
-                          [(0, 0), (center_dist, 0)])
+    if draw_original:
+        plotter.draw_contours(os.path.join(folder, 'original_contour.png'),
+                              [('math_drive', to_cartesian(polar_contour, (0, 0))),
+                               ('math_driven', to_cartesian(driven, (center_dist, 0), phi[0]))],
+                              [(0, 0), (center_dist, 0)])
     drive = list(limit_phi_derivative(polar_contour, max_phi, iteration))
     driven, center_dist, phi = compute_dual_gear(drive)
-    plotter.draw_contours(os.path.join(folder, f'smoothed_contour_{"%3.4f" % max_phi}.png'),
-                          [('math_drive', to_cartesian(drive, (0, 0))),
-                           ('math_driven', to_cartesian(driven, (center_dist, 0), phi[0]))],
+    drive_cart = to_cartesian(drive, (0, 0))
+    driven_cart = to_cartesian(driven, (center_dist, 0), phi[0])
+    base_filename = f'smoothed_contour_{"%3.4f" % max_phi}'
+    save_contour(os.path.join(folder, base_filename + '_drive.dat'), drive_cart)
+    save_contour(os.path.join(folder, base_filename + '_driven.dat'), driven_cart)
+    with open(os.path.join(folder, base_filename + '.txt'), 'w') as file:
+        print(f'center_dist = {center_dist}', file=file)
+    plotter.draw_contours(os.path.join(folder, base_filename + '.png'),
+                          [('math_drive', drive_cart),
+                           ('math_driven', driven_cart)],
                           [(0, 0), (center_dist, 0)])
     return drive
 
