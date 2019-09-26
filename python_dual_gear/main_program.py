@@ -295,10 +295,11 @@ def gradual_average(drive_model: Model, driven_model: Model, drive_center: Tuple
         save_contour(debugger.file_path(average_str + '_driven.dat'), reconstructed_driven_contour)
 
 
-if __name__ == '__main__':
+if __name__ == '__main__'
     with open('folders_to_optimize.txt', 'r') as file:
         for line in file:
             drive, driven = line.rstrip().split(',')
             optimize_pairs_in_folder(drive, driven)
     # gradual_average(find_model_by_name('fish'), find_model_by_name('butterfly'),
     #                 (0.586269239439921, 0.6331503727314829), (0.5490357715218726, 0.5500494966539466), 101)
+    main_stage_one(find_model_by_name('maple'), find_model_by_name('maple'))
