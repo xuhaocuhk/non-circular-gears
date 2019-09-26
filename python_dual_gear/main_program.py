@@ -20,6 +20,7 @@ from util_functions import save_contour
 import traceback
 import util_functions
 import opt_groups
+import matplotlib.pyplot as plt
 
 # writing log to file
 logging.basicConfig(filename='debug\\info.log', level=logging.INFO)
@@ -244,10 +245,11 @@ def optimize_pairs_in_folder(source_folder, dest_folder):
     dest_models = retrieve_models_from_folder(dest_folder)
 
     pairs_to_optimize = list(itertools.product(source_models, dest_models))
-    existing_names = set(
-        tuple(sorted((drive_model.name, driven_model.name))) for drive_model, driven_model in pairs_to_optimize)
-    pairs_to_optimize = [(drive_model, driven_model) for drive_model, driven_model in pairs_to_optimize if
-                         (driven_model.name, drive_model.name) not in existing_names]
+    if source_folder == dest_folder:
+        existing_names = set(
+            tuple(sorted((drive_model.name, driven_model.name))) for drive_model, driven_model in pairs_to_optimize)
+        pairs_to_optimize = [(drive_model, driven_model) for drive_model, driven_model in pairs_to_optimize if
+                             (driven_model.name, drive_model.name) not in existing_names]
 
     for source_model, dest_model in pairs_to_optimize:
         try:
@@ -255,8 +257,9 @@ def optimize_pairs_in_folder(source_folder, dest_folder):
             score = main_stage_one(source_model, dest_model, False, False, True, True)
             with open(os.path.abspath(os.path.join(os.path.dirname(__file__), 'debug/scores.log')), 'a') as file:
                 print(f'{source_model.name},{dest_model.name},{score}', file=file)
-        except:
-            traceback.print_stack()
+            plt.close('all')
+        except Exception:
+            print(sys.exc_info())
 
 
 def gradual_average(drive_model: Model, driven_model: Model, drive_center: Tuple[float, float],
@@ -292,8 +295,11 @@ def gradual_average(drive_model: Model, driven_model: Model, drive_center: Tuple
         save_contour(debugger.file_path(average_str + '_driven.dat'), reconstructed_driven_contour)
 
 
-if __name__ == '__main__':
-    # optimize_pairs_in_folder('animal_fly', 'animal_fly')
+if __name__ == '__main__'
+    with open('folders_to_optimize.txt', 'r') as file:
+        for line in file:
+            drive, driven = line.rstrip().split(',')
+            optimize_pairs_in_folder(drive, driven)
     # gradual_average(find_model_by_name('fish'), find_model_by_name('butterfly'),
     #                 (0.586269239439921, 0.6331503727314829), (0.5490357715218726, 0.5500494966539466), 101)
-    main_stage_one(find_model_by_name('heart'), find_model_by_name('heart'), False, False, True, True)
+    # main_stage_one(find_model_by_name('maple'), find_model_by_name('maple'))
