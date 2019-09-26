@@ -302,4 +302,4 @@ if __name__ == '__main__'
             optimize_pairs_in_folder(drive, driven)
     # gradual_average(find_model_by_name('fish'), find_model_by_name('butterfly'),
     #                 (0.586269239439921, 0.6331503727314829), (0.5490357715218726, 0.5500494966539466), 101)
-    main_stage_one(find_model_by_name('maple'), find_model_by_name('maple'))
+    # main_stage_one(find_model_by_name('maple'), find_model_by_name('maple'))
