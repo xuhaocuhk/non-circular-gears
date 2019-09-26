@@ -171,7 +171,7 @@ def sample_in_windows(drive_contour: np.ndarray, driven_contour: np.ndarray,
 def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray, sampling_count: int, keep_count: int,
                           sampling_accuracy: int, iteration_count: int, debugging_suite: DebuggingSuite,
                           torque_weight: float = 0.0) -> List[Tuple[float, Polar_T]]:
-    logger.log(f'Initiating Sampling Optimization with torque_weight = {torque_weight}')
+    logger.info(f'Initiating Sampling Optimization with torque_weight = {torque_weight}')
     drive_polygon = Polygon(drive_contour)
     driven_polygon = Polygon(driven_contour)
     min_x, min_y, max_x, max_y = drive_polygon.bounds
