@@ -238,6 +238,15 @@ def retrieve_models_from_folder(folder_name):
     ) for filename in os.listdir(folder_name) if '.txt' in filename]
 
 
+def retrieve_model_from_folder(folder_name, model_name):
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../silhouette/'))
+    models = retrieve_models_from_folder(os.path.join(base_dir, folder_name))
+    for model in models:
+        if model.name.endswith(model_name):
+            return model
+    return None
+
+
 def optimize_pairs_in_folder(source_folder, dest_folder):
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../silhouette/'))
     source_folder = os.path.join(base_dir, source_folder)
@@ -296,11 +305,13 @@ def gradual_average(drive_model: Model, driven_model: Model, drive_center: Tuple
         save_contour(debugger.file_path(average_str + '_driven.dat'), reconstructed_driven_contour)
 
 
-if __name__ == '__main__'
-    with open('folders_to_optimize.txt', 'r') as file:
-        for line in file:
-            drive, driven = line.rstrip().split(',')
-            optimize_pairs_in_folder(drive, driven)
+if __name__ == '__main__':
+    # with open('folders_to_optimize.txt', 'r') as file:
+    #     for line in file:
+    #         drive, driven = line.rstrip().split(',')
+    #         optimize_pairs_in_folder(drive, driven)
     # gradual_average(find_model_by_name('fish'), find_model_by_name('butterfly'),
     #                 (0.586269239439921, 0.6331503727314829), (0.5490357715218726, 0.5500494966539466), 101)
     # main_stage_one(find_model_by_name('maple'), find_model_by_name('maple'))
+    main_stage_one(retrieve_model_from_folder('human', 'girl'), retrieve_model_from_folder('animal_fly', 'pengiun1'),
+                   False, False, True, True)
