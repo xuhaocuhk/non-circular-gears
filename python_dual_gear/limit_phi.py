@@ -63,6 +63,7 @@ def plot_limited_phi(polar_contour: Polar_T, folder: str, max_phi: float, iterat
     :param folder: folder to store the plots
     :param max_phi: maximum of phi derivative
     :param iteration: iteration times
+    :param draw_original: whether or not to draw the original plot
     :return: optimized drive
     """
     plotter = Plotter()
@@ -110,4 +111,4 @@ if __name__ == '__main__':
     drive_polar = shape_processor.toExteriorPolarCoord(Point(0, 0), cart_drive, 1024)
     debugger = MyDebugger(['phi_lim'])
     for limit in np.linspace(1, 4, 200, endpoint=True):
-        plot_limited_phi(drive_polar, debugger.get_root_debug_dir_name(), limit, 10)
+        plot_limited_phi(drive_polar, debugger.get_root_debug_dir_name(), limit, 100)
