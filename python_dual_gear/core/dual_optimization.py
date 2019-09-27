@@ -50,39 +50,6 @@ def phi_distance(polar_drive: Iterable[float], polar_driven: Iterable[float],
            d_phi_drive, d_phi_driven, dist_drive, dist_driven
 
 
-def compress(original_array: np.ndarray, new_size: int) -> np.ndarray:
-    """
-    compress an ndarray
-    :param original_array: the original array
-    :param new_size: new size (shall be a factor of the original size)
-    :return: compressed array
-    """
-    assert original_array.shape[0] % new_size == 0
-    return original_array[::original_array.shape[0] / new_size]
-
-
-def extend_part(original_array: np.ndarray, start_index: int, end_index: int, new_size: int) -> np.ndarray:
-    """
-    extend a part of a long periodic function to the new size
-    :param original_array: the original periodic array
-    :param start_index: the starting of the part to be extended
-    :param end_index: the ending (exclusive) of the part to be extended
-    :param new_size: the new size to be extended to
-    :return: the part, extended to new_size
-    """
-    assert original_array.shape[0] >= end_index > start_index
-    assert new_size % (end_index - start_index) == 0
-    period = 2 * math.pi
-    start_angle = start_index * period / original_array.shape[0]
-    end_angle = end_index * period / original_array.shape[0]
-    return np.interp(
-        np.linspace(start_angle, end_angle, new_size, False),
-        np.linspace(0, period, original_array.shape[0], False),
-        original_array,
-        period=period
-    )
-
-
 def contour_distance(drive_contour: np.ndarray, drive_center: Tuple[float, float], driven_contour: np.ndarray,
                      driven_center: Tuple[float, float], sampling_accuracy: int = 1024) \
         -> Tuple[float, List[float], List[float], float, float]:
