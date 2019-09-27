@@ -174,6 +174,23 @@ def sample_in_windows(drive_contour: np.ndarray, driven_contour: np.ndarray,
             save_information(path_prefix + f'{index}.txt', center_drive, center_driven, final_score,
                              max_dphi_drive=max_phi,
                              actual_distance=distance)
+
+            # get information about thee phi' functions
+            original_figure = plt.gcf()
+            plt.figure(figsize=(16, 16))
+            figure, new_subplots = plt.subplots(2, 2)
+            new_subplots[0][0].plot(np.linspace(0, 2 * math.pi, len(d_drive), endpoint=False), d_drive)
+            new_subplots[0][1].plot(np.linspace(0, 2 * math.pi, len(d_driven), endpoint=False), d_driven)
+            new_subplots[1][0].plot(np.linspace(0, 2 * math.pi, len(d_drive), endpoint=False),
+                                    align_and_average(d_drive, d_driven, k=k))
+            if k != 1:
+                # then offset shall be 0
+                new_subplots[1][1].plot(np.linspace(0, 2 * math.pi, len(d_drive), endpoint=False),
+                                        extend_part(d_driven, 0, int(len(d_driven) / k), len(d_drive)))
+            plt.axis('equal')
+            plt.savefig(path_prefix + f'{index}_functions.png')
+            plt.close(figure)
+            plt.figure(original_figure.number)
     results.sort(key=lambda dist, *_: dist)
     return results[:keep_count]
 
