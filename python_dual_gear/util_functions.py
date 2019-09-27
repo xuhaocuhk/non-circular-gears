@@ -1,4 +1,4 @@
-from typing import Iterable, Collection, SupportsFloat, Sized, Callable, Tuple
+from typing import Union, Collection, SupportsFloat, Callable, Tuple
 import math
 import numpy as np
 import struct
@@ -27,7 +27,8 @@ def compress(original_array: np.ndarray, new_size: int) -> np.ndarray:
     return original_array[::original_array.shape[0] / new_size]
 
 
-def extend_part(original_array: np.ndarray, start_index: int, end_index: int, new_size: int) -> np.ndarray:
+def extend_part(original_array: Union[np.ndarray, Collection[float]], start_index: int, end_index: int,
+                new_size: int) -> np.ndarray:
     """
     extend a part of a long periodic function to the new size
     :param original_array: the original periodic array
@@ -36,14 +37,18 @@ def extend_part(original_array: np.ndarray, start_index: int, end_index: int, ne
     :param new_size: the new size to be extended to
     :return: the part, extended to new_size
     """
-    assert original_array.shape[0] >= end_index > start_index
+    assert end_index > start_index
     assert new_size % (end_index - start_index) == 0
     period = 2 * math.pi
-    start_angle = start_index * period / original_array.shape[0]
-    end_angle = end_index * period / original_array.shape[0]
+    if isinstance(original_array, np.ndarray):
+        n = original_array.shape[0]
+    else:
+        n = len(original_array)
+    start_angle = start_index * period / n
+    end_angle = end_index * period / n
     return np.interp(
         np.linspace(start_angle, end_angle, new_size, False),
-        np.linspace(0, period, original_array.shape[0], False),
+        np.linspace(0, period, n, False),
         original_array,
         period=period
     )
@@ -60,9 +65,17 @@ def align(array_a: Collection, array_b: Collection, stride: int = 1,
     :param k: multiplicity of the second array when compared to the first array
     :return: offset: align array_a[0] with array_b[offset]
     """
-    assert len(array_a) == len(array_b)
-    return min([(offset, distance_function(array_a, array_b[offset:] + array_b[:offset])) for offset in
-                range(0, len(array_a), stride)], key=lambda tup: tup[1])[0]
+    if k == 1:
+        assert len(array_a) == len(array_b)
+        return min([(offset, distance_function(array_a, array_b[offset:] + array_b[:offset])) for offset in
+                    range(0, len(array_a), stride)], key=lambda tup: tup[1])[0]
+    else:
+        assert len(array_b) % k == 0
+        b_len = len(array_b) / k
+        return min([
+            (offset, distance_function(array_a, list(extend_part(array_b, offset, offset + b_len, len(array_a)))))
+            for offset in range(0, len(array_b), stride)
+        ], key=lambda tup: tup[1])[0]
 
 
 def pack_contour(contour: np.ndarray) -> bytes:
