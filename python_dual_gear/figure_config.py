@@ -25,9 +25,9 @@ input_shapes = {
     'driven_edge': (127, 127, 127),
 }
 math_shapes = {
-    'drive_face': (183, 208, 207),
+    'drive_face': (165, 189, 225),
     'drive_edge': (127, 127, 127),
-    'driven_face': (161, 187, 169),
+    'driven_face': (102, 160, 218),
     'driven_edge': (127, 127, 127),
 }
 carve_shapes = {

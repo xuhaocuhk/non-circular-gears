@@ -133,7 +133,7 @@ if __name__ == '__main__':
     drive_gear = toExteriorPolarCoord(Point(*drive_model.center_point), drive_contour, 1024)
 
     debugger = MyDebugger('different_k')
-    for k in (10, 2, 3, 4, 5, 1):
+    for k in range(1, 11):
         driven_gear, center_distance, phi = compute_dual_gear(drive_gear, k)
         os.makedirs(debugger.file_path(f'k={k}'), exist_ok=True)
         plot_sampled_function((drive_gear, driven_gear), (phi,), debugger.file_path(f'k={k}'), 100, 0.001,
