@@ -1,4 +1,4 @@
-from typing import Iterable, Collection, SupportsFloat, Sized, Callable, Tuple
+from typing import Union, Collection, SupportsFloat, Callable, Tuple
 import math
 import numpy as np
 import struct
@@ -16,19 +16,66 @@ def standard_deviation_distance(x: Collection[SupportsFloat], y: Collection[Supp
     return math.sqrt(sum(((float(x_i) - float(y_i)) ** 2 for x_i, y_i in zip(x, y))) / len(x))
 
 
+def compress(original_array: np.ndarray, new_size: int) -> np.ndarray:
+    """
+    compress an ndarray
+    :param original_array: the original array
+    :param new_size: new size (shall be a factor of the original size)
+    :return: compressed array
+    """
+    assert original_array.shape[0] % new_size == 0
+    return original_array[::original_array.shape[0] / new_size]
+
+
+def extend_part(original_array: Union[np.ndarray, Collection[float]], start_index: int, end_index: int,
+                new_size: int) -> np.ndarray:
+    """
+    extend a part of a long periodic function to the new size
+    :param original_array: the original periodic array
+    :param start_index: the starting of the part to be extended
+    :param end_index: the ending (exclusive) of the part to be extended
+    :param new_size: the new size to be extended to
+    :return: the part, extended to new_size
+    """
+    assert end_index > start_index
+    assert new_size % (end_index - start_index) == 0
+    period = 2 * math.pi
+    if isinstance(original_array, np.ndarray):
+        n = original_array.shape[0]
+    else:
+        n = len(original_array)
+    start_angle = start_index * period / n
+    end_angle = end_index * period / n
+    return np.interp(
+        np.linspace(start_angle, end_angle, new_size, False),
+        np.linspace(0, period, n, False),
+        original_array,
+        period=period
+    )
+
+
 def align(array_a: Collection, array_b: Collection, stride: int = 1,
-          distance_function: Callable = standard_deviation_distance) -> int:
+          distance_function: Callable = standard_deviation_distance, k: int = 1) -> int:
     """
     align two sized iterables to the position with minimum distance
     :param array_a: sized iterable A
     :param array_b: sized iterable B
     :param stride: positive number as the stride of comparison, the larger the faster and less accurate
     :param distance_function: function to calculate
+    :param k: multiplicity of the second array when compared to the first array
     :return: offset: align array_a[0] with array_b[offset]
     """
-    assert len(array_a) == len(array_b)
-    return min([(offset, distance_function(array_a, array_b[offset:] + array_b[:offset])) for offset in
-                range(0, len(array_a), stride)], key=lambda tup: tup[1])[0]
+    if k == 1:
+        assert len(array_a) == len(array_b)
+        return min([(offset, distance_function(array_a, array_b[offset:] + array_b[:offset])) for offset in
+                    range(0, len(array_a), stride)], key=lambda tup: tup[1])[0]
+    else:
+        assert len(array_b) % k == 0
+        b_len = len(array_b) / k
+        return min([
+            (offset, distance_function(array_a, list(extend_part(array_b, offset, offset + b_len, len(array_a)))))
+            for offset in range(0, len(array_b), stride)
+        ], key=lambda tup: tup[1])[0]
 
 
 def pack_contour(contour: np.ndarray) -> bytes:

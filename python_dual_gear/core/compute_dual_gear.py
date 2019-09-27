@@ -9,7 +9,7 @@ import util_functions
 import matplotlib.pyplot as plt
 
 
-def compute_dual_gear(x: [float], k: int = 1) -> ([float], float, [float]):
+def compute_dual_gear(x: List[float], k: int = 1) -> Tuple[List[float], float, List[float]]:
     """
     compute the dual gear with the gear given
     :param x: sample points of drive gear's polar function, theta uniformly in [0, 2*pi)
@@ -75,7 +75,7 @@ def compute_dual_gear(x: [float], k: int = 1) -> ([float], float, [float]):
     return list(y), center_distance, list(phi)
 
 
-def cumulative_sum(x: list) -> list:
+def cumulative_sum(x: List) -> List:
     length = len(x)
     result = [x[0]]
     for i in range(1, length):
