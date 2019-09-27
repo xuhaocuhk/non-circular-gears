@@ -1,10 +1,9 @@
 """
 Dual optimization for two functions with phi-averaging
-WARNING: assuming k=1
 """
 
 import numpy as np
-from util_functions import standard_deviation_distance, align, save_contour, point_in_contour
+from util_functions import standard_deviation_distance, align, save_contour, point_in_contour, extend_part
 from typing import Iterable, Tuple, List
 from core.compute_dual_gear import compute_dual_gear
 from core.phi_shape_average import differentiate_function, pre_process, rebuild_polar
@@ -28,12 +27,13 @@ Polar_T = List[float]
 logger = logging.getLogger(__name__)
 
 
-def phi_distance(polar_drive: Iterable[float], polar_driven: Iterable[float],
+def phi_distance(polar_drive: Iterable[float], polar_driven: Iterable[float], k: int = 1,
                  distance_function=standard_deviation_distance) -> Tuple[float, List[float], List[float], float, float]:
     """
     Get the distance between two phi functions
     :param polar_drive: polar coordinates of the drive contour
     :param polar_driven: polar coordinates of the driven contour
+    :param k: the k parameter
     :param distance_function: the distance function used to calculate the distance
     :param torque_weight: weight of torque term
     :return: the distance between phi functions, two d_phi functions and center distances
@@ -45,13 +45,17 @@ def phi_distance(polar_drive: Iterable[float], polar_driven: Iterable[float],
     d_phi_driven = list(differentiate_function(pre_process(phi_driven)))
     # d_phi_driven = [1.0 / phi for phi in differentiate_function(pre_process(phi_driven))]
 
-    offset = align(d_phi_drive, d_phi_driven, distance_function=distance_function)
+    offset = align(d_phi_drive, d_phi_driven, distance_function=distance_function, k=k)
+    if k != 1:
+        assert len(d_phi_driven) % k == 0
+        d_phi_driven = list(extend_part(d_phi_driven, offset, offset + int(len(d_phi_driven) / k), len(d_phi_drive)))
+        offset = 0
     return distance_function(d_phi_drive, d_phi_driven[offset:] + d_phi_driven[:offset]), \
            d_phi_drive, d_phi_driven, dist_drive, dist_driven
 
 
 def contour_distance(drive_contour: np.ndarray, drive_center: Tuple[float, float], driven_contour: np.ndarray,
-                     driven_center: Tuple[float, float], sampling_accuracy: int = 1024) \
+                     driven_center: Tuple[float, float], sampling_accuracy: int = 1024, k: int = 1) \
         -> Tuple[float, List[float], List[float], float, float]:
     """
     Determine the distance between two contours
@@ -59,7 +63,7 @@ def contour_distance(drive_contour: np.ndarray, drive_center: Tuple[float, float
     """
     drive_polar = toExteriorPolarCoord(Point(*drive_center), drive_contour, sampling_accuracy)
     driven_polar = toExteriorPolarCoord(Point(*driven_center), driven_contour, sampling_accuracy)
-    return phi_distance(drive_polar, driven_polar)
+    return phi_distance(drive_polar, driven_polar, k)
 
 
 def split_window(window: Window_T, x_split_count: int, y_split_count: int) -> List[Window_T]:
@@ -82,10 +86,14 @@ def center_of_window(window: Window_T) -> Tuple[float, float]:
     return (min_x + max_x) / 2, (min_y + max_y) / 2
 
 
-def align_and_average(array_a: List, array_b: List, average_factor: float = 0.5) -> List:
+def align_and_average(array_a: List, array_b: List, average_factor: float = 0.5, k: int = 1) -> List:
     assert len(array_a) == len(array_b)
     assert 0 <= average_factor <= 1
-    offset = align(array_a, array_b)
+    offset = align(array_a, array_b, k)
+    if k != 1:
+        assert len(array_b) % k == 0
+        array_b = extend_part(array_b, offset, offset + int(len(array_b) / k), len(array_a))
+        offset = 0
     return [array_a[index - offset] * average_factor + array_b[index] * (1 - average_factor)
             for index in range(len(array_a))]
 
@@ -105,7 +113,7 @@ def save_information(filename: str, center_drive: Point_T, center_driven: Point_
 
 def sample_in_windows(drive_contour: np.ndarray, driven_contour: np.ndarray,
                       window_pairs: List[Tuple[Window_T, Window_T]], keep_count: int,
-                      debugging_suite: DebuggingSuite, center_determine_function=center_of_window,
+                      debugging_suite: DebuggingSuite, k: int = 1, center_determine_function=center_of_window,
                       sampling_accuracy=1024, torque_weight=0.0) -> List[Tuple[float, Window_T, Window_T, Polar_T]]:
     """
     find the best sample windows
@@ -114,6 +122,7 @@ def sample_in_windows(drive_contour: np.ndarray, driven_contour: np.ndarray,
     :param window_pairs: pair of windows
     :param keep_count: count of the windows to be kept
     :param debugging_suite: the debugging suite
+    :param k: the k of the opposing gear
     :param center_determine_function: function to determine from window to center
     :param sampling_accuracy: number of samples when converting to polar contour
     :param torque_weight: weight of torque term
@@ -136,8 +145,8 @@ def sample_in_windows(drive_contour: np.ndarray, driven_contour: np.ndarray,
             # not good windows
             continue
         distance, d_drive, d_driven, dist_drive, dist_driven = \
-            contour_distance(drive_contour, center_drive, driven_contour, center_driven, sampling_accuracy)
-        reconstructed_drive = rebuild_polar((dist_drive + dist_driven) / 2, align_and_average(d_drive, d_driven))
+            contour_distance(drive_contour, center_drive, driven_contour, center_driven, sampling_accuracy, k)
+        reconstructed_drive = rebuild_polar((dist_drive + dist_driven) / 2, align_and_average(d_drive, d_driven, k=k))
         list_reconstructed_drive = list(reconstructed_drive)
         max_phi = max(differentiate_function(pre_process(compute_dual_gear(list_reconstructed_drive)[-1])))
         final_score = distance + torque_weight * max_phi
@@ -145,7 +154,7 @@ def sample_in_windows(drive_contour: np.ndarray, driven_contour: np.ndarray,
         results.append((final_score, drive_window, driven_window, list_reconstructed_drive))
         if subplots is not None:
             update_polygon_subplots(drive_contour, driven_contour, subplots[0])  # clear sample regions
-            reconstructed_driven, *_ = compute_dual_gear(list_reconstructed_drive)
+            reconstructed_driven, *_ = compute_dual_gear(list_reconstructed_drive, k)
             reconstructed_drive_contour = toCartesianCoordAsNp(reconstructed_drive, 0, 0)
             reconstructed_driven_contour = toCartesianCoordAsNp(reconstructed_driven, 0, 0)
             update_polygon_subplots(reconstructed_drive_contour, reconstructed_driven_contour, subplots[1])
@@ -171,8 +180,9 @@ def sample_in_windows(drive_contour: np.ndarray, driven_contour: np.ndarray,
 
 def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray, sampling_count: int, keep_count: int,
                           sampling_accuracy: int, iteration_count: int, debugging_suite: DebuggingSuite,
-                          torque_weight: float = 0.0) -> List[Tuple[float, Polar_T]]:
+                          torque_weight: float = 0.0, k: int = 1) -> List[Tuple[float, Polar_T]]:
     logger.info(f'Initiating Sampling Optimization with torque_weight = {torque_weight}')
+    logger.info(f'k={k}')
     drive_polygon = Polygon(drive_contour)
     driven_polygon = Polygon(driven_contour)
     min_x, min_y, max_x, max_y = drive_polygon.bounds
@@ -193,12 +203,12 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
         ]))
         results = sample_in_windows(drive_contour, driven_contour, window_pairs, keep_count,
                                     debugging_suite.sub_suite(os.path.join(path, 'result_')),
-                                    sampling_accuracy=sampling_accuracy, torque_weight=torque_weight)
+                                    sampling_accuracy=sampling_accuracy, torque_weight=torque_weight, k=k)
         window_pairs = [(drive_window, driven_window) for _, drive_window, driven_window, __ in results]
         if debugging_suite.plotter is not None:
             for index, final_result in enumerate(results):
                 score, *_, reconstructed_drive = final_result
-                driven, center_distance, phi = compute_dual_gear(reconstructed_drive)
+                driven, center_distance, phi = compute_dual_gear(reconstructed_drive, k)
                 final_drive = toCartesianCoordAsNp(reconstructed_drive, 0, 0)
                 final_driven = np.array(
                     psf_rotate(toCartesianCoordAsNp(driven, center_distance, 0), phi[0], (center_distance, 0)))

@@ -25,6 +25,7 @@ import matplotlib.pyplot as plt
 # writing log to file
 logging.basicConfig(filename='debug\\info.log', level=logging.INFO)
 logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
+logger = logging.getLogger(__name__)
 
 
 def math_cut(drive_model: Model, cart_drive: np.ndarray, debugger: MyDebugger, plotter: Optional[Plotter],
@@ -63,11 +64,11 @@ def rotate_and_carve(cart_drive, center, center_distance, debugger, drive_model,
     return cart_driven_gear
 
 
-def optimize_center(cart_input_drive, cart_input_driven, debugger, opt_config, plotter):
+def optimize_center(cart_input_drive, cart_input_driven, debugger, opt_config, plotter, k=1):
     debug_suite = DebuggingSuite(debugger, plotter, plt.figure(figsize=(16, 9)))
     results = sampling_optimization(cart_input_drive, cart_input_driven, opt_config['sampling_count'],
                                     opt_config['keep_count'], opt_config['resampling_accuracy'],
-                                    opt_config['max_sample_depth'], debug_suite, opt_config['torque_weight'])
+                                    opt_config['max_sample_depth'], debug_suite, opt_config['torque_weight'], k=k)
     results.sort(key=lambda total_score, *_: total_score)
     best_result = results[0]
     logging.info(f'Best result with score {best_result[0]}')
@@ -148,17 +149,18 @@ def generate_all_models():
 
 
 def main_stage_one(drive_model: Model, driven_model: Model, do_math_cut=True, math_animation=False,
-                   reply_cut_anim=False, save_cut_anim=True, opt_config='optimization_config.yaml', ):
+                   reply_cut_anim=False, save_cut_anim=True, opt_config='optimization_config.yaml', k=1):
     # initialize logging system, configuration files, etc.
     opt_config = os.path.join(os.path.dirname(__file__), opt_config)
     debugger, opt_config, plotter = init((drive_model, driven_model), opt_config)
+    logger.info(f'Optimizing {drive_model.name} with {driven_model.name}')
 
     # get input polygons
     cart_input_drive, cart_input_driven = get_inputs(debugger, drive_model, driven_model, plotter)
 
     # optimization
     center, center_distance, cart_drive, score = optimize_center(cart_input_drive, cart_input_driven, debugger,
-                                                                 opt_config, plotter)
+                                                                 opt_config, plotter, k=k)
     return score
 
 
@@ -312,6 +314,6 @@ if __name__ == '__main__':
     #         optimize_pairs_in_folder(drive, driven)
     # gradual_average(find_model_by_name('fish'), find_model_by_name('butterfly'),
     #                 (0.586269239439921, 0.6331503727314829), (0.5490357715218726, 0.5500494966539466), 101)
-    # main_stage_one(find_model_by_name('maple'), find_model_by_name('maple'))
-    main_stage_one(retrieve_model_from_folder('human', 'girl'), retrieve_model_from_folder('animal_fly', 'pengiun1'),
-                   False, False, True, True)
+    main_stage_one(find_model_by_name('ellipse'), find_model_by_name('ellipse'), k=2)
+    # main_stage_one(retrieve_model_from_folder('human', 'girl'), retrieve_model_from_folder('animal_fly', 'pengiun1'),
+    #                False, False, True, True)
