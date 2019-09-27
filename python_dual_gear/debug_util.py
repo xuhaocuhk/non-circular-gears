@@ -17,8 +17,9 @@ class MyDebugger:
             self.model_name = model_name
         else:
             self.model_name = '_'.join(model_name)
-        self._debug_dir_name = os.path.join(MyDebugger.pre_fix, datetime.datetime.fromtimestamp(time.time()).strftime(
-            f'%Y-%m-%d_%H-%M-%S_{self.model_name}'))
+        self._debug_dir_name = os.path.join(os.path.dirname(__file__), MyDebugger.pre_fix,
+                                            datetime.datetime.fromtimestamp(time.time()).strftime(
+                                                f'%Y-%m-%d_%H-%M-%S_{self.model_name}'))
         self._debug_dir_name = os.path.join(os.path.dirname(__file__), self._debug_dir_name)
         logging.info("=================== Program Start ====================")
         logging.info(f"Output directory: {self._debug_dir_name}")
