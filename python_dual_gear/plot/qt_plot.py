@@ -110,9 +110,34 @@ class PlotterWindow(QtWidgets.QWidget):
 
 if __name__ == '__main__':
     from math import sin, cos, pi
+    from core.compute_dual_gear import compute_dual_gear
+    from shape_processor import toCartesianCoordAsNp, toExteriorPolarCoord
+    from models import find_model_by_name
+    from shape_factory import get_shape_contour
+    from shapely.geometry import Polygon, Point
+    from core.dual_optimization import split_window, center_of_window
+    from plot.plot_sampled_function import rotate
+    from debug_util import MyDebugger
 
-    test_gear = np.array(
-        [(.3 * cos(theta), .4 * sin(theta)) for theta in np.linspace(0, 2 * pi, 1024, endpoint=True)]
-    )
+    interested_models = ['heart', 'drop', 'boy']
     plotter = Plotter()
-    plotter.draw_contours('test.png', [('math_drive', test_gear)], [(0, 0)])
+    debugger = MyDebugger('higher_k_test')
+    for drive_model_name in interested_models:
+        drive_model = find_model_by_name(drive_model_name)
+        drive_contour = get_shape_contour(drive_model, True, None, smooth=drive_model.smooth)
+        drive_polygon = Polygon(drive_contour)
+        min_x, min_y, max_x, max_y = drive_polygon.bounds
+        entire_window = (min_x, max_x, min_y, max_y)
+
+        for window in split_window(entire_window, 5, 5):
+            center_point = center_of_window(window)
+            if drive_polygon.contains(Point(*center_point)):
+                drive_polar = toExteriorPolarCoord(Point(*center_point), drive_contour, 1024)
+                for k in (2, 4, 8):
+                    driven_polar, center_distance, phi = compute_dual_gear(drive_polar, k)
+                    driven_contour = toCartesianCoordAsNp(driven_polar, center_distance, 0)
+                    driven_contour = np.array(rotate(driven_contour, phi[0], (center_distance, 0)))
+                    plotter.draw_contours(debugger.file_path(f'{drive_model_name}_k={k}.png'), [
+                        ('math_drive', toCartesianCoordAsNp(drive_polar, 0, 0)),
+                        ('math_driven', driven_contour)
+                    ], [(0, 0), (center_distance, 0)])
