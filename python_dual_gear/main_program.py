@@ -21,9 +21,11 @@ import traceback
 import util_functions
 import opt_groups
 import matplotlib.pyplot as plt
+import time
+import datetime
 
 # writing log to file
-logging.basicConfig(filename='debug\\info.log', level=logging.INFO)
+logging.basicConfig(filename='debug\\info.log', level=logging.ERROR)
 logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 logger = logging.getLogger(__name__)
 
@@ -65,7 +67,7 @@ def rotate_and_carve(cart_drive, center, center_distance, debugger, drive_model,
 
 
 def optimize_center(cart_input_drive, cart_input_driven, debugger, opt_config, plotter, k=1):
-    debug_suite = DebuggingSuite(debugger, plotter, plt.figure(figsize=(16, 9)))
+    debug_suite = DebuggingSuite(debugger, None, None)
     results = sampling_optimization(cart_input_drive, cart_input_driven, opt_config['sampling_count'],
                                     opt_config['keep_count'], opt_config['resampling_accuracy'],
                                     opt_config['max_sample_depth'], debug_suite, opt_config['torque_weight'], k=k,
@@ -113,8 +115,9 @@ def add_teeth(center, center_distance, debugger, drive, drive_model, plotter):
 def get_inputs(debugger, drive_model, driven_model, plotter):
     cart_drive = shape_factory.get_shape_contour(drive_model, uniform=True, plots=None)
     cart_driven = shape_factory.get_shape_contour(driven_model, uniform=True, plots=None)
-    plotter.draw_contours(debugger.file_path('input_drive.png'), [('input_drive', cart_drive)], None)
-    plotter.draw_contours(debugger.file_path('input_driven.png'), [('input_driven', cart_driven)], None)
+    if plotter is not None:
+        plotter.draw_contours(debugger.file_path('input_drive.png'), [('input_drive', cart_drive)], None)
+        plotter.draw_contours(debugger.file_path('input_driven.png'), [('input_driven', cart_driven)], None)
     logging.debug('original 3D meshes generated')
     return cart_drive, cart_driven
 
@@ -157,11 +160,14 @@ def main_stage_one(drive_model: Model, driven_model: Model, do_math_cut=True, ma
     logger.info(f'Optimizing {drive_model.name} with {driven_model.name}')
 
     # get input polygons
-    cart_input_drive, cart_input_driven = get_inputs(debugger, drive_model, driven_model, plotter)
+    cart_input_drive, cart_input_driven = get_inputs(debugger, drive_model, driven_model, None)
 
     # optimization
     center, center_distance, cart_drive, score = optimize_center(cart_input_drive, cart_input_driven, debugger,
-                                                                 opt_config, plotter, k=k)
+                                                                 opt_config, None, k=k)
+    with open(debugger.file_path('end_time.txt'), 'w') as file:
+        print('process finished at', datetime.datetime.fromtimestamp(time.time()).strftime(f'%Y-%m-%d_%H-%M-%S'),
+              file=file)
     return score
 
 
