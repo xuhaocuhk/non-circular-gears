@@ -129,7 +129,7 @@ if __name__ == '__main__':
         min_x, min_y, max_x, max_y = drive_polygon.bounds
         entire_window = (min_x, max_x, min_y, max_y)
 
-        for window in split_window(entire_window, 5, 5):
+        for index, window in enumerate(split_window(entire_window, 5, 5)):
             center_point = center_of_window(window)
             if drive_polygon.contains(Point(*center_point)):
                 drive_polar = toExteriorPolarCoord(Point(*center_point), drive_contour, 1024)
@@ -137,7 +137,7 @@ if __name__ == '__main__':
                     driven_polar, center_distance, phi = compute_dual_gear(drive_polar, k)
                     driven_contour = toCartesianCoordAsNp(driven_polar, center_distance, 0)
                     driven_contour = np.array(rotate(driven_contour, phi[0], (center_distance, 0)))
-                    plotter.draw_contours(debugger.file_path(f'{drive_model.name}_k={k}.png'), [
+                    plotter.draw_contours(debugger.file_path(f'{drive_model.name}_{index}_k={k}.png'), [
                         ('math_drive', toCartesianCoordAsNp(drive_polar, 0, 0)),
                         ('math_driven', driven_contour)
                     ], [(0, 0), (center_distance, 0)])
