@@ -204,8 +204,9 @@ def sample_in_windows(drive_contour: np.ndarray, driven_contour: np.ndarray,
 
 def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray, sampling_count: int, keep_count: int,
                           sampling_accuracy: int, iteration_count: int, debugging_suite: DebuggingSuite,
-                          torque_weight: float = 0.0, k: int = 1) -> List[Tuple[float, Polar_T]]:
-    logger.info(f'Initiating Sampling Optimization with torque_weight = {torque_weight}')
+                          torque_weight: float = 0.0, k: int = 1, mismatch_penalty=0.5) -> List[Tuple[float, Polar_T]]:
+    logger.info(f'Initiating Sampling Optimization with torque_weight = {torque_weight},'
+                f' mismatch_penalty = {mismatch_penalty}')
     logger.info(f'k={k}')
     drive_polygon = Polygon(drive_contour)
     driven_polygon = Polygon(driven_contour)
@@ -227,8 +228,9 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
         ]))
         results = sample_in_windows(drive_contour, driven_contour, window_pairs, keep_count,
                                     debugging_suite.sub_suite(os.path.join(path, 'result_')),
-                                    sampling_accuracy=sampling_accuracy, torque_weight=torque_weight, k=k)
-        window_pairs = [(drive_window, driven_window) for _, drive_window, driven_window, __ in results]
+                                    sampling_accuracy=sampling_accuracy, torque_weight=torque_weight, k=k,
+                                    mismatch_penalty=mismatch_penalty)
+        window_pairs = [(drive_window, driven_window) for _, drive_window, driven_window, *__ in results]
         if debugging_suite.plotter is not None:
             for index, final_result in enumerate(results):
                 score, *_, reconstructed_drive, max_phi, m_penalty = final_result
