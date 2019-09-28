@@ -108,13 +108,15 @@ def save_information(filename: str, center_drive: Point_T, center_driven: Point_
         print(f'center_driven={center_driven}', file=file)
         print(f'distance={distance}', file=file)
         for key, value in kwargs.items():
-            print(f'{key}={value}', file=file)
+            if value is not None:
+                print(f'{key}={value}', file=file)
 
 
 def sample_in_windows(drive_contour: np.ndarray, driven_contour: np.ndarray,
                       window_pairs: List[Tuple[Window_T, Window_T]], keep_count: int,
                       debugging_suite: DebuggingSuite, k: int = 1, center_determine_function=center_of_window,
-                      sampling_accuracy=1024, torque_weight=0.0) -> List[Tuple[float, Window_T, Window_T, Polar_T]]:
+                      sampling_accuracy=1024, torque_weight=0.0, mismatch_penalty: float = 0.5) \
+        -> List[Tuple[float, Window_T, Window_T, Polar_T, float, float]]:
     """
     find the best sample windows
     :param drive_contour: the drive contour
@@ -126,7 +128,8 @@ def sample_in_windows(drive_contour: np.ndarray, driven_contour: np.ndarray,
     :param center_determine_function: function to determine from window to center
     :param sampling_accuracy: number of samples when converting to polar contour
     :param torque_weight: weight of torque term
-    :return: list of (score, drive_window, driven_window, reconstructed_drive)
+    :param mismatch_penalty: penalty for the extended d_driven not matching start and end (only for k>1)
+    :return: list of (score, drive_window, driven_window, reconstructed_drive, max_phi, mismatch_penalty)
     """
     results = []
     path_prefix = debugging_suite.path_prefix  # store in a directory
@@ -150,8 +153,13 @@ def sample_in_windows(drive_contour: np.ndarray, driven_contour: np.ndarray,
         list_reconstructed_drive = list(reconstructed_drive)
         max_phi = max(differentiate_function(pre_process(compute_dual_gear(list_reconstructed_drive)[-1])))
         final_score = distance + torque_weight * max_phi
+        m_penalty = None
+        if k != 1:
+            m_penalty = mismatch_penalty * abs(d_driven[0] - d_driven[-1])
+            logger.info(f'{index} gear: mismatching start = {d_driven[0]}, end = {d_driven[-1]}, penalized {m_penalty}')
+            final_score += m_penalty
         logging.info(f'{index} gear: plain score={distance}, max of phi\'={max_phi}')
-        results.append((final_score, drive_window, driven_window, list_reconstructed_drive))
+        results.append((final_score, drive_window, driven_window, list_reconstructed_drive, max_phi, m_penalty))
         if subplots is not None:
             update_polygon_subplots(drive_contour, driven_contour, subplots[0])  # clear sample regions
             reconstructed_driven, *_ = compute_dual_gear(list_reconstructed_drive, k)
@@ -172,8 +180,7 @@ def sample_in_windows(drive_contour: np.ndarray, driven_contour: np.ndarray,
             save_contour(path_prefix + f'{index}_drive.dat', reconstructed_drive_contour)
             save_contour(path_prefix + f'{index}_driven.dat', reconstructed_driven_contour)
             save_information(path_prefix + f'{index}.txt', center_drive, center_driven, final_score,
-                             max_dphi_drive=max_phi,
-                             actual_distance=distance)
+                             max_dphi_drive=max_phi, actual_distance=distance, mismatch_penalty=m_penalty)
 
             # get information about thee phi' functions
             original_figure = plt.gcf()
@@ -224,7 +231,7 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
         window_pairs = [(drive_window, driven_window) for _, drive_window, driven_window, __ in results]
         if debugging_suite.plotter is not None:
             for index, final_result in enumerate(results):
-                score, *_, reconstructed_drive = final_result
+                score, *_, reconstructed_drive, max_phi, m_penalty = final_result
                 driven, center_distance, phi = compute_dual_gear(reconstructed_drive, k)
                 final_drive = toCartesianCoordAsNp(reconstructed_drive, 0, 0)
                 final_driven = np.array(
@@ -239,7 +246,8 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
                 d_drive = differentiate_function(pre_process(phi))
                 save_information(os.path.join(path, f'final_result_{index}.txt'), (0, 0), (center_distance, 0), score,
                                  max_dphi_drive=max(d_drive),
-                                 actual_distance=score - torque_weight * max(d_drive))
+                                 actual_distance=score - torque_weight * max_phi,
+                                 mismatch_penalty=m_penalty)
 
     results = results[:keep_count]
     results.sort(key=lambda dist, *_: dist)

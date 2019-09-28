@@ -8,3 +8,4 @@ sampling_count:
   - 3
   - 3
 torque_weight: 0
+mismatch_penalty: 0.5
