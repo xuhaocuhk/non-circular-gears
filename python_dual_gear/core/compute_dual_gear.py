@@ -7,6 +7,7 @@ from typing import Tuple, Optional, Union, List
 from plot.qt_plot import Plotter
 import util_functions
 import logging
+import matplotlib.pyplot as plt
 from time import perf_counter_ns
 
 logger = logging.getLogger(__name__)
@@ -118,9 +119,9 @@ def rotate_and_cut(drive_polygon: Polygon, center_distance, phi, k=1, debugger: 
         _drive_polygon = rotate(drive_polygon, angle_sum, use_radians=True, origin=(0, 0))
         driven_polygon = rotate(driven_polygon, angle, use_radians=True, origin=(center_distance, 0))
         driven_polygon = driven_polygon.difference(_drive_polygon)
-        _plot_polygon((_drive_polygon, driven_polygon), plot_x_range + plot_y_range)
-        plt.scatter((0, center_distance), (0, 0), s=100, c='b')
         if debugger is not None and index % save_rate == 0:
+            _plot_polygon((_drive_polygon, driven_polygon), plot_x_range + plot_y_range)
+            plt.scatter((0, center_distance), (0, 0), s=100, c='b')
             file_path = os.path.join(debugger.get_cutting_debug_dir_name(), f'before_cut_{index // save_rate}.png')
             if plotter is None:
                 fig.savefig(file_path)

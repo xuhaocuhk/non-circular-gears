@@ -105,19 +105,21 @@ def add_teeth(center, center_distance, debugger, drive, drive_model, plotter):
                               tooth_num=drive_model.tooth_num,
                               plt_axis=None, consider_driving_torque=False,
                               consider_driving_continue=False)
-    plotter.draw_contours(debugger.file_path('drive_with_teeth_before.png'), [('input_driven', drive)], None)
+    if plotter is not None:
+        plotter.draw_contours(debugger.file_path('drive_with_teeth_before.png'), [('input_driven', drive)], None)
 
     drive = Polygon(drive).buffer(0).simplify(0.000)
     if drive.geom_type == 'MultiPolygon':
         drive = max(drive, key=lambda a: a.area)
     drive = np.array(drive.exterior.coords)
-    plotter.draw_contours(debugger.file_path('drive_with_teeth.png'), [('input_driven', drive)], None)
+    if plotter is not None:
+        plotter.draw_contours(debugger.file_path('drive_with_teeth.png'), [('input_driven', drive)], None)
     return drive
 
 
-def get_inputs(debugger, drive_model, driven_model, plotter):
-    cart_drive = shape_factory.get_shape_contour(drive_model, uniform=True, plots=None)
-    cart_driven = shape_factory.get_shape_contour(driven_model, uniform=True, plots=None)
+def get_inputs(debugger, drive_model, driven_model, plotter, uniform=True):
+    cart_drive = shape_factory.get_shape_contour(drive_model, uniform=uniform, plots=None)
+    cart_driven = shape_factory.get_shape_contour(driven_model, uniform=uniform, plots=None)
     if plotter is not None:
         plotter.draw_contours(debugger.file_path('input_drive.png'), [('input_drive', cart_drive)], None)
         plotter.draw_contours(debugger.file_path('input_driven.png'), [('input_driven', cart_driven)], None)
@@ -162,11 +164,11 @@ def main_stage_one(drive_model: Model, driven_model: Model, do_math_cut=True, ma
     debugger, opt_config, plotter = init((drive_model, driven_model), opt_config)
     logger.info(f'Optimizing {drive_model.name} with {driven_model.name}')
 
-    start_time = perf_counter_ns()
-
     # get input polygons
-    cart_input_drive, cart_input_driven = get_inputs(debugger, drive_model, driven_model, None)
+    cart_input_drive, cart_input_driven = get_inputs(debugger, drive_model, driven_model, None, uniform=False)
     counts = cart_input_drive.shape[0], cart_input_driven.shape[0]
+    start_time = perf_counter_ns()
+    cart_input_drive, cart_input_driven = get_inputs(debugger, drive_model, driven_model, None, uniform=True)
     pre_processing = perf_counter_ns()
 
     # optimization
@@ -174,11 +176,11 @@ def main_stage_one(drive_model: Model, driven_model: Model, do_math_cut=True, ma
                                                                  opt_config, None, k=k)
     optimization = perf_counter_ns()
 
-    cart_drive = add_teeth((0, 0), center_distance, debugger, cart_input_drive, drive_model, plotter)
+    cart_drive = add_teeth((0, 0), center_distance, debugger, cart_drive, drive_model, None)
 
     # rotate and cut
     *_, phi = compute_dual_gear(toExteriorPolarCoord(Point(0, 0), cart_drive, 1024), k)
-    cart_driven_gear = rotate_and_carve(cart_drive, (0, 0), center_distance, debugger, drive_model, phi, plotter,
+    cart_driven_gear = rotate_and_carve(cart_drive, (0, 0), center_distance, debugger, drive_model, phi, None,
                                         replay_anim=False, save_anim=False)
     rotate_and_cut = perf_counter_ns()
 
@@ -190,6 +192,7 @@ def main_stage_one(drive_model: Model, driven_model: Model, do_math_cut=True, ma
             'counts': counts,
             'follower': cart_driven_gear.shape[0]
         }
+        print('\n'.join([f'{key}:{value}' for key, value in data.items()]), file=file)
     return score
 
 
