@@ -6,7 +6,10 @@ import os
 from typing import Tuple, Optional, Union, List
 from plot.qt_plot import Plotter
 import util_functions
-import matplotlib.pyplot as plt
+import logging
+from time import perf_counter_ns
+
+logger = logging.getLogger(__name__)
 
 
 def compute_dual_gear(x: List[float], k: int = 1) -> Tuple[List[float], float, List[float]]:
@@ -34,6 +37,8 @@ def compute_dual_gear(x: List[float], k: int = 1) -> Tuple[List[float], float, L
         return final_phi - target_final_phi
 
     # find the center distance
+    # set logger level to debug to get the performance data
+    logger.debug(f'Dual Gear Computation start at {perf_counter_ns()}')
     assert final_phi_bias(bound_left) * final_phi_bias(bound_right) < 0
     for i in range(iteration_bound):
         bound_middle = (bound_left + bound_right) / 2
@@ -43,22 +48,26 @@ def compute_dual_gear(x: List[float], k: int = 1) -> Tuple[List[float], float, L
             bound_left = bound_middle
     center_distance = (bound_left + bound_right) / 2
     assert isclose(bound_left, bound_right, rel_tol=float_tolerance)
+    logger.debug(f'center distance ready at {perf_counter_ns()}')
 
     # sum up to get phi
     phi = cumulative_sum([delta_alpha * xi / (center_distance - xi) for xi in x])
     assert isclose(phi[-1], target_final_phi, rel_tol=float_tolerance)
     phi = [0] + phi[:-1]  # convert to our convention
+    logger.debug(f'phi ready at {perf_counter_ns()}')
 
     # calculate the inverse function of phi
     uniform_k_value_points = np.linspace(0, target_final_phi, n + 1, endpoint=True)  # final point for simplicity
     phi_inv = np.interp(uniform_k_value_points, phi + [target_final_phi], np.linspace(0, 2 * pi, n + 1, endpoint=True))
     assert isclose(phi_inv[0], 0, rel_tol=float_tolerance)
+    logger.debug(f'inverse phi ready at {perf_counter_ns()}')
 
     # calculate the driven gear curve
     phi_inv = phi_inv[::-1]  # flip phi_inv
     y = [center_distance - x_len for x_len in np.interp(phi_inv, np.linspace(0, 2 * pi, n + 1, True), x + [x[0]])]
     y = y[:-1]  # drop the last one
     assert len(y) == len(phi)
+    logger.debug(f'driven curve finish at {perf_counter_ns()}')
 
     # duplicate to a full cycle
     original_phi = np.array(phi)
@@ -72,6 +81,7 @@ def compute_dual_gear(x: List[float], k: int = 1) -> Tuple[List[float], float, L
 
     # necessary transform for normalization
     phi = (-phi - pi) % (2 * pi)  # negate rotation direction and have pi initial phase
+    logger.debug(f'other things finish at {perf_counter_ns()}')
     return list(y), center_distance, list(phi)
 
 
