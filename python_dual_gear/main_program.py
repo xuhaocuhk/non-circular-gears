@@ -23,6 +23,7 @@ import opt_groups
 import matplotlib.pyplot as plt
 import time
 import datetime
+from time import perf_counter_ns
 
 # writing log to file
 logging.basicConfig(filename='debug\\info.log', level=logging.ERROR)
@@ -161,15 +162,34 @@ def main_stage_one(drive_model: Model, driven_model: Model, do_math_cut=True, ma
     debugger, opt_config, plotter = init((drive_model, driven_model), opt_config)
     logger.info(f'Optimizing {drive_model.name} with {driven_model.name}')
 
+    start_time = perf_counter_ns()
+
     # get input polygons
     cart_input_drive, cart_input_driven = get_inputs(debugger, drive_model, driven_model, None)
+    counts = cart_input_drive.shape[0], cart_input_driven.shape[0]
+    pre_processing = perf_counter_ns()
 
     # optimization
     center, center_distance, cart_drive, score = optimize_center(cart_input_drive, cart_input_driven, debugger,
                                                                  opt_config, None, k=k)
-    with open(debugger.file_path('end_time.txt'), 'w') as file:
-        print('process finished at', datetime.datetime.fromtimestamp(time.time()).strftime(f'%Y-%m-%d_%H-%M-%S'),
-              file=file)
+    optimization = perf_counter_ns()
+
+    cart_drive = add_teeth((0, 0), center_distance, debugger, cart_input_drive, drive_model, plotter)
+
+    # rotate and cut
+    *_, phi = compute_dual_gear(toExteriorPolarCoord(Point(0, 0), cart_drive, 1024), k)
+    cart_driven_gear = rotate_and_carve(cart_drive, (0, 0), center_distance, debugger, drive_model, phi, plotter,
+                                        replay_anim=False, save_anim=False)
+    rotate_and_cut = perf_counter_ns()
+
+    with open(debugger.file_path('timing_and_statistics.txt'), 'w') as file:
+        data = {
+            'pre_processing': pre_processing - start_time,
+            'optimization': optimization - pre_processing,
+            'rotate_and_cut': rotate_and_cut - optimization,
+            'counts': counts,
+            'follower': cart_driven_gear.shape[0]
+        }
     return score
 
 
@@ -315,5 +335,6 @@ if __name__ == '__main__':
         (find_model_by_name('butterfly'), find_model_by_name('fighter')),
         (find_model_by_name('guo'), find_model_by_name('shoes'))
     ]
-    print(final_results)
+    for drive, driven in final_results:
+        main_stage_one(drive, driven)
     # main_stage_one(retrieve_model_from_folder('human', 'bell'), retrieve_model_from_folder('human', 'candy'), k=2)
