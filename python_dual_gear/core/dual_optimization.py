@@ -184,8 +184,7 @@ def sample_in_windows(drive_contour: np.ndarray, driven_contour: np.ndarray,
 
             # get information about thee phi' functions
             original_figure = plt.gcf()
-            plt.figure(figsize=(16, 16))
-            figure, new_subplots = plt.subplots(2, 2)
+            figure, new_subplots = plt.subplots(2, 2, figsize=(16, 16))
             new_subplots[0][0].plot(np.linspace(0, 2 * math.pi, len(d_drive), endpoint=False), d_drive)
             new_subplots[0][1].plot(np.linspace(0, 2 * math.pi, len(d_driven), endpoint=False), d_driven)
             new_subplots[1][0].plot(np.linspace(0, 2 * math.pi, len(d_drive), endpoint=False),
