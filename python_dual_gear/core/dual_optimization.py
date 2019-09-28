@@ -195,7 +195,7 @@ def sample_in_windows(drive_contour: np.ndarray, driven_contour: np.ndarray,
                                         extend_part(d_driven, 0, int(len(d_driven) / k), len(d_drive)))
             plt.axis('equal')
             plt.savefig(path_prefix + f'{index}_functions.png')
-            plt.close(figure)
+            plt.close()
             plt.figure(original_figure.number)
     results.sort(key=lambda dist, *_: dist)
     return results[:keep_count]
