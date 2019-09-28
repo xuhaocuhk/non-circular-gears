@@ -118,12 +118,12 @@ if __name__ == '__main__':
     from core.dual_optimization import split_window, center_of_window
     from plot.plot_sampled_function import rotate
     from debug_util import MyDebugger
+    from main_program import retrieve_model_from_folder
 
-    interested_models = ['heart', 'drop', 'boy']
+    interested_models = [retrieve_model_from_folder('human', 'bell')]
     plotter = Plotter()
     debugger = MyDebugger('higher_k_test')
-    for drive_model_name in interested_models:
-        drive_model = find_model_by_name(drive_model_name)
+    for drive_model in interested_models:
         drive_contour = get_shape_contour(drive_model, True, None, smooth=drive_model.smooth)
         drive_polygon = Polygon(drive_contour)
         min_x, min_y, max_x, max_y = drive_polygon.bounds
@@ -137,7 +137,7 @@ if __name__ == '__main__':
                     driven_polar, center_distance, phi = compute_dual_gear(drive_polar, k)
                     driven_contour = toCartesianCoordAsNp(driven_polar, center_distance, 0)
                     driven_contour = np.array(rotate(driven_contour, phi[0], (center_distance, 0)))
-                    plotter.draw_contours(debugger.file_path(f'{drive_model_name}_k={k}.png'), [
+                    plotter.draw_contours(debugger.file_path(f'{drive_model.name}_k={k}.png'), [
                         ('math_drive', toCartesianCoordAsNp(drive_polar, 0, 0)),
                         ('math_driven', driven_contour)
                     ], [(0, 0), (center_distance, 0)])
