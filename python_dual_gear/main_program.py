@@ -68,7 +68,8 @@ def optimize_center(cart_input_drive, cart_input_driven, debugger, opt_config, p
     debug_suite = DebuggingSuite(debugger, plotter, plt.figure(figsize=(16, 9)))
     results = sampling_optimization(cart_input_drive, cart_input_driven, opt_config['sampling_count'],
                                     opt_config['keep_count'], opt_config['resampling_accuracy'],
-                                    opt_config['max_sample_depth'], debug_suite, opt_config['torque_weight'], k=k)
+                                    opt_config['max_sample_depth'], debug_suite, opt_config['torque_weight'], k=k,
+                                    mismatch_penalty=opt_config['mismatch_penalty'])
     results.sort(key=lambda total_score, *_: total_score)
     best_result = results[0]
     logging.info(f'Best result with score {best_result[0]}')
@@ -314,6 +315,6 @@ if __name__ == '__main__':
     #         optimize_pairs_in_folder(drive, driven)
     # gradual_average(find_model_by_name('fish'), find_model_by_name('butterfly'),
     #                 (0.586269239439921, 0.6331503727314829), (0.5490357715218726, 0.5500494966539466), 101)
-    main_stage_one(find_model_by_name('square'), find_model_by_name('ellipse'), k=2)
+    main_stage_one(retrieve_model_from_folder('human', 'bell'), retrieve_model_from_folder('human', 'candy'), k=2)
     # main_stage_one(retrieve_model_from_folder('human', 'girl'), retrieve_model_from_folder('animal_fly', 'pengiun1'),
     #                False, False, True, True)
