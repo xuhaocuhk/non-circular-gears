@@ -254,7 +254,7 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
     results = results[:keep_count]
     results.sort(key=lambda dist, *_: dist)
     results = [(score, reconstructed_drive)
-               for score, drive_window, driven_window, reconstructed_drive in results]
+               for score, drive_window, driven_window, reconstructed_drive, max_phi, m_penalty in results]
     return results
 
 
