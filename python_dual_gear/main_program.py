@@ -80,6 +80,8 @@ def optimize_center(cart_input_drive, cart_input_driven, debugger, opt_config, p
     drive_contour = toCartesianCoordAsNp(polar_drive, 0, 0)
     driven_contour = toCartesianCoordAsNp(polar_driven, center_distance, 0)
     driven_contour = np.array(rotate(driven_contour, phi[0], (center_distance, 0)))
+    if plotter is None:
+        plotter = Plotter()
     plotter.draw_contours(debugger.file_path('optimize_result.png'),
                           [('carve_drive', drive_contour), ('carve_driven', driven_contour)],
                           [(0, 0), (center_distance, 0)])
