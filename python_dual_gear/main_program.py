@@ -1,5 +1,5 @@
 from debug_util import MyDebugger, DebuggingSuite
-from models import our_models, Model, find_model_by_name
+from models import our_models, Model, find_model_by_name, retrieve_models_from_folder, retrieve_model_from_folder
 from shape_processor import *
 from core.compute_dual_gear import compute_dual_gear, rotate_and_cut
 from shapely.affinity import translate
@@ -236,28 +236,6 @@ def optimize_pairs():
             traceback.print_stack()
 
 
-def retrieve_models_from_folder(folder_name):
-    assert os.path.isdir(folder_name)
-    return [Model(
-        name=f'({os.path.basename(folder_name)}){filename[:-4]}',
-        sample_num=1024,
-        center_point=(0, 0),
-        tooth_num=32,
-        tooth_height=0.05,
-        k=1,
-        smooth=0
-    ) for filename in os.listdir(folder_name) if '.txt' in filename]
-
-
-def retrieve_model_from_folder(folder_name, model_name):
-    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../silhouette/'))
-    models = retrieve_models_from_folder(os.path.join(base_dir, folder_name))
-    for model in models:
-        if model.name.endswith(model_name):
-            return model
-    return None
-
-
 def optimize_pairs_in_folder(source_folder, dest_folder):
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../silhouette/'))
     source_folder = os.path.join(base_dir, source_folder)
@@ -317,12 +295,7 @@ def gradual_average(drive_model: Model, driven_model: Model, drive_center: Tuple
 
 
 if __name__ == '__main__':
-    # with open('folders_to_optimize.txt', 'r') as file:
-    #     for line in file:
-    #         drive, driven = line.rstrip().split(',')
-    #         optimize_pairs_in_folder(drive, driven)
-    # gradual_average(find_model_by_name('fish'), find_model_by_name('butterfly'),
-    #                 (0.586269239439921, 0.6331503727314829), (0.5490357715218726, 0.5500494966539466), 101)
+    final_results = [
+        find_model_by_name('')
+    ]
     main_stage_one(retrieve_model_from_folder('human', 'bell'), retrieve_model_from_folder('human', 'candy'), k=2)
-    # main_stage_one(retrieve_model_from_folder('human', 'girl'), retrieve_model_from_folder('animal_fly', 'pengiun1'),
-    #                False, False, True, True)
