@@ -81,8 +81,6 @@ def optimize_center(cart_input_drive, cart_input_driven, debugger, opt_config, p
     drive_contour = toCartesianCoordAsNp(polar_drive, 0, 0)
     driven_contour = toCartesianCoordAsNp(polar_driven, center_distance, 0)
     driven_contour = np.array(rotate(driven_contour, phi[0], (center_distance, 0)))
-    if plotter is None:
-        plotter = Plotter()
     plotter.draw_contours(debugger.file_path('optimize_result.png'),
                           [('carve_drive', drive_contour), ('carve_driven', driven_contour)],
                           [(0, 0), (center_distance, 0)])
@@ -173,16 +171,21 @@ def main_stage_one(drive_model: Model, driven_model: Model, do_math_cut=True, ma
 
     # optimization
     center, center_distance, cart_drive, score = optimize_center(cart_input_drive, cart_input_driven, debugger,
-                                                                 opt_config, None, k=k)
+                                                                 opt_config, plotter, k=k)
     optimization = perf_counter_ns()
 
-    cart_drive = add_teeth((0, 0), center_distance, debugger, cart_drive, drive_model, None)
+    rotate_and_cut = 0
+    cart_driven_gear = np.array([0.0])
+    try:
+        cart_drive = add_teeth((0, 0), center_distance, debugger, cart_drive, drive_model, None)
 
-    # rotate and cut
-    *_, phi = compute_dual_gear(toExteriorPolarCoord(Point(0, 0), cart_drive, 1024), k)
-    cart_driven_gear = rotate_and_carve(cart_drive, (0, 0), center_distance, debugger, drive_model, phi, None,
-                                        replay_anim=False, save_anim=False)
-    rotate_and_cut = perf_counter_ns()
+        # rotate and cut
+        *_, phi = compute_dual_gear(toExteriorPolarCoord(Point(0, 0), cart_drive, 1024), k)
+        cart_driven_gear = rotate_and_carve(cart_drive, (0, 0), center_distance, debugger, drive_model, phi, None,
+                                            replay_anim=False, save_anim=False)
+        rotate_and_cut = perf_counter_ns()
+    except:
+        print(f'error in stage two for {drive_model.name}, {driven_model.name}')
 
     with open(debugger.file_path('timing_and_statistics.txt'), 'w') as file:
         data = {
@@ -339,5 +342,8 @@ if __name__ == '__main__':
         (find_model_by_name('guo'), find_model_by_name('shoes'))
     ]
     for drive, driven in final_results:
-        main_stage_one(drive, driven)
+        try:
+            main_stage_one(drive, driven)
+        except:
+            pass
     # main_stage_one(retrieve_model_from_folder('human', 'bell'), retrieve_model_from_folder('human', 'candy'), k=2)
