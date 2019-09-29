@@ -186,6 +186,7 @@ def main_stage_one(drive_model: Model, driven_model: Model, do_math_cut=True, ma
         rotate_and_cut = perf_counter_ns()
     except:
         print(f'error in stage two for {drive_model.name}, {driven_model.name}')
+        logger.error(f'stage two for {drive_model.name}, {driven_model.name}')
 
     with open(debugger.file_path('timing_and_statistics.txt'), 'w') as file:
         data = {
@@ -328,22 +329,22 @@ if __name__ == '__main__':
         (find_model_by_name('triangle'), find_model_by_name('qingtianwa')),
         (find_model_by_name('fish'), find_model_by_name('butterfly')),
         (find_model_by_name('heart'), find_model_by_name('heart')),
-        (find_model_by_name('human/hat'), find_model_by_name('human/trump')),
-        (find_model_by_name('human/girl'), find_model_by_name('human/hat')),
-        (find_model_by_name('countries/australia'), find_model_by_name('animal_land/koala')),
-        (find_model_by_name('human/boy'), find_model_by_name('human/girl')),
+        (find_model_by_name('hat'), find_model_by_name('trump')),
+        (find_model_by_name('girl'), find_model_by_name('hat')),
+        (find_model_by_name('australia'), find_model_by_name('koala')),
+        (find_model_by_name('boy'), find_model_by_name('girl')),
         (find_model_by_name('drop'), find_model_by_name('heart')),
-        (find_model_by_name('human/trump'), find_model_by_name('human/chicken_leg')),
-        (find_model_by_name('human/bell'), find_model_by_name('human/candy')),
-        (find_model_by_name('animal_fly/4dove'), find_model_by_name('animal_fly/4dove')),
-        (find_model_by_name('animal_land/dog'), find_model_by_name('food/bond1')),
-        (find_model_by_name('animal_sea/3fish'), find_model_by_name('animal_sea/fish25')),
+        (find_model_by_name('trump'), find_model_by_name('chicken_leg')),
+        (find_model_by_name('bell'), find_model_by_name('human/candy')),
+        (find_model_by_name('dove'), find_model_by_name('dove')),
+        (find_model_by_name('dog'), find_model_by_name('food/bond1')),
+        (find_model_by_name('fishA'), find_model_by_name('fishB')),
         (find_model_by_name('butterfly'), find_model_by_name('fighter')),
-        (find_model_by_name('guo'), find_model_by_name('shoes'))
+        (find_model_by_name('pot'), find_model_by_name('shoes'))
     ]
     for drive, driven in final_results:
         try:
             main_stage_one(drive, driven)
         except:
-            pass
+            logger.error(f'Error for {drive.name}, {driven.name}')
     # main_stage_one(retrieve_model_from_folder('human', 'bell'), retrieve_model_from_folder('human', 'candy'), k=2)
