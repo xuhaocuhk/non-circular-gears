@@ -54,10 +54,10 @@ def math_cut(drive_model: Model, cart_drive: np.ndarray, debugger: MyDebugger, p
 
 
 def rotate_and_carve(cart_drive, center, center_distance, debugger, drive_model, phi, plotter, replay_anim=False,
-                     save_anim=False):
+                     save_anim=False, k=1):
     centered_drive = cart_drive - center
     poly_drive_gear = Polygon(centered_drive).buffer(0)
-    poly_driven_gear, cut_fig, subplot = rotate_and_cut(poly_drive_gear, center_distance, phi, k=drive_model.k,
+    poly_driven_gear, cut_fig, subplot = rotate_and_cut(poly_drive_gear, center_distance, phi, k=k,
                                                         debugger=debugger if save_anim else None,
                                                         replay_animation=replay_anim, plotter=plotter)
     poly_driven_gear = translate(poly_driven_gear, center_distance).buffer(0).simplify(1e-5)  # as in generate_gear
@@ -222,12 +222,15 @@ def main_stage_two():
     # model_name = "starfish"
     # dir_path = r"E:\OneDrive - The Chinese University of Hong Kong\research_PhD\non-circular-gear\basic_results\finalist\triangle_qingtianwa\iteration_2\final_result_0_drive.dat"
     # model_name = "triangle"
-    dir_path = r"E:\OneDrive - The Chinese University of Hong Kong\research_PhD\non-circular-gear\basic_results\finalist\trump_chicken_leg\iteration_2\final_result_0_drive.dat"
-    model_name = "trump"
+    # dir_path = r"E:\OneDrive - The Chinese University of Hong Kong\research_PhD\non-circular-gear\basic_results\finalist\trump_chicken_leg\iteration_2\final_result_0_drive.dat"
+    # model_name = "trump"
     # dir_path = r"E:\OneDrive - The Chinese University of Hong Kong\research_PhD\non-circular-gear\basic_results\finalist\butterfly_fighter\iteration_2\final_result_0_drive.dat"
     # model_name = "butterfly"
     # dir_path = r"E:\OneDrive - The Chinese University of Hong Kong\research_PhD\non-circular-gear\basic_results\finalist\boy_girl\iteration_2\final_result_0_drive.dat"
     # model_name = "boy"
+    dir_path = r'C:\Projects\gears\python_dual_gear\debug\2019-09-30_19-23-20_bell_(human)candy\optimized_drive.dat'
+    model_name = 'bell'
+    k = 2
 
     drive_model = find_model_by_name(model_name)
     drive_model.center_point = (0, 0)
@@ -239,17 +242,22 @@ def main_stage_two():
     cart_input_drive = shape_factory.uniform_and_smooth(cart_input_drive, drive_model)
 
     # math cutting
-    center_distance, phi, polar_math_drive, polar_math_driven = math_cut(drive_model=drive_model,
-                                                                         cart_drive=cart_input_drive,
-                                                                         debugger=debugger, plotter=plotter,
-                                                                         animation=True)
+    # center_distance, phi, polar_math_drive, polar_math_driven = math_cut(drive_model=drive_model,
+    #                                                                      cart_drive=cart_input_drive,
+    #                                                                      debugger=debugger, plotter=plotter,
+    #                                                                      animation=True)
 
+    start_time = perf_counter_ns()
+    *_, center_distance, phi = compute_dual_gear(toExteriorPolarCoord(Point(0, 0), cart_input_drive, 1024), k)
     # add teeth
     cart_drive = add_teeth((0, 0), center_distance, debugger, cart_input_drive, drive_model, plotter)
 
     # rotate and cut
-    cart_driven_gear = rotate_and_carve(cart_drive, (0, 0), center_distance, debugger, drive_model, phi, plotter,
+    cart_driven_gear = rotate_and_carve(cart_drive, (0, 0), center_distance, debugger, drive_model, phi, None, k=k,
                                         replay_anim=False, save_anim=False)
+    rotate_and_cut = perf_counter_ns()
+    print('rotate_and_carve done in' + str(rotate_and_cut - start_time))
+    print('count of follower:' + str(cart_driven_gear.shape[0]))
 
     # save 2D contour
     fabrication.generate_2d_obj(debugger, 'drive_2d_(0,0).obj', cart_drive)
@@ -341,16 +349,17 @@ if __name__ == '__main__':
         # (find_model_by_name('boy'), find_model_by_name('girl')),
         # (find_model_by_name('drop'), find_model_by_name('heart')),
         # (find_model_by_name('trump'), find_model_by_name('chicken_leg')),
-        # (find_model_by_name('bell'), find_model_by_name('human/candy')),
+        (find_model_by_name('bell'), find_model_by_name('human/candy')),
         # (find_model_by_name('dove'), find_model_by_name('dove')),
-        (find_model_by_name('dog'), find_model_by_name('food/bond1')),
-        (find_model_by_name('fishA'), find_model_by_name('animal_sea/fishB')),
-        (find_model_by_name('butterfly'), find_model_by_name('fighter')),
-        (find_model_by_name('pot'), find_model_by_name('shoes'))
+        # (find_model_by_name('dog'), find_model_by_name('food/bond1')),
+        # (find_model_by_name('fishA'), find_model_by_name('animal_sea/fishB')),
+        # (find_model_by_name('butterfly'), find_model_by_name('fighter')),
+        # (find_model_by_name('pot'), find_model_by_name('shoes'))
     ]
-    for drive, driven in final_results:
-        try:
-            main_stage_one(drive, driven)
-        except:
-            logger.error(f'Error for {drive.name}, {driven.name}')
+    # for drive, driven in final_results:
+    #     try:
+    #         main_stage_one(drive, driven, k=1)
+    #     except:
+    #         logger.error(f'Error for {drive.name}, {driven.name}')
+    main_stage_two()
     # main_stage_one(retrieve_model_from_folder('human', 'bell'), retrieve_model_from_folder('human', 'candy'), k=2)
