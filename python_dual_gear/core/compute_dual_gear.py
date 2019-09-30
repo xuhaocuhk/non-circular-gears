@@ -8,6 +8,7 @@ from plot.qt_plot import Plotter
 import util_functions
 import logging
 from time import perf_counter_ns
+import matplotlib.pyplot as plt
 
 logger = logging.getLogger(__name__)
 # logger.setLevel(logging.DEBUG)  # set logger level to debug to get the performance data
