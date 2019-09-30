@@ -161,17 +161,22 @@ def main_stage_one(drive_model: Model, driven_model: Model, do_math_cut=True, ma
     opt_config = os.path.join(os.path.dirname(__file__), opt_config)
     debugger, opt_config, plotter = init((drive_model, driven_model), opt_config)
     logger.info(f'Optimizing {drive_model.name} with {driven_model.name}')
+    plt.close('all')
+    character_str = f'{drive_model.name}, {driven_model.name}'
+    print('starting' + character_str)
 
     # get input polygons
     cart_input_drive, cart_input_driven = get_inputs(debugger, drive_model, driven_model, None, uniform=False)
     counts = cart_input_drive.shape[0], cart_input_driven.shape[0]
     start_time = perf_counter_ns()
     cart_input_drive, cart_input_driven = get_inputs(debugger, drive_model, driven_model, None, uniform=True)
+    print('pre-processing done for ' + character_str)
     pre_processing = perf_counter_ns()
 
     # optimization
     center, center_distance, cart_drive, score = optimize_center(cart_input_drive, cart_input_driven, debugger,
                                                                  opt_config, plotter, k=k)
+    print('optimization done for ' + character_str)
     optimization = perf_counter_ns()
 
     rotate_and_cut = 0
@@ -183,6 +188,7 @@ def main_stage_one(drive_model: Model, driven_model: Model, do_math_cut=True, ma
         *_, phi = compute_dual_gear(toExteriorPolarCoord(Point(0, 0), cart_drive, 1024), k)
         cart_driven_gear = rotate_and_carve(cart_drive, (0, 0), center_distance, debugger, drive_model, phi, None,
                                             replay_anim=False, save_anim=False)
+        print('rotate_and_carve done for ' + character_str)
         rotate_and_cut = perf_counter_ns()
     except:
         print(f'error in stage two for {drive_model.name}, {driven_model.name}')
@@ -323,22 +329,22 @@ def gradual_average(drive_model: Model, driven_model: Model, drive_center: Tuple
 
 if __name__ == '__main__':
     final_results = [
-        (find_model_by_name('square'), find_model_by_name('square')),
-        (find_model_by_name('ellipse'), find_model_by_name('ellipse')),
-        (find_model_by_name('starfish'), find_model_by_name('starfish')),
-        (find_model_by_name('triangle'), find_model_by_name('qingtianwa')),
-        (find_model_by_name('fish'), find_model_by_name('butterfly')),
-        (find_model_by_name('heart'), find_model_by_name('heart')),
-        (find_model_by_name('hat'), find_model_by_name('trump')),
-        (find_model_by_name('girl'), find_model_by_name('hat')),
-        (find_model_by_name('australia'), find_model_by_name('koala')),
-        (find_model_by_name('boy'), find_model_by_name('girl')),
-        (find_model_by_name('drop'), find_model_by_name('heart')),
-        (find_model_by_name('trump'), find_model_by_name('chicken_leg')),
-        (find_model_by_name('bell'), find_model_by_name('human/candy')),
-        (find_model_by_name('dove'), find_model_by_name('dove')),
+        # (find_model_by_name('square'), find_model_by_name('square')),
+        # (find_model_by_name('ellipse'), find_model_by_name('ellipse')),
+        # (find_model_by_name('starfish'), find_model_by_name('starfish')),
+        # (find_model_by_name('triangle'), find_model_by_name('qingtianwa')),
+        # (find_model_by_name('fish'), find_model_by_name('butterfly')),
+        # (find_model_by_name('heart'), find_model_by_name('heart')),
+        # (find_model_by_name('hat'), find_model_by_name('trump')),
+        # (find_model_by_name('girl'), find_model_by_name('hat')),
+        # (find_model_by_name('australia'), find_model_by_name('koala')),
+        # (find_model_by_name('boy'), find_model_by_name('girl')),
+        # (find_model_by_name('drop'), find_model_by_name('heart')),
+        # (find_model_by_name('trump'), find_model_by_name('chicken_leg')),
+        # (find_model_by_name('bell'), find_model_by_name('human/candy')),
+        # (find_model_by_name('dove'), find_model_by_name('dove')),
         (find_model_by_name('dog'), find_model_by_name('food/bond1')),
-        (find_model_by_name('fishA'), find_model_by_name('fishB')),
+        (find_model_by_name('fishA'), find_model_by_name('animal_sea/fishB')),
         (find_model_by_name('butterfly'), find_model_by_name('fighter')),
         (find_model_by_name('pot'), find_model_by_name('shoes'))
     ]
