@@ -29,8 +29,8 @@ logger = logging.getLogger(__name__)
 
 
 def math_cut(drive_model: Model, cart_drive: np.ndarray, debugger: MyDebugger, plotter: Optional[Plotter],
-             animation=False):
-    center = drive_model.center_point
+             animation=False, center_point: Optional[Tuple[float, float]] = None):
+    center = center_point or drive_model.center_point
     polar_math_drive = toExteriorPolarCoord(Point(center[0], center[1]), cart_drive, drive_model.sample_num)
     polar_math_driven, center_distance, phi = compute_dual_gear(polar_math_drive, k=drive_model.k)
 
@@ -44,9 +44,15 @@ def math_cut(drive_model: Model, cart_drive: np.ndarray, debugger: MyDebugger, p
                           [('math_drive', toCartesianCoordAsNp(polar_math_drive, 0, 0))], None)
     plotter.draw_contours(debugger.file_path('math_driven.png'),
                           [('math_driven', toCartesianCoordAsNp(polar_math_driven, 0, 0))], None)
+    plotter.draw_contours(debugger.file_path('math_results.png'), [
+        ('math_drive', toCartesianCoordAsNp(polar_math_drive, 0, 0)),
+        ('math_driven', np.array(
+            rotate(list(toCartesianCoordAsNp(polar_math_driven, center_distance, 0)), phi[0], (center_distance, 0))))
+    ], [(0, 0), (center_distance, 0)])
 
     logging.info('math rotate complete')
     logging.info(f'Center Distance = {center_distance}')
+
     return center_distance, phi, polar_math_drive, polar_math_driven
 
 
@@ -315,6 +321,15 @@ if __name__ == '__main__':
     #         optimize_pairs_in_folder(drive, driven)
     # gradual_average(find_model_by_name('fish'), find_model_by_name('butterfly'),
     #                 (0.586269239439921, 0.6331503727314829), (0.5490357715218726, 0.5500494966539466), 101)
-    main_stage_one(retrieve_model_from_folder('human', 'bell'), retrieve_model_from_folder('human', 'candy'), k=2)
+    # main_stage_one(retrieve_model_from_folder('human', 'bell'), retrieve_model_from_folder('human', 'candy'), k=2)
     # main_stage_one(retrieve_model_from_folder('human', 'girl'), retrieve_model_from_folder('animal_fly', 'pengiun1'),
     #                False, False, True, True)
+    from util_functions import read_contour
+
+    contour = read_contour(
+        r'C:\Users\kevin\Downloads\gears-4e23b0245663bcd9d84214baa25cb3ce18deb1b6\python_dual_gear\debug\2019-10-01_10-28-36_square_square\iteration_3\final_result_8_drive.dat')
+    center_point = (0.20838102019680055, -0.08593468127440144)
+    drive_model = find_model_by_name('square')
+    debugger = MyDebugger('square_square')
+    plotter = Plotter()
+    math_cut(drive_model, contour, debugger, plotter, True, center_point)
