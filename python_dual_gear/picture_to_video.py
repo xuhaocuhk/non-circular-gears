@@ -19,6 +19,8 @@ folder_name = 'png'
 prefix = ''
 # also attach a reversed version
 attach_reverse = True
+# replay
+replay_times = 0
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -56,6 +58,11 @@ for model in models:
         rev_img_array = deepcopy(img_array)[::-1]
         img_array = img_array + rev_img_array
         logger.info('reverse data attached')
+
+    if replay_times > 0:
+        unit_part = deepcopy(img_array)
+        for i in range(replay_times):
+            img_array += deepcopy(unit_part)
 
     out = cv2.VideoWriter(os.path.join(models_root_dir, video_name), cv2.VideoWriter_fourcc(*'mp4v'),
                           len(img_array) / video_length_sec, size)
