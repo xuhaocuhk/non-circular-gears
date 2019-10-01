@@ -13,7 +13,7 @@ def standard_deviation_distance(x: Collection[SupportsFloat], y: Collection[Supp
     :return: standard deviation
     """
     assert len(x) == len(y)
-    return math.sqrt(sum(((float(x_i) - float(y_i)) ** 2 for x_i, y_i in zip(x, y))) / len(x))
+    return math.sqrt(sum(((float(x_i) - float(y_i)) ** 2 for x_i, y_i in zip(x, y))) / len(x)) + 0.5 * abs(y[-1] - y[0])
 
 
 def compress(original_array: np.ndarray, new_size: int) -> np.ndarray:
