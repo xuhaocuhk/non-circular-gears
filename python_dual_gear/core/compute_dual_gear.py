@@ -9,9 +9,10 @@ import util_functions
 import logging
 import matplotlib.pyplot as plt
 from time import perf_counter_ns
+import matplotlib.pyplot as plt
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)  # set logger level to debug to get the performance data
+# logger.setLevel(logging.DEBUG)  # set logger level to debug to get the performance data
 
 
 def compute_dual_gear(x: List[float], k: int = 1) -> Tuple[List[float], float, List[float]]:

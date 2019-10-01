@@ -32,8 +32,8 @@ logger = logging.getLogger(__name__)
 
 
 def math_cut(drive_model: Model, cart_drive: np.ndarray, debugger: MyDebugger, plotter: Optional[Plotter],
-             animation=False):
-    center = drive_model.center_point
+             animation=False, center_point: Optional[Tuple[float, float]] = None):
+    center = center_point or drive_model.center_point
     polar_math_drive = toExteriorPolarCoord(Point(center[0], center[1]), cart_drive, drive_model.sample_num)
     polar_math_driven, center_distance, phi = compute_dual_gear(polar_math_drive, k=drive_model.k)
 
@@ -47,9 +47,15 @@ def math_cut(drive_model: Model, cart_drive: np.ndarray, debugger: MyDebugger, p
                           [('math_drive', toCartesianCoordAsNp(polar_math_drive, 0, 0))], None)
     plotter.draw_contours(debugger.file_path('math_driven.png'),
                           [('math_driven', toCartesianCoordAsNp(polar_math_driven, 0, 0))], None)
+    plotter.draw_contours(debugger.file_path('math_results.png'), [
+        ('math_drive', toCartesianCoordAsNp(polar_math_drive, 0, 0)),
+        ('math_driven', np.array(
+            rotate(list(toCartesianCoordAsNp(polar_math_driven, center_distance, 0)), phi[0], (center_distance, 0))))
+    ], [(0, 0), (center_distance, 0)])
 
     logging.info('math rotate complete')
     logging.info(f'Center Distance = {center_distance}')
+
     return center_distance, phi, polar_math_drive, polar_math_driven
 
 
