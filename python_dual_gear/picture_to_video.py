@@ -10,15 +10,17 @@ from copy import deepcopy
 # how long is this video, in seconds
 video_length_sec = 10
 # root directory of models
-models_root_dir = r'C:\Projects\gears\python_dual_gear\debug\pending'
+models_root_dir = r'C:\Projects\gears\python_dual_gear\debug\video_phi_lim'
 # names not treated as a model
 ignored_names = ['picture_to_video.py', '.DS_Store']
 # folder to be searched inside each model
-folder_name = 'png'
+folder_name = ''
 # file prefix of the photos
-prefix = ''
+prefix = 'smoothed_contour_'
+# sort the pictures reversely
+reverse_sort = True
 # also attach a reversed version
-attach_reverse = True
+attach_reverse = False
 # replay
 replay_times = 0
 
@@ -38,7 +40,7 @@ for model in models:
     image_files = [filename for filename in os.listdir(folder) if prefix in filename and '.png' in filename]
     image_files = [filename for filename in image_files if os.path.isfile(os.path.join(folder, filename))]
     image_files = [os.path.splitext(filename)[0][len(prefix):] for filename in image_files]
-    image_files.sort(key=float)
+    image_files.sort(key=float, reverse=reverse_sort)
     count = len(image_files)
     logger.info(f'{count} pictures retrieved from {model}')
 
