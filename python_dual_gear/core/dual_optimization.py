@@ -92,7 +92,7 @@ def center_of_window(window: Window_T) -> Tuple[float, float]:
 def align_and_average(array_a: List, array_b: List, average_factor: float = 0.5, k: int = 1) -> List:
     assert len(array_a) == len(array_b)
     assert 0 <= average_factor <= 1
-    offset = align(array_a, array_b, k)
+    offset = align(array_a, array_b, k=k)
     if k != 1:
         assert len(array_b) % k == 0
         array_b = extend_part(array_b, offset, offset + int(len(array_b) / k), len(array_a))

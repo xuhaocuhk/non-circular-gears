@@ -13,7 +13,7 @@ def standard_deviation_distance(x: Collection[SupportsFloat], y: Collection[Supp
     :return: standard deviation
     """
     assert len(x) == len(y)
-    return math.sqrt(sum(((float(x_i) - float(y_i)) ** 2 for x_i, y_i in zip(x, y))) / len(x)) + 0.5 * abs(y[-1] - y[0])
+    return math.sqrt(sum(((float(x_i) - float(y_i)) ** 2 for x_i, y_i in zip(x, y))) / len(x))
 
 
 def compress(original_array: np.ndarray, new_size: int) -> np.ndarray:
@@ -71,7 +71,11 @@ def align(array_a: Collection, array_b: Collection, stride: int = 1,
                     range(0, len(array_a), stride)], key=lambda tup: tup[1])[0]
     else:
         assert len(array_b) % k == 0
-        b_len = len(array_b) / k
+        b_len = len(array_b) // k
+        val = [
+            (offset, distance_function(array_a, list(extend_part(array_b, offset, offset + b_len, len(array_a)))))
+            for offset in range(0, len(array_b), stride)
+        ]
         return min([
             (offset, distance_function(array_a, list(extend_part(array_b, offset, offset + b_len, len(array_a)))))
             for offset in range(0, len(array_b), stride)
