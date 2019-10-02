@@ -48,9 +48,12 @@ def phi_distance(polar_drive: Iterable[float], polar_driven: Iterable[float], k:
     offset = align(d_phi_drive, d_phi_driven, distance_function=distance_function, k=k)
     if k != 1:
         assert len(d_phi_driven) % k == 0
-        d_phi_driven = list(extend_part(d_phi_driven, offset, offset + int(len(d_phi_driven) / k), len(d_phi_drive)))
+        extended_d_phi_driven = list(
+            extend_part(d_phi_driven, offset, offset + int(len(d_phi_driven) / k), len(d_phi_drive)))
         offset = 0
-    return distance_function(d_phi_drive, d_phi_driven[offset:] + d_phi_driven[:offset]), \
+    else:
+        extended_d_phi_driven = d_phi_driven
+    return distance_function(d_phi_drive, extended_d_phi_driven[offset:] + extended_d_phi_driven[:offset]), \
            d_phi_drive, d_phi_driven, dist_drive, dist_driven
 
 
@@ -147,8 +150,20 @@ def sample_in_windows(drive_contour: np.ndarray, driven_contour: np.ndarray,
                 Point(*center_driven))):
             # not good windows
             continue
+        # polar, dist, phi = compute_dual_gear(
+        #     toExteriorPolarCoord(Point(*center_driven), driven_contour, sampling_accuracy), 1)
+        # polar, dist, phi = compute_dual_gear(polar, 1)
+        # d_phi = differentiate_function(pre_process(phi))
+        # fig, splts = plt.subplots(2, 2, figsize=(9, 9))
+        # splts[0][1].plot(*driven_contour.transpose())
+        # splts[0][1].axis('equal')
+        # splts[1][0].plot(np.linspace(0, 2 * math.pi, len(phi), endpoint=False), phi)
+        # splts[1][1].plot(np.linspace(0, 2 * math.pi, len(d_phi), endpoint=False), d_phi, color='red')
+        # plt.show() #checkpoint passed
         distance, d_drive, d_driven, dist_drive, dist_driven = \
             contour_distance(drive_contour, center_drive, driven_contour, center_driven, sampling_accuracy, k)
+        # splts[1][1].plot(np.linspace(0, 2 * math.pi, len(d_driven), endpoint=False), d_driven, color='blue')
+        # plt.show()
         reconstructed_drive = rebuild_polar((dist_drive + dist_driven) / 2, align_and_average(d_drive, d_driven, k=k))
         list_reconstructed_drive = list(reconstructed_drive)
         max_phi = max(differentiate_function(pre_process(compute_dual_gear(list_reconstructed_drive)[-1])))
@@ -186,13 +201,17 @@ def sample_in_windows(drive_contour: np.ndarray, driven_contour: np.ndarray,
             original_figure = plt.gcf()
             figure, new_subplots = plt.subplots(2, 2, figsize=(16, 16))
             new_subplots[0][0].plot(np.linspace(0, 2 * math.pi, len(d_drive), endpoint=False), d_drive)
+            new_subplots[0][0].axis([0, 2 * math.pi, 0, 2 * math.pi])
             new_subplots[0][1].plot(np.linspace(0, 2 * math.pi, len(d_driven), endpoint=False), d_driven)
+            new_subplots[0][1].axis([0, 2 * math.pi, 0, 2 * math.pi])
             new_subplots[1][0].plot(np.linspace(0, 2 * math.pi, len(d_drive), endpoint=False),
                                     align_and_average(d_drive, d_driven, k=k))
+            new_subplots[1][0].axis([0, 2 * math.pi, 0, 2 * math.pi])
             if k != 1:
                 # then offset shall be 0
                 new_subplots[1][1].plot(np.linspace(0, 2 * math.pi, len(d_drive), endpoint=False),
                                         extend_part(d_driven, 0, int(len(d_driven) / k), len(d_drive)))
+                new_subplots[1][1].axis('equal')
             plt.axis('equal')
             plt.savefig(path_prefix + f'{index}_functions.png')
             plt.close()
@@ -201,9 +220,10 @@ def sample_in_windows(drive_contour: np.ndarray, driven_contour: np.ndarray,
     return results[:keep_count]
 
 
-def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray, sampling_count: int, keep_count: int,
-                          sampling_accuracy: int, iteration_count: int, debugging_suite: DebuggingSuite,
-                          torque_weight: float = 0.0, k: int = 1, mismatch_penalty=0.5) -> List[Tuple[float, Polar_T]]:
+def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray, sampling_count: Tuple[int, int],
+                          keep_count: int, sampling_accuracy: int, iteration_count: int,
+                          debugging_suite: DebuggingSuite, torque_weight: float = 0.0, k: int = 1,
+                          mismatch_penalty=0.5) -> List[Tuple[float, Polar_T]]:
     logger.info(f'Initiating Sampling Optimization with torque_weight = {torque_weight},'
                 f' mismatch_penalty = {mismatch_penalty}')
     logger.info(f'k={k}')
@@ -220,7 +240,8 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
     for iteration in range(iteration_count):
         path = debugging_suite.debugger.file_path('iteration_' + str(iteration))
         os.makedirs(path, exist_ok=True)
-        if k == 1:
+        # if k == 1:
+        if True:
             window_pairs = list(itertools.chain.from_iterable([
                 itertools.product(split_window(drive_window, x_sample, y_sample),
                                   split_window(driven_window, x_sample, y_sample))
@@ -305,7 +326,13 @@ def dual_annealing_optimization(drive_contour: np.ndarray, driven_contour: np.nd
 
 
 if __name__ == '__main__':
-    from main_program import main_stage_one
-    from models import find_model_by_name
+    from util_functions import read_contour
+    from debug_util import MyDebugger
+    from plot.qt_plot import Plotter
 
-    main_stage_one(find_model_by_name('heart'), find_model_by_name('heart'), False, False, True, True)
+    drive_path = r'..\debug\2019-10-02_10-10-06_higher_k_test\(plant)leaf_12_k=5_drive.dat'
+    driven_path = r'..\debug\2019-10-02_10-10-06_higher_k_test\(plant)leaf_12_k=5_driven.dat'
+    drive_contour = read_contour(drive_path)
+    driven_contour = read_contour(driven_path)
+    sampling_optimization(drive_contour, driven_contour, (7, 7), 3, 1280, 2,
+                          DebuggingSuite(MyDebugger(['leaf', 'flower']), Plotter(), None, None), k=5)
