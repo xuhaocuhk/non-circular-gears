@@ -241,19 +241,18 @@ def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray,
         path = debugging_suite.debugger.file_path('iteration_' + str(iteration))
         os.makedirs(path, exist_ok=True)
         # if k == 1:
-        if True:
-            window_pairs = list(itertools.chain.from_iterable([
-                itertools.product(split_window(drive_window, x_sample, y_sample),
-                                  split_window(driven_window, x_sample, y_sample))
-                for drive_window, driven_window in window_pairs
-            ]))
-        else:
-            # do not allow the driven gear with k to move center
-            window_pairs = list(itertools.chain.from_iterable([
-                itertools.product(split_window(drive_window, x_sample, y_sample),
-                                  [driven_window])
-                for drive_window, driven_window in window_pairs
-            ]))
+        window_pairs = list(itertools.chain.from_iterable([
+            itertools.product(split_window(drive_window, x_sample, y_sample),
+                              split_window(driven_window, x_sample, y_sample))
+            for drive_window, driven_window in window_pairs
+        ]))
+        # else:
+        #     # do not allow the driven gear with k to move center
+        #     window_pairs = list(itertools.chain.from_iterable([
+        #         itertools.product(split_window(drive_window, x_sample, y_sample),
+        #                           [driven_window])
+        #         for drive_window, driven_window in window_pairs
+        #     ]))
         results = sample_in_windows(drive_contour, driven_contour, window_pairs, keep_count,
                                     debugging_suite.sub_suite(os.path.join(path, 'result_')),
                                     sampling_accuracy=sampling_accuracy, torque_weight=torque_weight, k=k,
