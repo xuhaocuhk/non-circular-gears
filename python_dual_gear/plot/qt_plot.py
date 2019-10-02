@@ -54,12 +54,15 @@ class Plotter:
         return self.create_polygon((contour + self.translation) * self.scaling)
 
     def draw_contours(self, file_path: str, contours: Iterable[Tuple[str, np.ndarray]],
-                      centers: Optional[Iterable[Tuple[float, float]]]):
+                      centers: Optional[Iterable[Tuple[float, float]]], text: Optional[str] = None,
+                      text_position: Optional[Tuple[float, float]] = None):
         """
         draw the given contours and save to an image file
         :param file_path: the path to the image file to save
         :param contours: (color option, contour) of the contours to draw
         :param centers: additional centers to be drawn
+        :param text: additional text to be written
+        :param text_position: place to draw the text
         :return: None
         """
         contours = list(contours)
@@ -71,6 +74,13 @@ class Plotter:
             self.window.centers = [tuple(self.scaling * (np.array(center) + self.translation)) for center in centers]
         else:
             self.window.centers = []
+        if text is not None:
+            text_point = QtCore.QPointF(
+                *[self.scaling * (trans + val) for trans, val in zip(self.translation, text_position)])
+            self.window.text = text_point, text
+        else:
+            self.window.text = None
+
         self._save_canvas(file_path)
 
     def _save_canvas(self, file_path: str):
@@ -92,6 +102,7 @@ class PlotterWindow(QtWidgets.QWidget):
         self.centers = []
         self.center_pen = None
         self.center_brush = None
+        self.text = None
         super().__init__()
 
     def paintEvent(self, event: QtGui.QPaintEvent):
@@ -106,6 +117,11 @@ class PlotterWindow(QtWidgets.QWidget):
             painter.setBrush(self.center_brush)
             for center in self.centers:
                 painter.drawEllipse(QtCore.QPointF(*center), conf.scatter_point['radius'], conf.scatter_point['radius'])
+        if self.text is not None:
+            painter.setFont(QtGui.QFont('Helvetica', 20))
+            painter.setPen(QtGui.QColor(0, 0, 0))
+            print(self.text)
+            painter.drawText(*self.text)
 
 
 if __name__ == '__main__':
