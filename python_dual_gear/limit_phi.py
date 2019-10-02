@@ -45,7 +45,7 @@ def limit_phi_derivative(polar: Polar_T, max_phi: float, iteration: int) -> np.n
             break
         d_phi = [value / s * 2 * pi for value in d_phi]
     # rebuild the function with d_phi
-    return rebuild_polar(center_dist, d_phi)
+    return rebuild_polar(1.1, d_phi)
 
 
 def to_cartesian(polar_contour: Polar_T, center: Tuple[float, float], rotation: Optional[float] = None) -> np.ndarray:
@@ -85,7 +85,8 @@ def plot_limited_phi(polar_contour: Polar_T, folder: str, max_phi: float, iterat
     plotter.draw_contours(os.path.join(folder, base_filename + '.png'),
                           [('math_drive', drive_cart),
                            ('math_driven', driven_cart)],
-                          [(0, 0), (center_dist, 0)])
+                          [(0, 0), (center_dist, 0)],
+                          '%1.3f' % max_phi, (0, 1.0))
     return drive
 
 
@@ -105,10 +106,11 @@ if __name__ == '__main__':
     """
 
     dat_path = os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                            'debug/2019-09-25_21-55-14_heart_heart/iteration_2/final_result_0_drive.dat'
+                                            # 'debug/video_results/boy_girl_1/optimized_drive.dat'
+                                            'debug/video_results/starfish_starfish/final_result_0_drive.dat'
                                             ))
     cart_drive = read_contour(dat_path)
     drive_polar = shape_processor.toExteriorPolarCoord(Point(0, 0), cart_drive, 1024)
     debugger = MyDebugger(['phi_lim'])
-    for limit in np.linspace(1, 4, 200, endpoint=True):
+    for limit in np.linspace(1, 3, 201, endpoint=True):
         plot_limited_phi(drive_polar, debugger.get_root_debug_dir_name(), limit, 100)

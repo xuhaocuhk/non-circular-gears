@@ -118,7 +118,7 @@ class PlotterWindow(QtWidgets.QWidget):
             for center in self.centers:
                 painter.drawEllipse(QtCore.QPointF(*center), conf.scatter_point['radius'], conf.scatter_point['radius'])
         if self.text is not None:
-            painter.setFont(QtGui.QFont('Helvetica', 20))
+            painter.setFont(QtGui.QFont('Helvetica', 40))
             painter.setPen(QtGui.QColor(0, 0, 0))
             print(self.text)
             painter.drawText(*self.text)
