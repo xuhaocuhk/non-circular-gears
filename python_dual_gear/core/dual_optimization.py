@@ -177,7 +177,7 @@ def sample_in_windows(drive_contour: np.ndarray, driven_contour: np.ndarray,
         results.append((final_score, drive_window, driven_window, list_reconstructed_drive, max_phi, m_penalty))
         if subplots is not None:
             update_polygon_subplots(drive_contour, driven_contour, subplots[0])  # clear sample regions
-            reconstructed_driven, *_ = compute_dual_gear(list_reconstructed_drive, k)
+            reconstructed_driven, plt_center_dist, plt_phi = compute_dual_gear(list_reconstructed_drive, k)
             reconstructed_drive_contour = toCartesianCoordAsNp(reconstructed_drive, 0, 0)
             reconstructed_driven_contour = toCartesianCoordAsNp(reconstructed_driven, 0, 0)
             update_polygon_subplots(reconstructed_drive_contour, reconstructed_driven_contour, subplots[1])
@@ -207,6 +207,22 @@ def sample_in_windows(drive_contour: np.ndarray, driven_contour: np.ndarray,
             new_subplots[1][0].plot(np.linspace(0, 2 * math.pi, len(d_drive), endpoint=False),
                                     align_and_average(d_drive, d_driven, k=k))
             new_subplots[1][0].axis([0, 2 * math.pi, 0, 2 * math.pi])
+            debugging_suite.plotter.draw_contours(
+                path_prefix + f'drive_contour_{index}.png',
+                [('carve_drive', drive_contour)],
+                [center_drive])
+            debugging_suite.plotter.draw_contours(
+                path_prefix + f'driven_contour_{index}.png',
+                [('carve_driven', driven_contour)],
+                [center_driven])
+            final_driven = np.array(
+                psf_rotate(toCartesianCoordAsNp(reconstructed_driven, plt_center_dist, 0), plt_phi[0],
+                           (plt_center_dist, 0)))
+            debugging_suite.plotter.draw_contours(
+                path_prefix + f'reconstructed_contour_{index}.png',
+                [('carve_drive', reconstructed_drive_contour),
+                 ('carve_driven', final_driven)],
+                [center_driven])
             if k != 1:
                 # then offset shall be 0
                 new_subplots[1][1].plot(np.linspace(0, 2 * math.pi, len(d_drive), endpoint=False),
