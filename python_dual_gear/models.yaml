@@ -1,4 +1,11 @@
 - center_point: [0.7, 0.7]
+  k: 3
+  name: leaf
+  sample_num: 2048
+  smooth: 24
+  tooth_height: 0.02
+  tooth_num: 32
+- center_point: [0.7, 0.7]
   k: 1
   name: pot
   sample_num: 2048

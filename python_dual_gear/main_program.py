@@ -355,7 +355,7 @@ if __name__ == '__main__':
         # (find_model_by_name('boy'), find_model_by_name('girl')),
         # (find_model_by_name('drop'), find_model_by_name('heart')),
         # (find_model_by_name('trump'), find_model_by_name('chicken_leg')),
-        (find_model_by_name('bell'), find_model_by_name('human/candy')),
+        # (find_model_by_name('bell'), find_model_by_name('human/candy')),
         # (find_model_by_name('dove'), find_model_by_name('dove')),
         # (find_model_by_name('dog'), find_model_by_name('food/bond1')),
         # (find_model_by_name('fishA'), find_model_by_name('animal_sea/fishB')),
@@ -367,5 +367,5 @@ if __name__ == '__main__':
     #         main_stage_one(drive, driven, k=1)
     #     except:
     #         logger.error(f'Error for {drive.name}, {driven.name}')
-    main_stage_two()
-    # main_stage_one(retrieve_model_from_folder('human', 'bell'), retrieve_model_from_folder('human', 'candy'), k=2)
+    # main_stage_two()
+    main_stage_one(find_model_by_name('leaf'), retrieve_model_from_folder('plant', 'shamrock'), k=3)
