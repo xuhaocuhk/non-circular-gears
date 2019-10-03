@@ -162,3 +162,6 @@ if __name__ == '__main__':
                                  toCartesianCoordAsNp(drive_polar, 0, 0))
                     save_contour(debugger.file_path(f'{drive_model.name}_{index}_k={k}_driven.dat'),
                                  driven_contour)
+                    with open(debugger.file_path(f'{drive_model.name}_{index}_k={k}.txt'), 'w') as file:
+                        print('drive_center=', center_point, file=file)
+                        print('center_dist=', center_distance, file=file)
