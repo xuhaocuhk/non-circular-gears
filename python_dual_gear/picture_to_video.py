@@ -8,17 +8,17 @@ import sys
 from copy import deepcopy
 
 # how long is this video, in seconds
-video_length_sec = 10
+video_length_sec = 15
 # root directory of models
-models_root_dir = r'C:\Projects\gears\python_dual_gear\debug\video_phi_lim'
+models_root_dir = r'C:\Projects\gears\python_dual_gear\debug\video_method'
 # names not treated as a model
 ignored_names = ['picture_to_video.py', '.DS_Store']
 # folder to be searched inside each model
-folder_name = ''
+folder_name = 'cut_rotate'
 # file prefix of the photos
-prefix = 'smoothed_contour_'
+prefix = 'after_cut_'
 # sort the pictures reversely
-reverse_sort = True
+reverse_sort = False
 # also attach a reversed version
 attach_reverse = False
 # replay
@@ -36,6 +36,9 @@ for model in models:
     if not os.path.isdir(folder):
         continue
 
+    # the file name of this video
+    video_name = f"{model}.mp4"
+
     # filter the files of interest
     image_files = [filename for filename in os.listdir(folder) if prefix in filename and '.png' in filename]
     image_files = [filename for filename in image_files if os.path.isfile(os.path.join(folder, filename))]
@@ -43,9 +46,6 @@ for model in models:
     image_files.sort(key=float, reverse=reverse_sort)
     count = len(image_files)
     logger.info(f'{count} pictures retrieved from {model}')
-
-    # the file name of this video
-    video_name = f"{model}.mp4"
 
     img_array = []
     for image_file in image_files:
