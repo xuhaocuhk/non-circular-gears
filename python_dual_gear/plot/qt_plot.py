@@ -54,12 +54,15 @@ class Plotter:
         return self.create_polygon((contour + self.translation) * self.scaling)
 
     def draw_contours(self, file_path: str, contours: Iterable[Tuple[str, np.ndarray]],
-                      centers: Optional[Iterable[Tuple[float, float]]]):
+                      centers: Optional[Iterable[Tuple[float, float]]], text: Optional[str] = None,
+                      text_position: Optional[Tuple[float, float]] = None):
         """
         draw the given contours and save to an image file
         :param file_path: the path to the image file to save
         :param contours: (color option, contour) of the contours to draw
         :param centers: additional centers to be drawn
+        :param text: additional text to be written
+        :param text_position: place to draw the text
         :return: None
         """
         contours = list(contours)
@@ -71,6 +74,13 @@ class Plotter:
             self.window.centers = [tuple(self.scaling * (np.array(center) + self.translation)) for center in centers]
         else:
             self.window.centers = []
+        if text is not None:
+            text_point = QtCore.QPointF(
+                *[self.scaling * (trans + val) for trans, val in zip(self.translation, text_position)])
+            self.window.text = text_point, text
+        else:
+            self.window.text = None
+
         self._save_canvas(file_path)
 
     def _save_canvas(self, file_path: str):
@@ -92,6 +102,7 @@ class PlotterWindow(QtWidgets.QWidget):
         self.centers = []
         self.center_pen = None
         self.center_brush = None
+        self.text = None
         super().__init__()
 
     def paintEvent(self, event: QtGui.QPaintEvent):
@@ -106,6 +117,11 @@ class PlotterWindow(QtWidgets.QWidget):
             painter.setBrush(self.center_brush)
             for center in self.centers:
                 painter.drawEllipse(QtCore.QPointF(*center), conf.scatter_point['radius'], conf.scatter_point['radius'])
+        if self.text is not None:
+            painter.setFont(QtGui.QFont('Computer Modern', 40))
+            painter.setPen(QtGui.QColor(0, 0, 0))
+            print(self.text)
+            painter.drawText(*self.text)
 
 
 if __name__ == '__main__':
@@ -119,8 +135,9 @@ if __name__ == '__main__':
     from plot.plot_sampled_function import rotate
     from debug_util import MyDebugger
     from main_program import retrieve_model_from_folder
+    from util_functions import save_contour
 
-    interested_models = [retrieve_model_from_folder('human', 'bell')]
+    interested_models = [retrieve_model_from_folder('plant', 'leaf')]
     plotter = Plotter()
     debugger = MyDebugger('higher_k_test')
     for drive_model in interested_models:
@@ -129,11 +146,11 @@ if __name__ == '__main__':
         min_x, min_y, max_x, max_y = drive_polygon.bounds
         entire_window = (min_x, max_x, min_y, max_y)
 
-        for index, window in enumerate(split_window(entire_window, 5, 5)):
+        for index, window in enumerate(split_window(entire_window, 7, 7)):
             center_point = center_of_window(window)
             if drive_polygon.contains(Point(*center_point)):
                 drive_polar = toExteriorPolarCoord(Point(*center_point), drive_contour, 1024)
-                for k in (2, 4, 8):
+                for k in (5,):
                     driven_polar, center_distance, phi = compute_dual_gear(drive_polar, k)
                     driven_contour = toCartesianCoordAsNp(driven_polar, center_distance, 0)
                     driven_contour = np.array(rotate(driven_contour, phi[0], (center_distance, 0)))
@@ -141,3 +158,10 @@ if __name__ == '__main__':
                         ('math_drive', toCartesianCoordAsNp(drive_polar, 0, 0)),
                         ('math_driven', driven_contour)
                     ], [(0, 0), (center_distance, 0)])
+                    save_contour(debugger.file_path(f'{drive_model.name}_{index}_k={k}_drive.dat'),
+                                 toCartesianCoordAsNp(drive_polar, 0, 0))
+                    save_contour(debugger.file_path(f'{drive_model.name}_{index}_k={k}_driven.dat'),
+                                 driven_contour)
+                    with open(debugger.file_path(f'{drive_model.name}_{index}_k={k}.txt'), 'w') as file:
+                        print('drive_center=', center_point, file=file)
+                        print('center_dist=', center_distance, file=file)

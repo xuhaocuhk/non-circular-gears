@@ -71,7 +71,11 @@ def align(array_a: Collection, array_b: Collection, stride: int = 1,
                     range(0, len(array_a), stride)], key=lambda tup: tup[1])[0]
     else:
         assert len(array_b) % k == 0
-        b_len = len(array_b) / k
+        b_len = len(array_b) // k
+        val = [
+            (offset, distance_function(array_a, list(extend_part(array_b, offset, offset + b_len, len(array_a)))))
+            for offset in range(0, len(array_b), stride)
+        ]
         return min([
             (offset, distance_function(array_a, list(extend_part(array_b, offset, offset + b_len, len(array_a)))))
             for offset in range(0, len(array_b), stride)
