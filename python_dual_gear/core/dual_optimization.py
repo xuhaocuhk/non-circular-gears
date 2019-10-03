@@ -164,7 +164,7 @@ def sample_in_windows(drive_contour: np.ndarray, driven_contour: np.ndarray,
             contour_distance(drive_contour, center_drive, driven_contour, center_driven, sampling_accuracy, k)
         # splts[1][1].plot(np.linspace(0, 2 * math.pi, len(d_driven), endpoint=False), d_driven, color='blue')
         # plt.show()
-        reconstructed_drive = rebuild_polar((dist_drive + dist_driven) / 2, align_and_average(d_drive, d_driven, k=k))
+        reconstructed_drive = rebuild_polar(0.9, align_and_average(d_drive, d_driven, k=k))
         list_reconstructed_drive = list(reconstructed_drive)
         max_phi = max(differentiate_function(pre_process(compute_dual_gear(list_reconstructed_drive)[-1])))
         final_score = distance + torque_weight * max_phi
@@ -222,7 +222,7 @@ def sample_in_windows(drive_contour: np.ndarray, driven_contour: np.ndarray,
                 path_prefix + f'reconstructed_contour_{index}.png',
                 [('carve_drive', reconstructed_drive_contour),
                  ('carve_driven', final_driven)],
-                [center_driven])
+                [(0, 0), (plt_center_dist, 0)])
             if k != 1:
                 # then offset shall be 0
                 new_subplots[1][1].plot(np.linspace(0, 2 * math.pi, len(d_drive), endpoint=False),
