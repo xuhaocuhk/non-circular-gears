@@ -1,6 +1,6 @@
-from shape_processor import *
-from models import Model
-from drive_gears.generate_standard_shapes import std_shapes, generate_std_shapes
+from drive_gears.shape_processor import *
+from drive_gears.models import Model
+from drive_gears.standard_shapes import std_shapes, generate_std_shapes
 from plot.plot_util import plot_cartesian_shape
 from matplotlib.axes import Axes
 from typing import Union, Iterable, Optional

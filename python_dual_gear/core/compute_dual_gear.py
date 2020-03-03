@@ -11,6 +11,8 @@ from time import perf_counter_ns
 import matplotlib.pyplot as plt
 
 logger = logging.getLogger(__name__)
+
+
 # logger.setLevel(logging.DEBUG)  # set logger level to debug to get the performance data
 
 
@@ -198,22 +200,3 @@ def polygon_to_contour(draw_config: str, polygon: Union[Polygon, MultiPolygon]) 
     if not isinstance(polygon, MultiPolygon):
         polygon = polygon,
     return [(draw_config, util_functions.shapely_polygon_to_numpy_contour(poly)) for poly in polygon]
-
-
-if __name__ == '__main__':
-    import matplotlib.pyplot as plt
-    from drive_gears.focal_ellipse_gear import generate_gear
-    from shapely.affinity import translate, rotate
-    from plot.plot_sampled_function import plot_sampled_function
-
-    drive_gear = generate_gear(256)
-    y, center_distance, phi = compute_dual_gear(drive_gear, 1)
-    plot_sampled_function((drive_gear, y), (phi,), None, 200, 0.001, ((0, 0), (center_distance, 0)), (8, 8),
-                          ((-5, 15), (-10, 10)))
-    poly, *_ = rotate_and_cut(to_polygon(drive_gear), center_distance, phi, 1, replay_animation=False)
-    poly = translate(poly, center_distance)
-    poly = rotate(poly, phi[0], origin=(center_distance, 0), use_radians=True)
-    _plot_polygon((to_polygon(drive_gear), poly))
-    plt.scatter((0, center_distance), (0, 0), s=100, c='b')
-    plt.savefig('dual_gear_shapely.png')
-    plt.show()

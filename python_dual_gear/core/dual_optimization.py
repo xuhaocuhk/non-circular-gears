@@ -7,7 +7,7 @@ from util_functions import standard_deviation_distance, align, save_contour, poi
 from typing import Iterable, Tuple, List
 from core.compute_dual_gear import compute_dual_gear
 from core.phi_shape_average import differentiate_function, pre_process, rebuild_polar
-from shape_processor import toExteriorPolarCoord, toCartesianCoordAsNp
+from drive_gears.shape_processor import toExteriorPolarCoord, toCartesianCoordAsNp
 from shapely.geometry import Point, Polygon
 from core.optimize_dual_shapes import uniform_interval, update_polygon_subplots
 from plot.plot_sampled_function import rotate as psf_rotate
@@ -338,16 +338,3 @@ def dual_annealing_optimization(drive_contour: np.ndarray, driven_contour: np.nd
     score, d_phi_drive, d_phi_driven, dist_drive, dist_driven = \
         contour_distance(drive_contour, (drive_x, drive_y), driven_contour, (driven_x, driven_y), resampling_accuracy)
     return score, list(rebuild_polar((dist_drive + dist_driven) / 2, align_and_average(d_phi_drive, d_phi_driven)))
-
-
-if __name__ == '__main__':
-    from util_functions import read_contour
-    from debug_util import MyDebugger
-    from plot.qt_plot import Plotter
-
-    drive_path = r'..\debug\2019-10-02_10-10-06_higher_k_test\(plant)leaf_12_k=5_drive.dat'
-    driven_path = r'..\debug\2019-10-02_10-10-06_higher_k_test\(plant)leaf_12_k=5_driven.dat'
-    drive_contour = read_contour(drive_path)
-    driven_contour = read_contour(driven_path)
-    sampling_optimization(drive_contour, driven_contour, (7, 7), 3, 1280, 2,
-                          DebuggingSuite(MyDebugger(['leaf', 'flower']), Plotter(), None, None), k=5)

@@ -93,17 +93,3 @@ class DebuggingSuite:
             return DebuggingSuite(self.debugger, self.plotter, self.figure, additional_path_prefix)
         else:
             return DebuggingSuite(self.debugger, self.plotter, self.figure, self.path_prefix + additional_path_prefix)
-
-
-def __main__test__function(args):
-    """
-    function merely meant to test the debugger used by '__name__==__main__' part, do not import
-    """
-    print('this shall be stdout' + repr(args))
-    error = 1 / 0
-
-
-if __name__ == '__main__':
-    p_debugger = SubprocessDebugger(MyDebugger('hello'), __main__test__function, ('233',))
-    p_debugger.start()
-    p_debugger.join()

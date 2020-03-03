@@ -51,8 +51,8 @@ def optimization_test(names: List[Iterable[str]], optimize_pairs: List[Tuple[np.
 
 
 if __name__ == '__main__':
-    from shape_factory import get_shape_contour
-    from models import our_models
+    from drive_gears.shape_factory import get_shape_contour
+    from drive_gears.models import our_models
 
     models = {
         model.name: get_shape_contour(model, True, None, model.smooth) for model in our_models

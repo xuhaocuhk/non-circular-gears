@@ -237,25 +237,10 @@ def getShapeExample():
     contour = getUniformContourSampledShape(contour, n)
     # plt.fill(contour[:, 0], contour[:, 1], "r", alpha=0.3)
 
-    # get center visible point
-    # center = getVisiblePoint(contour)
-    # convert to polar coordinate
-    # polar_poly = toPolarCoord(Point(center[0], center[1]), contour, n)
-    # center = (565, 289)
-    # polar_poly = toExteriorPolarCoord(Point(center[0], center[1]), contour, n)
-    # convert to euclidean coordinate to test
-    # contour = toEuclideanCoordAsNp(polar_poly, center[0], center[1])
 
     # add tooth
     contour = addToothToContour(contour, height=5, tooth_num=64)
 
     plt.fill(contour[:, 0], contour[:, 1], "g", alpha=0.3)
-    # plt.scatter(center[0], center[1], s=5, c='b')
-    # for p in contour:
-    #    plt.scatter(p[0], p[1], s=10, c='b')
     plt.show()
     input()
-
-
-if __name__ == '__main__':
-    getShapeExample()

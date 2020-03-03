@@ -1,10 +1,10 @@
 from debug_util import MyDebugger, DebuggingSuite
-from models import our_models, Model, find_model_by_name
-from shape_processor import *
+from drive_gears.models import our_models, Model, find_model_by_name
+from drive_gears.shape_processor import *
 from core.compute_dual_gear import compute_dual_gear, rotate_and_cut
 from shapely.affinity import translate
 import fabrication
-import shape_factory
+from drive_gears import shape_factory
 import logging
 import sys
 from plot.plot_sampled_function import plot_sampled_function, rotate
@@ -14,12 +14,10 @@ import os
 import itertools
 from typing import Optional, Iterable, List, Tuple
 from core.optimize_dual_shapes import counterclockwise_orientation
-from core.dual_optimization import sampling_optimization, dual_annealing_optimization, split_window, center_of_window, \
-    align_and_average, contour_distance, rebuild_polar
+from core.dual_optimization import sampling_optimization, dual_annealing_optimization, align_and_average, \
+    contour_distance, rebuild_polar
 from util_functions import save_contour
-import traceback
 import util_functions
-import opt_groups
 import matplotlib.pyplot as plt
 
 # writing log to file
@@ -224,14 +222,6 @@ def main_stage_two():
     fabrication.generate_3D_with_axles(8, debugger.file_path('drive_2d_(0,0).obj'),
                                        debugger.file_path(f'driven_2d_({center_distance, 0}).obj'),
                                        (0, 0), (center_distance, 0), debugger, 6)
-
-
-def optimize_pairs():
-    for drive, driven in opt_groups.pairs_to_optimize:
-        try:
-            main_stage_one(find_model_by_name(drive), find_model_by_name(driven), False, False, True, True)
-        except:
-            traceback.print_stack()
 
 
 def retrieve_models_from_folder(folder_name):

@@ -1,7 +1,6 @@
-from shape_processor import getUniformContourSampledShape
+from drive_gears.shape_processor import getUniformContourSampledShape
 import numpy as np
-from dtw import dtw
-import matplotlib.pyplot as plt
+from optimization.dtw import dtw
 from typing import Union
 
 
@@ -91,30 +90,3 @@ def shape_difference_rating(contour_a: np.ndarray, contour_b: np.ndarray,
     return tar_distance(tar_a, tar_b, distance_function)
 
 
-if __name__ == '__main__':
-    import os
-    import math
-    from core.compute_dual_gear import compute_dual_gear
-    from shape_processor import toExteriorPolarCoord, toCartesianCoordAsNp
-    from shapely.geometry import Point
-    from core.optimize_dual_shapes import counterclockwise_orientation
-
-    plt.ion()
-    fig, subplots = plt.subplots(2, 2)
-    circle_contour = np.array(
-        [(5 * math.cos(theta), 5 * math.sin(theta)) for theta in np.linspace(0, 2 * math.pi, 1024, False)])
-    debug_dir = os.path.join(os.path.dirname(__file__), 'debug/objective_function_test_3/')
-    os.makedirs(debug_dir, exist_ok=True)
-
-    polar_coordinates = toExteriorPolarCoord(Point(0, 0), circle_contour, 1024)
-    dual_gear, *_ = compute_dual_gear(polar_coordinates, 1)
-    dual = toCartesianCoordAsNp(dual_gear, 0, 0)
-    dual = counterclockwise_orientation(dual)
-    subplots[0][0].plot(*circle_contour.transpose())
-    subplots[0][1].plot(*dual.transpose())
-    subplots[0][1].text(0, 0, '%.7f' % shape_difference_rating(circle_contour, dual, 64))
-    subplots[0][0].axis('equal')
-    subplots[0][1].axis('equal')
-    tars = [triangle_area_representation(contour, 64)[:, 0] for contour in (circle_contour, dual)]
-    for tar, subplot in zip(tars, subplots[1]):
-        subplot.plot(tar)

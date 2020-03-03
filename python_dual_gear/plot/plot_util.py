@@ -1,8 +1,7 @@
 from matplotlib.lines import Line2D
-from shape_processor import toExteriorPolarCoord, toCartesianCoordAsNp
+from drive_gears.shape_processor import toCartesianCoordAsNp
 import matplotlib.pyplot as plt
 import numpy as np
-import figure_config
 from plot.qt_plot import Plotter
 
 
@@ -37,14 +36,3 @@ def plot_contour_and_save(plotter: Plotter, contour: np.ndarray, file_path: str,
                           center=None):
     raise
 
-
-if __name__ == '__main__':
-    from debug_util import MyDebugger
-
-    debugger = MyDebugger('test')
-    contour = np.array([
-        (0, 0),
-        (2, 3),
-        (3, -2)
-    ])
-    plot_contour_and_save(contour, debugger.file_path('test.png'), (1.0, 0.0, 0.0), (0.0, 0.0, 1.0))

@@ -147,13 +147,3 @@ def point_in_contour(contour: np.ndarray, x: float, y: float) -> bool:
     """
     return Polygon(contour).contains(Point(x, y))
 
-
-if __name__ == '__main__':
-    test_array = np.array([
-        (0, 0),
-        (1, 2),
-        (3, 4),
-        (12.0, 2.23)
-    ])
-    save_contour('test.dat', test_array)
-    print(read_contour('test.dat'))

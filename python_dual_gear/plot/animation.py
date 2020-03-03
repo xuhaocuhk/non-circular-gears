@@ -1,19 +1,18 @@
 """
 This file is for scripting animations, and for illustration figure generation
 """
-from models import find_model_by_name, Model
+from drive_gears.models import find_model_by_name, Model
 import main_program
-import shape_factory
+from drive_gears import shape_factory
 from main_program import init
 import logging
 from shapely.geometry import Polygon, Point
 from core.dual_optimization import split_window, center_of_window
-from util_functions import point_in_contour, save_contour
+from util_functions import point_in_contour
 import numpy as np
-from shape_processor import toExteriorPolarCoord, toCartesianCoordAsNp
+from drive_gears.shape_processor import toExteriorPolarCoord, toCartesianCoordAsNp
 from core.compute_dual_gear import compute_dual_gear
 from plot.plot_sampled_function import rotate
-from core.dual_optimization import save_information
 
 
 def dual_shape():

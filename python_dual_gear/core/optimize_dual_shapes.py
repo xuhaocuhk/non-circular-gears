@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 import os
 from debug_util import MyDebugger
-from shape_processor import getUniformContourSampledShape, toExteriorPolarCoord, toCartesianCoordAsNp
+from drive_gears.shape_processor import getUniformContourSampledShape, toExteriorPolarCoord, toCartesianCoordAsNp
 from core.objective_function import triangle_area_representation, shape_difference_rating, trivial_distance
 from shapely.geometry import Polygon, Point
 import itertools

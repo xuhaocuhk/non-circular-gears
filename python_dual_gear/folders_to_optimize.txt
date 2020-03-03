@@ -1,6 +1,0 @@
-human,human
-human,food
-human,plant
-human,animal_sea
-human,animal_land
-human,animal_fly

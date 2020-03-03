@@ -1,7 +1,7 @@
 from math import sin, cos, pi, sqrt
 from scipy.spatial import distance
 import numpy as np
-from shape_processor import toCartesianCoordAsNp
+from drive_gears.shape_processor import toCartesianCoordAsNp
 
 ellipse_a, ellipse_b = 1.5, 1
 

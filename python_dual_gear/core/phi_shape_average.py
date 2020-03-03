@@ -79,26 +79,3 @@ def shape_average(polygon_a: Iterable[float], polygon_b: Iterable[float]) -> np.
     average_dphi = [(dphi_a[index - offset] + dphi_b[index]) / 2 for index in range(len(dphi_a))]
     center_distance = (center_distance_a + center_distance_b) / 2
     return rebuild_polar(center_distance, np.array(average_dphi))
-
-
-if __name__ == '__main__':
-    from debug_util import MyDebugger
-    from shape_processor import toCartesianCoordAsNp, toExteriorPolarCoord
-    from shapely.geometry import Point
-    from plot.qt_plot import Plotter
-    from math import sin, cos
-
-    debugger = MyDebugger('average_test')
-    ellipse = toExteriorPolarCoord(Point(0, 0), np.array(
-        [(0.3 * cos(theta), 0.2 * sin(theta)) for theta in np.linspace(0, 2 * pi, 1024, endpoint=False)]), 1024)
-    ellipse_copy = toExteriorPolarCoord(Point(0, 0), np.array(
-        [(0.2 * cos(theta), 0.3 * sin(theta)) for theta in np.linspace(0, 2 * pi, 1024, endpoint=False)]), 1024)
-    plotter = Plotter()
-
-    # save the figures
-    plotter.draw_contours(debugger.file_path('a.png'), [('math_drive', toCartesianCoordAsNp(ellipse, 0, 0))], None)
-    plotter.draw_contours(debugger.file_path('b.png'), [('math_driven', toCartesianCoordAsNp(ellipse_copy, 0, 0))],
-                          None)
-    print(shape_average(ellipse, ellipse_copy))
-    plotter.draw_contours(debugger.file_path('result.png'),
-                          [('math_drive', toCartesianCoordAsNp(shape_average(ellipse, ellipse_copy), 0, 0))], None)
