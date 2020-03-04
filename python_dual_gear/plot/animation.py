@@ -1,6 +1,8 @@
 """
 This file is for scripting animations, and for illustration figure generation
 """
+import core.compute_dual_gear
+import core.rotate_and_carve
 from drive_gears.models import find_model_by_name, Model
 import main_program
 from drive_gears import shape_factory
@@ -28,11 +30,11 @@ def dual_shape():
     cart_input_drive, cart_input_driven = main_program.get_inputs(debugger, drive_model, driven_model, plotter)
 
     # math cutting
-    center_distance, phi, polar_math_drive, polar_math_driven = main_program.math_cut(drive_model=drive_model,
-                                                                                      cart_drive=cart_input_drive,
-                                                                                      debugger=debugger,
-                                                                                      plotter=plotter,
-                                                                                      animation=True)
+    center_distance, phi, polar_math_drive, polar_math_driven = core.rotate_and_carve.math_cut(drive_model=drive_model,
+                                                                                               cart_drive=cart_input_drive,
+                                                                                               debugger=debugger,
+                                                                                               plotter=plotter,
+                                                                                               animation=True)
 
 
 def get_duals(drive_model: Model, x_sample_count: int, y_sample_count: int, horizontal_shifting: float):

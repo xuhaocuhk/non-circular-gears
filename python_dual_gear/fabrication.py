@@ -1,7 +1,7 @@
 """
 functions related to 3D modelling and fabrication
 """
-from debug_util import MyDebugger
+from report import Reporter
 import numpy as np
 from shapely.geometry import Polygon
 from shapely.geometry import Point
@@ -47,7 +47,7 @@ def generate_2d_obj(debugger, filename, points):
         print(1, file=file)
 
 
-def generate_3d_mesh(debugger: MyDebugger, filename: str, contour: np.ndarray, thickness: float):
+def generate_3d_mesh(debugger: Reporter, filename: str, contour: np.ndarray, thickness: float):
     """
     generate a 3D mesh of the given contour with the given thickness
     :param debugger: the debugger to provide directory for obj to be stored
@@ -83,7 +83,7 @@ def generate_3d_mesh(debugger: MyDebugger, filename: str, contour: np.ndarray, t
             print('f ' + ' '.join([str(point) for point in (upper_prev, lower_prev, lower_point)]), file=obj_file)
 
 
-def generate_3d_mesh_hole(debugger: Union[MyDebugger, str], filename: str, contour: np.ndarray, interiors: np.ndarray,
+def generate_3d_mesh_hole(debugger: Union[Reporter, str], filename: str, contour: np.ndarray, interiors: np.ndarray,
                           thickness=7.76):
     """
     this is the function to generate an obj file of a polygon with an inner hole (serves as the axis hole)
@@ -94,7 +94,7 @@ def generate_3d_mesh_hole(debugger: Union[MyDebugger, str], filename: str, conto
     :param thickness: the thickness of the object
     :return: None
     """
-    if isinstance(debugger, MyDebugger):
+    if isinstance(debugger, Reporter):
         destination = debugger.file_path(filename)
     else:
         assert os.path.isdir(debugger)
@@ -186,7 +186,7 @@ def draw_cross(axis):
 
 
 def generate_3D_with_axles(distance: float, filename_drive: str, filename_driven: str, drive_axis: Tuple[float, float],
-                           driven_axis: Tuple[float, float], debugger: Optional[MyDebugger], thickness=7.76):
+                           driven_axis: Tuple[float, float], debugger: Optional[Reporter], thickness=7.76):
     """
     :param distance: distance between axes of two gears
     (distance between 2 adjacent horizontal holes is 7.97, vertical holes is 9.6)

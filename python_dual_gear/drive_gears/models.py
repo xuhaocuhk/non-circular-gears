@@ -45,3 +45,16 @@ def generate_model_pool(model_names: Tuple[str]):
 
 if __name__ == '__main__':
     print(our_models)
+
+
+def retrieve_models_from_folder(folder_name):
+    assert os.path.isdir(folder_name)
+    return [Model(
+        name=f'({os.path.basename(folder_name)}){filename[:-4]}',
+        sample_num=1024,
+        center_point=(0, 0),
+        tooth_num=32,
+        tooth_height=0.05,
+        k=1,
+        smooth=0
+    ) for filename in os.listdir(folder_name) if '.txt' in filename]

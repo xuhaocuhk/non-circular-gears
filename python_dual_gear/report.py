@@ -9,7 +9,7 @@ from plot.qt_plot import Plotter
 from matplotlib.figure import Figure
 
 
-class MyDebugger:
+class Reporter:
     pre_fix = 'debug'
 
     def __init__(self, model_name: Union[str, Iterable[str]]):
@@ -17,7 +17,7 @@ class MyDebugger:
             self.model_name = model_name
         else:
             self.model_name = '_'.join(model_name)
-        self._debug_dir_name = os.path.join(os.path.dirname(__file__), MyDebugger.pre_fix,
+        self._debug_dir_name = os.path.join(os.path.dirname(__file__), Reporter.pre_fix,
                                             datetime.datetime.fromtimestamp(time.time()).strftime(
                                                 f'%Y-%m-%d_%H-%M-%S_{self.model_name}'))
         self._debug_dir_name = os.path.join(os.path.dirname(__file__), self._debug_dir_name)
@@ -39,8 +39,8 @@ class MyDebugger:
 
     def _init_debug_dir(self):
         # init root debug dir
-        if not os.path.exists(MyDebugger.pre_fix):
-            os.mkdir(MyDebugger.pre_fix)
+        if not os.path.exists(Reporter.pre_fix):
+            os.mkdir(Reporter.pre_fix)
         os.mkdir(self._debug_dir_name)
         logging.info("Directory %s established" % self._debug_dir_name)
         os.mkdir(os.path.join(self._debug_dir_name, "math_rotate"))
@@ -49,12 +49,12 @@ class MyDebugger:
         logging.info("Directory %s established" % os.path.join(self._debug_dir_name, "cut_rotate"))
 
 
-class SubprocessDebugger:
+class SubprocessReporter:
     """
     the debugger that starts a subprocess for a given function
     """
 
-    def __init__(self, debugger: MyDebugger, function: Callable, args: tuple = ()):
+    def __init__(self, debugger: Reporter, function: Callable, args: tuple = ()):
         self.debugger = debugger
         self.function = function
         self.args = args
@@ -80,8 +80,8 @@ class SubprocessDebugger:
         self.process.join()
 
 
-class DebuggingSuite:
-    def __init__(self, debugger: MyDebugger, plotter: Optional[Plotter] = None, figure: Optional[Figure] = None,
+class ReportingSuite:
+    def __init__(self, debugger: Reporter, plotter: Optional[Plotter] = None, figure: Optional[Figure] = None,
                  path_prefix: Optional[str] = None):
         self.debugger = debugger
         self.plotter = plotter
@@ -90,6 +90,6 @@ class DebuggingSuite:
 
     def sub_suite(self, additional_path_prefix):
         if self.path_prefix is None:
-            return DebuggingSuite(self.debugger, self.plotter, self.figure, additional_path_prefix)
+            return ReportingSuite(self.debugger, self.plotter, self.figure, additional_path_prefix)
         else:
-            return DebuggingSuite(self.debugger, self.plotter, self.figure, self.path_prefix + additional_path_prefix)
+            return ReportingSuite(self.debugger, self.plotter, self.figure, self.path_prefix + additional_path_prefix)

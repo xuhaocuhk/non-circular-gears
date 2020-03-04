@@ -12,7 +12,7 @@ from shapely.geometry import Point, Polygon
 from core.optimize_dual_shapes import uniform_interval, update_polygon_subplots
 from plot.plot_sampled_function import rotate as psf_rotate
 import itertools
-from debug_util import DebuggingSuite
+from report import ReportingSuite
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 import scipy.optimize as opt
@@ -117,7 +117,7 @@ def save_information(filename: str, center_drive: Point_T, center_driven: Point_
 
 def sample_in_windows(drive_contour: np.ndarray, driven_contour: np.ndarray,
                       window_pairs: List[Tuple[Window_T, Window_T]], keep_count: int,
-                      debugging_suite: DebuggingSuite, k: int = 1, center_determine_function=center_of_window,
+                      debugging_suite: ReportingSuite, k: int = 1, center_determine_function=center_of_window,
                       sampling_accuracy=1024, torque_weight=0.0, mismatch_penalty: float = 0.5) \
         -> List[Tuple[float, Window_T, Window_T, Polar_T, float, float]]:
     """
@@ -238,7 +238,7 @@ def sample_in_windows(drive_contour: np.ndarray, driven_contour: np.ndarray,
 
 def sampling_optimization(drive_contour: np.ndarray, driven_contour: np.ndarray, sampling_count: Tuple[int, int],
                           keep_count: int, sampling_accuracy: int, iteration_count: int,
-                          debugging_suite: DebuggingSuite, torque_weight: float = 0.0, k: int = 1,
+                          debugging_suite: ReportingSuite, torque_weight: float = 0.0, k: int = 1,
                           mismatch_penalty=0.5) -> List[Tuple[float, Polar_T]]:
     logger.info(f'Initiating Sampling Optimization with torque_weight = {torque_weight},'
                 f' mismatch_penalty = {mismatch_penalty}')

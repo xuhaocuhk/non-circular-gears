@@ -1,5 +1,12 @@
 import math
+
+import numpy
 import numpy as np
+from shapely.geometry import Polygon
+
+from core.optimize_dual_shapes import counterclockwise_orientation
+from drive_gears.shape_processor import getNormals, addToothToContour
+
 
 def teeth_straight(x: float, height: float, width: float):
     assert 0 <= x <= 1
@@ -78,3 +85,20 @@ def get_value_on_tooth_domain(i : int, _tooth_samples):
 def get_teeth_idx(i: int, _tooth_samples):
     assert i < _tooth_samples[-1]
     return np.argmax(_tooth_samples > i)
+
+
+def add_teeth(center, center_distance, debugger, drive, drive_model, plotter):
+    drive = counterclockwise_orientation(drive)
+    normals = getNormals(drive, None, center, normal_filter=True)
+    drive = addToothToContour(drive, center, center_distance, normals, height=drive_model.tooth_height,
+                              tooth_num=drive_model.tooth_num,
+                              plt_axis=None, consider_driving_torque=False,
+                              consider_driving_continue=False)
+    plotter.draw_contours(debugger.file_path('drive_with_teeth_before.png'), [('input_driven', drive)], None)
+
+    drive = Polygon(drive).buffer(0).simplify(0.000)
+    if drive.geom_type == 'MultiPolygon':
+        drive = max(drive, key=lambda a: a.area)
+    drive = np.array(drive.exterior.coords)
+    plotter.draw_contours(debugger.file_path('drive_with_teeth.png'), [('input_driven', drive)], None)
+    return drive
