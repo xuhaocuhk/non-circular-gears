@@ -6,7 +6,7 @@ import core.rotate_and_carve
 from drive_gears.models import find_model_by_name, Model
 import main_program
 from drive_gears import shape_factory
-from main_program import init
+from main_program import initialize
 import logging
 from shapely.geometry import Polygon, Point
 from core.dual_optimization import split_window, center_of_window
@@ -23,7 +23,7 @@ def dual_shape():
     opt_config = 'optimization_config.yaml'
 
     # initialize logging system, configuration files, etc.
-    debugger, opt_config, plotter = main_program.init((drive_model, driven_model), opt_config, ["page_1_anim"])
+    debugger, opt_config, plotter = main_program.initialize((drive_model, driven_model), opt_config, ["page_1_anim"])
 
     # get input polygons
     drive_model.smooth = 0
@@ -32,7 +32,7 @@ def dual_shape():
     # math cutting
     center_distance, phi, polar_math_drive, polar_math_driven = core.rotate_and_carve.math_cut(drive_model=drive_model,
                                                                                                cart_drive=cart_input_drive,
-                                                                                               debugger=debugger,
+                                                                                               reporter=debugger,
                                                                                                plotter=plotter,
                                                                                                animation=True)
 
@@ -46,7 +46,7 @@ def get_duals(drive_model: Model, x_sample_count: int, y_sample_count: int, hori
     :param horizontal_shifting: shifting in x direction to keep the drive away from input
     :return: None
     """
-    debugger, _, plotter = init((drive_model,), None, ['duals'])
+    debugger, _, plotter = initialize((drive_model,), None, ['duals'])
     drive_contour = shape_factory.get_shape_contour(drive_model, True, None, drive_model.smooth)
     logging.debug('drive model loaded')
 

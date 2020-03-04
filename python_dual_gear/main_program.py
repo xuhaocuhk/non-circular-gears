@@ -28,7 +28,7 @@ def get_inputs(debugger, drive_model, driven_model, plotter):
     return cart_drive, cart_driven
 
 
-def init(models: Iterable[Model], opt_config, additional_debugging_names: Optional[List[str]] = None):
+def initialize(models: Iterable[Model], opt_config, additional_debugging_names: Optional[List[str]] = None):
     # reporter and logging
     if additional_debugging_names is None:
         additional_debugging_names = []
@@ -49,10 +49,10 @@ def init(models: Iterable[Model], opt_config, additional_debugging_names: Option
     return reporter, opt_config, plotter
 
 
-def main_stage_one(drive_model: Model, driven_model: Model, opt_config='optimization_config.yaml', k=1):
+def non_circular_gear(drive_model: Model, driven_model: Model, opt_config='optimization_config.yaml', k=1):
     # initialize logging system, configuration files, etc.
     opt_config = os.path.join(os.path.dirname(__file__), opt_config)
-    reporter, opt_config, plotter = init((drive_model, driven_model), opt_config)
+    reporter, opt_config, plotter = initialize((drive_model, driven_model), opt_config)
     logger.info(f'Optimizing {drive_model.name} with {driven_model.name}')
 
     # get input polygons
@@ -61,42 +61,26 @@ def main_stage_one(drive_model: Model, driven_model: Model, opt_config='optimiza
     # optimization
     center, center_distance, cart_drive, score = optimize_center(cart_input_drive, cart_input_driven, reporter,
                                                                  opt_config, plotter, k=k)
-    return score
-
-
-def main_stage_two():
-    dir_path = r"E:\OneDrive - The Chinese University of Hong Kong\research_PhD\non-circular-gear\basic_results\finalist\trump_chicken_leg\iteration_2\final_result_0_drive.dat"
-    model_name = "trump"
-
-    drive_model = find_model_by_name(model_name)
-    drive_model.center_point = (0, 0)
-    debugger = Reporter("stage_2_" + model_name)
-    plotter = Plotter()
-
-    # read shape
-    cart_input_drive = util_functions.read_contour(dir_path)
-    cart_input_drive = shape_factory.uniform_and_smooth(cart_input_drive, drive_model)
 
     # math cutting
     center_distance, phi, polar_math_drive, polar_math_driven = math_cut(drive_model=drive_model,
-                                                                         cart_drive=cart_input_drive,
-                                                                         debugger=debugger, plotter=plotter,
-                                                                         animation=True)
+                                                                         cart_drive=cart_input_drive, reporter=reporter,
+                                                                         plotter=plotter, animation=True)
 
     # add teeth
-    cart_drive = add_teeth((0, 0), center_distance, debugger, cart_input_drive, drive_model, plotter)
+    cart_drive = add_teeth((0, 0), center_distance, reporter, cart_input_drive, drive_model, plotter)
 
     # rotate and cut
-    cart_driven_gear = rotate_and_carve(cart_drive, (0, 0), center_distance, debugger, drive_model, phi, plotter,
+    cart_driven_gear = rotate_and_carve(cart_drive, (0, 0), center_distance, reporter, drive_model, phi, plotter,
                                         replay_anim=False, save_anim=False)
 
     # save 2D contour
-    fabrication.generate_2d_obj(debugger, 'drive_2d_(0,0).obj', cart_drive)
-    fabrication.generate_2d_obj(debugger, f'driven_2d_({center_distance, 0}).obj', cart_driven_gear)
+    fabrication.generate_2d_obj(reporter, 'drive_2d_(0,0).obj', cart_drive)
+    fabrication.generate_2d_obj(reporter, f'driven_2d_({center_distance, 0}).obj', cart_driven_gear)
 
     # generate 3D mesh with axle hole
-    fabrication.generate_3D_with_axles(8, debugger.file_path('drive_2d_(0,0).obj'),
-                                       debugger.file_path(f'driven_2d_({center_distance, 0}).obj'),
-                                       (0, 0), (center_distance, 0), debugger, 6)
+    fabrication.generate_3D_with_axles(8, reporter.file_path('drive_2d_(0,0).obj'),
+                                       reporter.file_path(f'driven_2d_({center_distance, 0}).obj'),
+                                       (0, 0), (center_distance, 0), reporter, 6)
 
 

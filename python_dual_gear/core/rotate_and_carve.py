@@ -113,23 +113,23 @@ def rotate_and_cut(drive_polygon: Polygon, center_distance, phi, k=1, debugger: 
     return driven_polygon, fig, subplot
 
 
-def math_cut(drive_model: Model, cart_drive: np.ndarray, debugger: Reporter, plotter: Optional[Plotter],
+def math_cut(drive_model: Model, cart_drive: np.ndarray, reporter: Reporter, plotter: Optional[Plotter],
              animation=False, center_point: Optional[Tuple[float, float]] = None):
     center = center_point or drive_model.center_point
     polar_math_drive = toExteriorPolarCoord(Point(center[0], center[1]), cart_drive, drive_model.sample_num)
     polar_math_driven, center_distance, phi = compute_dual_gear(polar_math_drive, k=drive_model.k)
 
     if animation:
-        plot_sampled_function((polar_math_drive, polar_math_driven), (phi,), debugger.get_math_debug_dir_name(),
+        plot_sampled_function((polar_math_drive, polar_math_driven), (phi,), reporter.get_math_debug_dir_name(),
                               100, 0.001, [(0, 0), (center_distance, 0)], (8, 8), ((-0.5, 1.5), (-1.1, 1.1)),
                               plotter=plotter)
 
     # save figures
-    plotter.draw_contours(debugger.file_path('math_drive.png'),
+    plotter.draw_contours(reporter.file_path('math_drive.png'),
                           [('math_drive', toCartesianCoordAsNp(polar_math_drive, 0, 0))], None)
-    plotter.draw_contours(debugger.file_path('math_driven.png'),
+    plotter.draw_contours(reporter.file_path('math_driven.png'),
                           [('math_driven', toCartesianCoordAsNp(polar_math_driven, 0, 0))], None)
-    plotter.draw_contours(debugger.file_path('math_results.png'), [
+    plotter.draw_contours(reporter.file_path('math_results.png'), [
         ('math_drive', toCartesianCoordAsNp(polar_math_drive, 0, 0)),
         ('math_driven', np.array(
             rotate(list(toCartesianCoordAsNp(polar_math_driven, center_distance, 0)), phi[0], (center_distance, 0))))
