@@ -61,14 +61,15 @@ def non_circular_gear(drive_model: Model, driven_model: Model, opt_config='optim
     # optimization
     center, center_distance, cart_drive, score = optimize_center(cart_input_drive, cart_input_driven, reporter,
                                                                  opt_config, plotter, k=k)
+    logger.info(f'Score = {score}')
 
     # math cutting
     center_distance, phi, polar_math_drive, polar_math_driven = math_cut(drive_model=drive_model,
-                                                                         cart_drive=cart_input_drive, reporter=reporter,
+                                                                         cart_drive=cart_drive, reporter=reporter,
                                                                          plotter=plotter, animation=True)
 
     # add teeth
-    cart_drive = add_teeth((0, 0), center_distance, reporter, cart_input_drive, drive_model, plotter)
+    cart_drive = add_teeth((0, 0), center_distance, reporter, cart_drive, drive_model, plotter)
 
     # rotate and cut
     cart_driven_gear = rotate_and_carve(cart_drive, (0, 0), center_distance, reporter, drive_model, phi, plotter,
@@ -84,3 +85,5 @@ def non_circular_gear(drive_model: Model, driven_model: Model, opt_config='optim
                                        (0, 0), (center_distance, 0), reporter, 6)
 
 
+if __name__ == '__main__':
+    non_circular_gear(find_model_by_name('heart'), find_model_by_name('heart'))

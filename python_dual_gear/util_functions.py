@@ -147,3 +147,16 @@ def point_in_contour(contour: np.ndarray, x: float, y: float) -> bool:
     """
     return Polygon(contour).contains(Point(x, y))
 
+
+def counterclockwise_orientation(contour: np.ndarray) -> np.ndarray:
+    """
+    change a contour to counterclockwise direction
+    """
+    # using the shoelace formula and code adopted from https://stackoverflow.com/questions/14505565/
+    # Wikipedia: det[x_i,x_i+1;y_i,y_i+1]
+    shoelace = sum(
+        [contour[i - 1, 0] * contour[i, 1] - contour[i, 0] * contour[i - 1, 1] for i in range(contour.shape[0])])
+    if shoelace < 0:
+        return contour[::-1]
+    else:
+        return contour

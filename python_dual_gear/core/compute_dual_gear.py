@@ -42,7 +42,6 @@ def compute_dual_gear(x: List[float], k: int = 1) -> Tuple[List[float], float, L
     phi = cumulative_sum([delta_alpha * xi / (center_distance - xi) for xi in x])
     assert isclose(phi[-1], target_final_phi, rel_tol=float_tolerance)
     phi = [0] + phi[:-1]  # convert to our convention
-    start_time = here
 
     # calculate the inverse function of phi
     uniform_k_value_points = np.linspace(0, target_final_phi, n + 1, endpoint=True)  # final point for simplicity

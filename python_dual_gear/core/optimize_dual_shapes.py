@@ -10,22 +10,8 @@ from shapely.geometry import Polygon, Point
 import itertools
 from matplotlib.patches import Rectangle
 from core.compute_dual_gear import compute_dual_gear
-from util_functions import align, save_contour
+from util_functions import align, save_contour, counterclockwise_orientation
 import core.phi_shape_average as phi_average
-
-
-def counterclockwise_orientation(contour: np.ndarray) -> np.ndarray:
-    """
-    change a contour to counterclockwise direction
-    """
-    # using the shoelace formula and code adopted from https://stackoverflow.com/questions/14505565/
-    # Wikipedia: det[x_i,x_i+1;y_i,y_i+1]
-    shoelace = sum(
-        [contour[i - 1, 0] * contour[i, 1] - contour[i, 0] * contour[i - 1, 1] for i in range(contour.shape[0])])
-    if shoelace < 0:
-        return contour[::-1]
-    else:
-        return contour
 
 
 def clockwise_orientation(contour: np.ndarray) -> np.ndarray:
