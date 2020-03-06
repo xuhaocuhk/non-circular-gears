@@ -1,6 +1,19 @@
 from math import pi, isclose
 import numpy as np
 from typing import Tuple, List
+from shapely.geometry import Polygon, MultiPolygon
+from report import Reporter
+import os
+from typing import Tuple, Optional, Union, List
+from plot.qt_plot import Plotter
+import util_functions
+import logging
+import matplotlib.pyplot as plt
+from time import perf_counter_ns
+import matplotlib.pyplot as plt
+
+logger = logging.getLogger(__name__)
+# logger.setLevel(logging.DEBUG)  # set logger level to debug to get the performance data
 
 
 def compute_dual_gear(x: List[float], k: int = 1) -> Tuple[List[float], float, List[float]]:
@@ -69,7 +82,7 @@ def compute_dual_gear(x: List[float], k: int = 1) -> Tuple[List[float], float, L
     return list(y), center_distance, list(phi)
 
 
-def cumulative_sum(x: List) -> List:
+def cumulative_sum(x: List[float]) -> List[float]:
     length = len(x)
     result = [x[0]]
     for i in range(1, length):

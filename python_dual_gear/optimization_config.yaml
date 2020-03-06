@@ -2,7 +2,7 @@ comparing_accuracy: 64
 k: 1
 keep_count: 3
 max_iteration: 4
-max_sample_depth: 2
+max_sample_depth: 3
 resampling_accuracy: 1024
 sampling_count:
   - 3

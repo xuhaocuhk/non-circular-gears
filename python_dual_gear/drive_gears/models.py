@@ -28,8 +28,34 @@ our_models = load_models(os.path.join(os.path.dirname(__file__), 'models.yaml'))
 
 
 def find_model_by_name(model_name: str) -> Union[Model, None]:
-    for model in our_models:
-        if model.name == model_name:
+    if '/' in model_name:
+        folder, name = model_name.split('/')
+        return retrieve_model_from_folder(folder, name)
+    else:
+        for model in our_models:
+            if model.name == model_name:
+                return model
+    return None
+
+
+def retrieve_models_from_folder(folder_name):
+    assert os.path.isdir(folder_name)
+    return [Model(
+        name=f'({os.path.basename(folder_name)}){filename[:-4]}',
+        sample_num=1024,
+        center_point=(0, 0),
+        tooth_num=32,
+        tooth_height=0.05,
+        k=1,
+        smooth=0
+    ) for filename in os.listdir(folder_name) if '.txt' in filename]
+
+
+def retrieve_model_from_folder(folder_name, model_name):
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../silhouette/'))
+    models = retrieve_models_from_folder(os.path.join(base_dir, folder_name))
+    for model in models:
+        if model.name.endswith(model_name):
             return model
     return None
 
