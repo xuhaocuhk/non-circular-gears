@@ -142,10 +142,10 @@ def math_cut(drive_model: Model, cart_drive: np.ndarray, reporter: Reporter, plo
 
 
 def rotate_and_carve(cart_drive, center, center_distance, debugger, drive_model, phi, plotter, replay_anim=False,
-                     save_anim=False):
+                     save_anim=False, k=1):
     centered_drive = cart_drive - center
     poly_drive_gear = Polygon(centered_drive).buffer(0)
-    poly_driven_gear, cut_fig, subplot = rotate_and_cut(poly_drive_gear, center_distance, phi, k=drive_model.k,
+    poly_driven_gear, cut_fig, subplot = rotate_and_cut(poly_drive_gear, center_distance, phi, k=k,
                                                         debugger=debugger if save_anim else None,
                                                         replay_animation=replay_anim, plotter=plotter)
     poly_driven_gear = translate(poly_driven_gear, center_distance).buffer(0).simplify(1e-5)  # as in generate_gear
