@@ -56,8 +56,8 @@ def init(models: Iterable[Model], opt_config, additional_debugging_names: Option
     return debugger, opt_config, plotter
 
 
-def main_stage_one(drive_model: Model, driven_model: Model, do_math_cut=True, math_animation=False,
-                   reply_cut_anim=False, save_cut_anim=True, opt_config='optimization_config.yaml', k=1):
+def main(drive_model: Model, driven_model: Model, do_math_cut=True, math_animation=False,
+         reply_cut_anim=False, save_cut_anim=True, opt_config='optimization_config.yaml', k=1):
     # initialize logging system, configuration files, etc.
     opt_config = os.path.join(os.path.dirname(__file__), opt_config)
     debugger, opt_config, plotter = init((drive_model, driven_model), opt_config)
@@ -68,11 +68,8 @@ def main_stage_one(drive_model: Model, driven_model: Model, do_math_cut=True, ma
 
     # get input polygons
     cart_input_drive, cart_input_driven = get_inputs(debugger, drive_model, driven_model, plotter, uniform=False)
-    counts = cart_input_drive.shape[0], cart_input_driven.shape[0]
-    start_time = perf_counter_ns()
     cart_input_drive, cart_input_driven = get_inputs(debugger, drive_model, driven_model, plotter, uniform=True)
     print('pre-processing done for ' + character_str)
-    pre_processing = perf_counter_ns()
 
     # optimization
     center, center_distance, cart_drive, score = optimize_center(cart_input_drive, cart_input_driven, debugger,
@@ -116,7 +113,6 @@ def gradual_average(drive_model: Model, driven_model: Model, drive_center: Tuple
     :param count_of_averages: count of average values
     :return: None
     """
-
     debugger, opt_config, plotter = init((drive_model, driven_model), 'optimization_config.yaml')
     drive_contour, driven_contour = get_inputs(debugger, drive_model, driven_model, plotter)
 
@@ -139,30 +135,5 @@ def gradual_average(drive_model: Model, driven_model: Model, drive_center: Tuple
 
 
 if __name__ == '__main__':
-    final_results = [
-        # (find_model_by_name('square'), find_model_by_name('square')),
-        # (find_model_by_name('ellipse'), find_model_by_name('ellipse')),
-        # (find_model_by_name('starfish'), find_model_by_name('starfish')),
-        # (find_model_by_name('triangle'), find_model_by_name('qingtianwa')),
-        # (find_model_by_name('fish'), find_model_by_name('butterfly')),
-        # (find_model_by_name('heart'), find_model_by_name('heart')),
-        # (find_model_by_name('hat'), find_model_by_name('trump')),
-        # (find_model_by_name('girl'), find_model_by_name('hat')),
-        # (find_model_by_name('australia'), find_model_by_name('koala')),
-        # (find_model_by_name('boy'), find_model_by_name('girl')),
-        # (find_model_by_name('drop'), find_model_by_name('heart')),
-        # (find_model_by_name('trump'), find_model_by_name('chicken_leg')),
-        # (find_model_by_name('bell'), find_model_by_name('human/candy')),
-        # (find_model_by_name('dove'), find_model_by_name('dove')),
-        # (find_model_by_name('dog'), find_model_by_name('food/bond1')),
-        # (find_model_by_name('fishA'), find_model_by_name('animal_sea/fishB')),
-        # (find_model_by_name('butterfly'), find_model_by_name('fighter')),
-        # (find_model_by_name('pot'), find_model_by_name('shoes'))
-    ]
-    # for drive, driven in final_results:
-    #     try:
-    #         main_stage_one(drive, driven, k=1)
-    #     except:
-    #         logger.error(f'Error for {drive.name}, {driven.name}')
-    # main_stage_two()
-    main_stage_one(find_model_by_name('fish'), find_model_by_name('butterfly'), k=1)
+    # the function "fund_model_by_name" automatically find the shape from silhouette directory
+    main(find_model_by_name('fish'), find_model_by_name('butterfly'))
