@@ -67,7 +67,6 @@ def main(drive_model: Model, driven_model: Model, do_math_cut=True, math_animati
     print('starting ' + character_str)
 
     # get input polygons
-    cart_input_drive, cart_input_driven = get_inputs(debugger, drive_model, driven_model, plotter, uniform=False)
     cart_input_drive, cart_input_driven = get_inputs(debugger, drive_model, driven_model, plotter, uniform=True)
     print('pre-processing done for ' + character_str)
 
