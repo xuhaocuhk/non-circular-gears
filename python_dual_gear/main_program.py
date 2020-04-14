@@ -80,7 +80,6 @@ def main(drive_model: Model, driven_model: Model, do_math_cut=True, math_animati
     drive_model.center_point = (0, 0)
     cart_drive = shape_factory.uniform_and_smooth(cart_drive, drive_model)
 
-    start_time = perf_counter_ns()
     *_, center_distance, phi = compute_dual_gear(toExteriorPolarCoord(Point(0, 0), cart_drive, 1024), k)
     # add teeth
     cart_drive = add_teeth((0, 0), center_distance, debugger, cart_drive, drive_model, plotter)
@@ -88,9 +87,6 @@ def main(drive_model: Model, driven_model: Model, do_math_cut=True, math_animati
     # rotate and cut
     cart_driven_gear = rotate_and_carve(cart_drive, (0, 0), center_distance, debugger, drive_model, phi, None, k=k,
                                         replay_anim=False, save_anim=False)
-    rotate_and_cut = perf_counter_ns()
-    logger.info('rotate_and_carve done in' + str(rotate_and_cut - start_time))
-    logger.info('count of follower:' + str(cart_driven_gear.shape[0]))
 
     # save 2D contour
     fabrication.generate_2d_obj(debugger, 'drive_2d_(0,0).obj', cart_drive)
