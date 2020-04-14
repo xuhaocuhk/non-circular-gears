@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 from time import perf_counter_ns
 
 # writing log to file
-logging.basicConfig(filename='debug\\info.log', level=logging.ERROR)
+logging.basicConfig(filename='debug\\info.log', level=logging.INFO)
 logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 logger = logging.getLogger(__name__)
 
