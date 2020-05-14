@@ -1,11 +1,11 @@
-comparing_accuracy: 32
-k: 1
-keep_count: 2
-max_iteration: 2
-max_sample_depth: 2
-resampling_accuracy: 1024
-sampling_count:
+comparing_accuracy: 32        # deprecated (used for shape similarity comparison in the second attempt)
+k: 1                          # transmission ratio
+keep_count: 2                 # the count of optimal and sub-optimal solutions kept at the end of each iteration
+max_iteration: 2              # deprecated (the maximum count of iterations in the second attempt)
+max_sample_depth: 2           # count of iterations (i.e. how deep (fine) we will sample the windows)
+resampling_accuracy: 1024     # the uniform samples we take for the polar function when transferring coord systems
+sampling_count:               # the (W, H) pair describing how we split
   - 1
   - 1
-torque_weight: 0
-mismatch_penalty: 0.5
+torque_weight: 0              # the weight for minimizing maximum torque
+mismatch_penalty: 0.5         # k > 1 only: penalty we give for a shape whose head and tail does not meet each other
