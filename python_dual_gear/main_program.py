@@ -131,4 +131,4 @@ def gradual_average(drive_model: Model, driven_model: Model, drive_center: Tuple
 
 if __name__ == '__main__':
     # the function "fund_model_by_name" automatically find the shape from silhouette directory
-    main(find_model_by_name('fish'), find_model_by_name('butterfly'))
+    main(find_model_by_name('heart'), find_model_by_name('heart'))
