@@ -22,3 +22,7 @@ The entry of the code is the "main" function in the file "main_program.py", in w
 We prepare a bunch of example input shapes in the directory "silhouette". To use any one of them as the input, you just need to type the file name into the function "find_model_by_name".
 Once the program is running, a new directory,  *python_dual_gear/debug/yyyy-mm-dd_hh-mm-ss_shapenames*, will be created.
 You can find all the intermediate and final results inside that folder.
+
+## Questions
+If you met problems, or have questions on this project, don't hesitate to contact us at 
+[kevin.futianwen@gmail.com] or [haoxu@cse.cuhk.edu.hk]
