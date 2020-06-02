@@ -1,5 +1,5 @@
 # [Computational Design and Optimization of Non-Circular Gears (Eurographics 2020)](https://appsrv.cse.cuhk.edu.hk/~haoxu/projects/compute_gear/)
-Hao Xu, Tianwen Fu, Peng Song, Mingjun Zhou, Chi-Wing Fu, and Niloy J. Mitra
+Hao Xu*, Tianwen Fu*, Peng Song, Mingjun Zhou, Chi-Wing Fu, and Niloy J. Mitra (*joint first authors)
 
 ## About this project
 The following image illustrates this project:
